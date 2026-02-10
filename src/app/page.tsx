@@ -5,17 +5,25 @@ import { useState } from 'react';
 import { FarmDataInput } from '@/components/calculator/FarmDataInput';
 import { EmissionsResults } from '@/components/calculator/EmissionsResults';
 import { MitigationAI } from '@/components/calculator/MitigationAI';
-import { calculateEmissions, FarmData, EmissionResults } from '@/lib/calculations';
-import { Leaf, BarChart3, Info, BookOpen, ShieldCheck } from 'lucide-react';
+import { calculateEmissions, FarmData, ComparativeResults } from '@/lib/calculations';
+import { Leaf, BarChart3, Info, BookOpen, ShieldCheck, Comparison } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Home() {
-  const [results, setResults] = useState<EmissionResults | null>(null);
+  const [results, setResults] = useState<ComparativeResults | null>(null);
   const [activeData, setActiveData] = useState<FarmData | null>(null);
 
   const handleCalculate = (data: FarmData) => {
-    const calculated = calculateEmissions(data);
-    setResults(calculated);
+    // Calculate baseline (no additive)
+    const baselineResults = calculateEmissions(data, false);
+    // Calculate scenario (with selected additive)
+    const scenarioResults = calculateEmissions(data, true);
+    
+    setResults({
+      baseline: baselineResults,
+      scenario: scenarioResults,
+      additiveType: data.additive
+    });
     setActiveData(data);
   };
 
@@ -30,12 +38,12 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-primary-foreground tracking-tight">FarmEI Estimator</h1>
-              <p className="text-primary-foreground/80 text-sm">Agricultural Emission Intensity Calculator</p>
+              <p className="text-primary-foreground/80 text-sm">Comparative Comparative Intensity Tool</p>
             </div>
           </div>
           <nav className="flex gap-6 text-primary-foreground/90 font-medium">
             <a href="#" className="hover:text-white transition-colors flex items-center gap-1"><Info className="w-4 h-4" /> About</a>
-            <a href="#" className="hover:text-white transition-colors flex items-center gap-1"><BookOpen className="w-4 h-4" /> Methodology</a>
+            <a href="#" className="hover:text-white transition-colors flex items-center gap-1"><BookOpen className="w-4 h-4" /> Additives</a>
             <a href="#" className="hover:text-white transition-colors flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Compliance</a>
           </nav>
         </div>
@@ -50,10 +58,10 @@ export default function Home() {
             
             <div className="mt-8 p-6 bg-secondary/10 rounded-xl border border-secondary/20">
               <h4 className="font-bold text-secondary mb-2 flex items-center gap-2">
-                <Info className="w-4 h-4" /> Why calculate EI?
+                <Info className="w-4 h-4" /> Comparative Analysis
               </h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Emission Intensities (EI) help farmers understand the environmental footprint of their production per animal unit. Lowering intensities often correlates with improved feed conversion and resource efficiency.
+                By comparing a baseline production system against one supplemented with additives like <b>Jefo Pro Solution</b> or <b>P(OA+EO)</b>, producers can quantify potential reductions in Nitrogen, Phosphorus, and Greenhouse Gas emissions.
               </p>
             </div>
           </div>
@@ -63,9 +71,9 @@ export default function Home() {
             {!results ? (
               <div className="h-full min-h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-primary/20 rounded-2xl bg-white/50 p-12 text-center">
                 <BarChart3 className="w-20 h-20 text-primary/20 mb-6" />
-                <h2 className="text-2xl font-bold text-primary mb-2">No Calculations Yet</h2>
+                <h2 className="text-2xl font-bold text-primary mb-2">Ready for Comparison</h2>
                 <p className="text-muted-foreground max-w-md">
-                  Complete the farm configuration form on the left to estimate your emission intensities and receive AI-driven mitigation advice.
+                  Set your farm parameters and select a feed additive to see a side-by-side analysis of your environmental footprint.
                 </p>
               </div>
             ) : (
@@ -73,10 +81,10 @@ export default function Home() {
                 <Tabs defaultValue="results" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-8 h-12 p-1 bg-primary/10">
                     <TabsTrigger value="results" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                      Emissions Results
+                      Comparative Results
                     </TabsTrigger>
                     <TabsTrigger value="analysis" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                      AI Mitigation Analysis
+                      Scenario Deep-Dive
                     </TabsTrigger>
                   </TabsList>
                   
@@ -85,7 +93,7 @@ export default function Home() {
                   </TabsContent>
                   
                   <TabsContent value="analysis" className="mt-0">
-                    {activeData && <MitigationAI data={activeData} results={results} />}
+                    {activeData && <MitigationAI data={activeData} results={results.scenario} />}
                   </TabsContent>
                 </Tabs>
               </div>
@@ -103,15 +111,7 @@ export default function Home() {
               <span className="font-bold text-xl">FarmEI</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} FarmEI Estimator. Empowering sustainable agriculture through science.
-            </div>
-            <div className="flex gap-4">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary rounded-sm" />
-              </div>
-              <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
-                <div className="w-4 h-4 bg-secondary rounded-sm" />
-              </div>
+              © {new Date().getFullYear()} FarmEI Estimator. Comparative science for sustainable livestock.
             </div>
           </div>
         </div>

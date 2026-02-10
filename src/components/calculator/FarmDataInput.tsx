@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { FarmData, AnimalType } from '@/lib/calculations';
-import { Beef, Bird, Tractor, Settings2 } from 'lucide-react';
+import { FarmData, AnimalType, FeedAdditive } from '@/lib/calculations';
+import { Bird, Tractor, Settings2, FlaskConical } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -22,7 +22,8 @@ export function FarmDataInput({ onCalculate }: Props) {
     feedCrudeProtein: 18,
     feedPhosphorus: 0.6,
     manureManagement: 'solid',
-    avgWeight: 2.5
+    avgWeight: 2.5,
+    additive: 'jefo-pro'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,7 +34,7 @@ export function FarmDataInput({ onCalculate }: Props) {
   const updateField = (field: keyof FarmData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: typeof value === 'string' && !isNaN(Number(value)) ? Number(value) : value
+      [field]: typeof value === 'string' && !isNaN(Number(value)) && field !== 'animalType' && field !== 'manureManagement' && field !== 'additive' ? Number(value) : value
     }));
   };
 
@@ -42,15 +43,33 @@ export function FarmDataInput({ onCalculate }: Props) {
       <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
         <div className="flex items-center gap-2">
           <Settings2 className="w-6 h-6" />
-          <CardTitle>Farm Configuration</CardTitle>
+          <CardTitle>Comparative Setup</CardTitle>
         </div>
         <CardDescription className="text-primary-foreground/80">
-          Enter your farm specific data to begin the emission intensity estimation.
+          Configure your baseline farm and select a supplement for comparison.
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2 md:col-span-2">
+              <Label className="flex items-center gap-1 text-primary font-bold">
+                <FlaskConical className="w-4 h-4" /> Scenario Additive
+              </Label>
+              <Select 
+                value={formData.additive} 
+                onValueChange={(val: FeedAdditive) => updateField('additive', val)}
+              >
+                <SelectTrigger className="border-2 border-primary/20">
+                  <SelectValue placeholder="Select additive" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="jefo-pro">Jefo Pro Solution</SelectItem>
+                  <SelectItem value="poa-eo">P(OA+EO)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label className="flex items-center gap-1"><Bird className="w-4 h-4" /> Animal Species</Label>
               <Select 
@@ -85,7 +104,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label>Avg. Animal Weight (kg)</Label>
+              <Label>Avg. Weight (kg)</Label>
               <Input 
                 type="number" 
                 step="0.1"
@@ -95,7 +114,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label>Daily Feed / Animal (kg)</Label>
+              <Label>Daily Feed (kg/animal)</Label>
               <Input 
                 type="number" 
                 step="0.01"
@@ -125,7 +144,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label className="flex items-center gap-1"><Tractor className="w-4 h-4" /> Manure Management Practice</Label>
+              <Label className="flex items-center gap-1"><Tractor className="w-4 h-4" /> Manure Management</Label>
               <Select 
                 value={formData.manureManagement} 
                 onValueChange={(val) => updateField('manureManagement', val)}
@@ -144,7 +163,7 @@ export function FarmDataInput({ onCalculate }: Props) {
           </div>
 
           <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold h-12 text-lg">
-            Calculate Emission Intensities
+            Compare Scenarios
           </Button>
         </form>
       </CardContent>
