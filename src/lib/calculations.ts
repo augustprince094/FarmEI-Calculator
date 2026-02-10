@@ -4,11 +4,12 @@ export type FeedAdditive = 'none' | 'jefo-pro' | 'poa-eo';
 export interface FarmData {
   animalType: AnimalType;
   count: number;
-  feedConsumption: number; // kg per animal per day
+  fcr: number; // Feed Conversion Ratio
+  cyclesPerYear: number; // Number of production cycles per year
   feedCrudeProtein: number; // percentage
   feedPhosphorus: number; // percentage
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
-  avgWeight: number; // kg
+  avgWeight: number; // kg (target market weight)
   additive: FeedAdditive;
 }
 
@@ -30,12 +31,13 @@ export interface ComparativeResults {
 }
 
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
-  const { count, feedConsumption, feedCrudeProtein, feedPhosphorus, animalType, manureManagement, avgWeight, additive } = data;
-  const daysInYear = 365;
+  const { count, fcr, cyclesPerYear, feedCrudeProtein, feedPhosphorus, animalType, manureManagement, avgWeight, additive } = data;
+  
+  // Total yearly feed consumption based on FCR:
+  // Feed = Gain * FCR. Assuming gain is roughly target market weight for simplicity.
+  const totalFeedPerYear = count * cyclesPerYear * avgWeight * fcr;
 
   // Additive logic: Heuristic impacts based on research for Jefo Pro and P(OA+EO)
-  // Jefo Pro Solution: ~8-10% N reduction, ~5% P reduction
-  // P(OA+EO): ~12-15% N reduction, ~8% P reduction, ~10% Methane reduction
   let nMitigationFactor = 1.0;
   let pMitigationFactor = 1.0;
   let ch4MitigationFactor = 1.0;
@@ -53,20 +55,20 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
 
   // Mass Balance - Nitrogen
-  const nitrogenIntakePerDay = (feedConsumption * (feedCrudeProtein / 100)) / 6.25;
+  // Nitrogen Intake (kg/yr) = Feed * (CP/100) / 6.25
+  const totalNitrogenIntake = (totalFeedPerYear * (feedCrudeProtein / 100)) / 6.25;
   const nRetentionFactor = animalType === 'broilers' ? 0.45 : 0.32;
-  const nitrogenExcretedPerDay = nitrogenIntakePerDay * (1 - nRetentionFactor) * nMitigationFactor;
-  const totalNitrogenExcreted = nitrogenExcretedPerDay * count * daysInYear;
+  const totalNitrogenExcreted = totalNitrogenIntake * (1 - nRetentionFactor) * nMitigationFactor;
 
   // Mass Balance - Phosphorus
   const pRetentionFactor = animalType === 'broilers' ? 0.35 : 0.25;
-  const phosphorusIntakePerDay = feedConsumption * (feedPhosphorus / 100);
-  const phosphorusExcretedPerDay = phosphorusIntakePerDay * (1 - pRetentionFactor) * pMitigationFactor;
-  const totalPhosphorusExcreted = phosphorusExcretedPerDay * count * daysInYear;
+  const totalPhosphorusIntake = totalFeedPerYear * (feedPhosphorus / 100);
+  const totalPhosphorusExcreted = totalPhosphorusIntake * (1 - pRetentionFactor) * pMitigationFactor;
 
   // Enteric Methane
+  // Poultry usually 0, Swine based on weight
   const entericEmissionFactor = animalType === 'broilers' ? 0 : (avgWeight * 0.03);
-  const totalEntericMethane = entericEmissionFactor * count * ch4MitigationFactor;
+  const totalEntericMethane = entericEmissionFactor * count * cyclesPerYear * ch4MitigationFactor;
 
   // Manure Methane
   const mcf = {
@@ -76,8 +78,11 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     'dry-lot': 0.015
   }[manureManagement] || 0.1;
   
+  // VS (Volatile Solids) estimation
+  const daysInCycle = animalType === 'broilers' ? 42 : 160; // Approximations
+  const totalDaysOccupied = cyclesPerYear * daysInCycle;
   const vsPerDay = animalType === 'broilers' ? (avgWeight * 0.01) : (avgWeight * 0.005);
-  const manureMethane = vsPerDay * count * daysInYear * mcf * 0.6 * ch4MitigationFactor;
+  const manureMethane = vsPerDay * count * totalDaysOccupied * mcf * 0.6 * ch4MitigationFactor;
 
   // Phosphorus Runoff
   const runoffFactor = 0.05;

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -8,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { FarmData, AnimalType } from '@/lib/calculations';
-import { Bird, Tractor, Settings2, Database } from 'lucide-react';
+import { Bird, Tractor, Settings2, Database, Repeat } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -18,7 +17,8 @@ export function FarmDataInput({ onCalculate }: Props) {
   const [formData, setFormData] = useState<FarmData>({
     animalType: 'broilers',
     count: 1000,
-    feedConsumption: 0.15,
+    fcr: 1.6,
+    cyclesPerYear: 6.5,
     feedCrudeProtein: 18,
     feedPhosphorus: 0.6,
     manureManagement: 'solid',
@@ -46,7 +46,7 @@ export function FarmDataInput({ onCalculate }: Props) {
           <CardTitle>Baseline Configuration</CardTitle>
         </div>
         <CardDescription className="text-primary-foreground/80">
-          Enter your current farm parameters to establish a baseline.
+          Enter your current farm parameters using Feed Conversion Ratio (FCR).
         </CardDescription>
       </CardHeader>
       <CardContent className="p-8">
@@ -61,9 +61,9 @@ export function FarmDataInput({ onCalculate }: Props) {
                 onValueChange={(val: AnimalType) => {
                   updateField('animalType', val);
                   if (val === 'swine') {
-                    setFormData(prev => ({ ...prev, avgWeight: 75, feedConsumption: 2.5 }));
+                    setFormData(prev => ({ ...prev, avgWeight: 110, fcr: 2.8, cyclesPerYear: 2.5 }));
                   } else {
-                    setFormData(prev => ({ ...prev, avgWeight: 2.5, feedConsumption: 0.15 }));
+                    setFormData(prev => ({ ...prev, avgWeight: 2.5, fcr: 1.6, cyclesPerYear: 6.5 }));
                   }
                 }}
               >
@@ -78,7 +78,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold">Number of Animals</Label>
+              <Label className="font-bold">Animals per Cycle</Label>
               <Input 
                 className="h-12"
                 type="number" 
@@ -89,7 +89,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold text-secondary">Avg. Weight (kg)</Label>
+              <Label className="font-bold text-secondary">Target Market Weight (kg)</Label>
               <Input 
                 className="h-12 border-secondary/20"
                 type="number" 
@@ -100,13 +100,26 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold text-secondary">Daily Feed (kg/animal)</Label>
+              <Label className="font-bold text-secondary">Feed Conversion Ratio (FCR)</Label>
               <Input 
                 className="h-12 border-secondary/20"
                 type="number" 
                 step="0.01"
-                value={formData.feedConsumption} 
-                onChange={(e) => updateField('feedConsumption', e.target.value)} 
+                value={formData.fcr} 
+                onChange={(e) => updateField('fcr', e.target.value)} 
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label className="flex items-center gap-1 font-bold text-primary/80">
+                <Repeat className="w-4 h-4" /> Cycles per Year
+              </Label>
+              <Input 
+                className="h-12"
+                type="number" 
+                step="0.1"
+                value={formData.cyclesPerYear} 
+                onChange={(e) => updateField('cyclesPerYear', e.target.value)} 
               />
             </div>
 
@@ -132,8 +145,8 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-3 md:col-span-2">
-              <Label className="flex items-center gap-1 font-bold"><Tractor className="w-4 h-4" /> Manure Management System</Label>
+            <div className="space-y-3 md:col-span-1">
+              <Label className="flex items-center gap-1 font-bold"><Tractor className="w-4 h-4" /> Manure Management</Label>
               <Select 
                 value={formData.manureManagement} 
                 onValueChange={(val) => updateField('manureManagement', val)}
