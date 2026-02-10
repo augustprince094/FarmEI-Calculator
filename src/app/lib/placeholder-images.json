@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-farm",
+      "description": "Aerial view of a sustainable farm",
+      "imageUrl": "https://picsum.photos/seed/farm1/1200/600",
+      "imageHint": "sustainable farm"
+    },
+    {
+      "id": "broilers",
+      "description": "Healthy poultry in a modern farm",
+      "imageUrl": "https://picsum.photos/seed/poultry/600/400",
+      "imageHint": "poultry farm"
+    },
+    {
+      "id": "swine",
+      "description": "Sustainable swine farming",
+      "imageUrl": "https://picsum.photos/seed/swine/600/400",
+      "imageHint": "pig farm"
+    }
+  ]
+}
