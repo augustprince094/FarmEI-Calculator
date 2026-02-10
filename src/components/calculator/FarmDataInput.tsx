@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { FarmData, AnimalType, FeedAdditive } from '@/lib/calculations';
-import { Bird, Tractor, Settings2, FlaskConical } from 'lucide-react';
+import { FarmData, AnimalType } from '@/lib/calculations';
+import { Bird, Tractor, Settings2, Database } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -23,7 +23,7 @@ export function FarmDataInput({ onCalculate }: Props) {
     feedPhosphorus: 0.6,
     manureManagement: 'solid',
     avgWeight: 2.5,
-    additive: 'jefo-pro'
+    additive: 'none'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,39 +39,23 @@ export function FarmDataInput({ onCalculate }: Props) {
   };
 
   return (
-    <Card className="shadow-xl border-none">
+    <Card className="shadow-2xl border-none">
       <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-6 h-6" />
-          <CardTitle>Comparative Setup</CardTitle>
+          <Database className="w-6 h-6" />
+          <CardTitle>Baseline Configuration</CardTitle>
         </div>
         <CardDescription className="text-primary-foreground/80">
-          Configure your baseline farm and select a supplement for comparison.
+          Enter your current farm parameters to establish a baseline.
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2 md:col-span-2">
+      <CardContent className="p-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-3">
               <Label className="flex items-center gap-1 text-primary font-bold">
-                <FlaskConical className="w-4 h-4" /> Scenario Additive
+                <Bird className="w-4 h-4" /> Animal Species
               </Label>
-              <Select 
-                value={formData.additive} 
-                onValueChange={(val: FeedAdditive) => updateField('additive', val)}
-              >
-                <SelectTrigger className="border-2 border-primary/20">
-                  <SelectValue placeholder="Select additive" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="jefo-pro">Jefo Pro Solution</SelectItem>
-                  <SelectItem value="poa-eo">P(OA+EO)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1"><Bird className="w-4 h-4" /> Animal Species</Label>
               <Select 
                 value={formData.animalType} 
                 onValueChange={(val: AnimalType) => {
@@ -83,7 +67,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                   }
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12">
                   <SelectValue placeholder="Select species" />
                 </SelectTrigger>
                 <SelectContent>
@@ -93,9 +77,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Number of Animals</Label>
+            <div className="space-y-3">
+              <Label className="font-bold">Number of Animals</Label>
               <Input 
+                className="h-12"
                 type="number" 
                 value={formData.count} 
                 onChange={(e) => updateField('count', e.target.value)} 
@@ -103,9 +88,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Avg. Weight (kg)</Label>
+            <div className="space-y-3">
+              <Label className="font-bold text-secondary">Avg. Weight (kg)</Label>
               <Input 
+                className="h-12 border-secondary/20"
                 type="number" 
                 step="0.1"
                 value={formData.avgWeight} 
@@ -113,9 +99,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Daily Feed (kg/animal)</Label>
+            <div className="space-y-3">
+              <Label className="font-bold text-secondary">Daily Feed (kg/animal)</Label>
               <Input 
+                className="h-12 border-secondary/20"
                 type="number" 
                 step="0.01"
                 value={formData.feedConsumption} 
@@ -123,9 +110,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Feed Crude Protein (%)</Label>
+            <div className="space-y-3">
+              <Label className="font-bold text-primary/80">Feed Crude Protein (%)</Label>
               <Input 
+                className="h-12"
                 type="number" 
                 step="0.1"
                 value={formData.feedCrudeProtein} 
@@ -133,9 +121,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Feed Phosphorus (%)</Label>
+            <div className="space-y-3">
+              <Label className="font-bold text-primary/80">Feed Phosphorus (%)</Label>
               <Input 
+                className="h-12"
                 type="number" 
                 step="0.01"
                 value={formData.feedPhosphorus} 
@@ -143,13 +132,13 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label className="flex items-center gap-1"><Tractor className="w-4 h-4" /> Manure Management</Label>
+            <div className="space-y-3 md:col-span-2">
+              <Label className="flex items-center gap-1 font-bold"><Tractor className="w-4 h-4" /> Manure Management System</Label>
               <Select 
                 value={formData.manureManagement} 
                 onValueChange={(val) => updateField('manureManagement', val)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12">
                   <SelectValue placeholder="Select practice" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,8 +151,8 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold h-12 text-lg">
-            Compare Scenarios
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 text-xl shadow-lg">
+            Establish Baseline Results
           </Button>
         </form>
       </CardContent>
