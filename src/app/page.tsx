@@ -1,38 +1,74 @@
+
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FarmDataInput } from '@/components/calculator/FarmDataInput';
 import { EmissionsResults } from '@/components/calculator/EmissionsResults';
 import { MitigationAI } from '@/components/calculator/MitigationAI';
 import { calculateEmissions, FarmData, ComparativeResults, EmissionResults } from '@/lib/calculations';
-import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers } from 'lucide-react';
+import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers, Calculator } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function Home() {
   const [baselineData, setBaselineData] = useState<FarmData | null>(null);
   const [baselineResults, setBaselineResults] = useState<EmissionResults | null>(null);
   const [comparisonResults, setComparisonResults] = useState<ComparativeResults | null>(null);
   const [step, setStep] = useState<'input' | 'results'>('input');
+  
+  const [selectedAdditive, setSelectedAdditive] = useState<FarmData['additive']>('none');
+  const [scenarioFcr, setScenarioFcr] = useState<number>(0);
 
   const handleEstablishBaseline = (data: FarmData) => {
     const results = calculateEmissions(data, false);
     setBaselineData(data);
     setBaselineResults(results);
+    setScenarioFcr(data.fcr); // Default scenario FCR to baseline
     setStep('results');
     setComparisonResults(null);
+    setSelectedAdditive('none');
   };
 
   const handleApplyMitigation = (additive: FarmData['additive']) => {
-    if (!baselineData) return;
+    if (!baselineData || !baselineResults) return;
     
-    const updatedData = { ...baselineData, additive };
+    setSelectedAdditive(additive);
+    
+    // If switching to an additive, we might want to suggest a slight FCR improvement
+    // but the user will be able to edit it manually.
+    let targetFcr = scenarioFcr;
+    if (additive !== 'none' && targetFcr === baselineData.fcr) {
+      targetFcr = parseFloat((baselineData.fcr * 0.97).toFixed(2)); // Suggest 3% improvement initially
+      setScenarioFcr(targetFcr);
+    } else if (additive === 'none') {
+      targetFcr = baselineData.fcr;
+      setScenarioFcr(targetFcr);
+    }
+
+    const updatedData = { ...baselineData, additive, fcr: targetFcr };
     const scenarioResults = calculateEmissions(updatedData, true);
     
     setComparisonResults({
-      baseline: baselineResults!,
+      baseline: baselineResults,
       scenario: scenarioResults,
       additiveType: additive
+    });
+  };
+
+  // Update scenario results when FCR changes
+  const handleFcrChange = (newFcr: number) => {
+    setScenarioFcr(newFcr);
+    if (!baselineData || !baselineResults || selectedAdditive === 'none') return;
+
+    const updatedData = { ...baselineData, additive: selectedAdditive, fcr: newFcr };
+    const scenarioResults = calculateEmissions(updatedData, true);
+    
+    setComparisonResults({
+      baseline: baselineResults,
+      scenario: scenarioResults,
+      additiveType: selectedAdditive
     });
   };
 
@@ -40,6 +76,7 @@ export default function Home() {
     setBaselineData(null);
     setBaselineResults(null);
     setComparisonResults(null);
+    setSelectedAdditive('none');
     setStep('input');
   };
 
@@ -97,34 +134,26 @@ export default function Home() {
                     <span className="font-bold capitalize">{baselineData?.animalType}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">FCR:</span>
+                    <span className="text-muted-foreground">Baseline FCR:</span>
                     <span className="font-bold text-secondary">{baselineData?.fcr}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-muted-foreground">Market Weight:</span>
                     <span className="font-bold">{baselineData?.avgWeight} kg</span>
                   </div>
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Cycles/Year:</span>
-                    <span className="font-bold">{baselineData?.cyclesPerYear}</span>
-                  </div>
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Manure Mgt:</span>
-                    <span className="font-bold capitalize">{baselineData?.manureManagement.replace('-', ' ')}</span>
-                  </div>
                 </div>
               </div>
 
               <div className="bg-primary/5 p-6 rounded-2xl border-2 border-primary/20">
                 <h3 className="font-bold text-primary mb-4 flex items-center gap-2">
-                  <ArrowRight className="w-4 h-4" /> Compare Mitigation
+                  <ArrowRight className="w-4 h-4" /> Mitigation Scenario
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Select a feed additive to model its impact on your efficiency and emissions.
+                  Select an additive and provide the improved FCR to model impact.
                 </p>
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-3 mb-6">
                   <Button 
-                    variant={comparisonResults?.additiveType === 'jefo-pro' ? 'default' : 'outline'}
+                    variant={selectedAdditive === 'jefo-pro' ? 'default' : 'outline'}
                     onClick={() => handleApplyMitigation('jefo-pro')}
                     className="justify-start h-auto py-3 px-4"
                   >
@@ -134,7 +163,7 @@ export default function Home() {
                     </div>
                   </Button>
                   <Button 
-                    variant={comparisonResults?.additiveType === 'poa-eo' ? 'default' : 'outline'}
+                    variant={selectedAdditive === 'poa-eo' ? 'default' : 'outline'}
                     onClick={() => handleApplyMitigation('poa-eo')}
                     className="justify-start h-auto py-3 px-4"
                   >
@@ -144,6 +173,24 @@ export default function Home() {
                     </div>
                   </Button>
                 </div>
+
+                {selectedAdditive !== 'none' && (
+                  <div className="space-y-3 p-4 bg-white rounded-xl border border-primary/20 animate-in zoom-in-95 duration-200">
+                    <Label className="text-xs font-bold text-primary flex items-center gap-1">
+                      <Calculator className="w-3 h-3" /> Expected FCR with Additive
+                    </Label>
+                    <Input 
+                      type="number"
+                      step="0.01"
+                      value={scenarioFcr}
+                      onChange={(e) => handleFcrChange(parseFloat(e.target.value) || 0)}
+                      className="h-10 border-primary/30 focus:ring-primary"
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Baseline was {baselineData?.fcr}. Improving FCR reduces total feed and nutrient load.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {baselineData && (comparisonResults?.scenario || baselineResults) && (
@@ -170,6 +217,8 @@ export default function Home() {
                     <EmissionsResults 
                       results={comparisonResults || { baseline: baselineResults, scenario: baselineResults, additiveType: 'none' }} 
                       isComparison={!!comparisonResults}
+                      baselineFcr={baselineData?.fcr || 0}
+                      scenarioFcr={scenarioFcr}
                     />
                   </TabsContent>
                   

@@ -7,16 +7,18 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   Legend
 } from 'recharts';
-import { Wind, Droplets, Leaf, Download, TrendingDown, Target } from 'lucide-react';
+import { Wind, Droplets, Leaf, Download, TrendingDown, Target, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
   results: ComparativeResults;
   isComparison?: boolean;
+  baselineFcr?: number;
+  scenarioFcr?: number;
 }
 
-export function EmissionsResults({ results, isComparison = false }: Props) {
+export function EmissionsResults({ results, isComparison = false, baselineFcr, scenarioFcr }: Props) {
   const { baseline, scenario, additiveType } = results;
 
   const barData = [
@@ -45,6 +47,10 @@ export function EmissionsResults({ results, isComparison = false }: Props) {
     ? Math.round(((baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent) / baseline.totalCarbonEquivalent) * 100)
     : 0;
 
+  const fcrImprovement = (baselineFcr && scenarioFcr && baselineFcr > 0)
+    ? Math.round(((baselineFcr - scenarioFcr) / baselineFcr) * 100)
+    : 0;
+
   return (
     <div className="space-y-6">
       {/* Summary Header */}
@@ -61,15 +67,28 @@ export function EmissionsResults({ results, isComparison = false }: Props) {
             )}
           </p>
         </div>
-        {isComparison && reductionPercentage > 0 && (
-          <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-primary/10">
-            <div className="p-3 bg-green-100 rounded-full">
-              <TrendingDown className="w-8 h-8 text-green-700" />
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">CO2e Reduction</p>
-              <p className="text-3xl font-black text-green-700">-{reductionPercentage}%</p>
-            </div>
+        {isComparison && (
+          <div className="flex items-center gap-4">
+            {fcrImprovement > 0 && (
+              <div className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-secondary/20">
+                 <Calculator className="w-5 h-5 text-secondary" />
+                 <div>
+                    <p className="text-[8px] font-bold uppercase text-muted-foreground">FCR Gain</p>
+                    <p className="text-lg font-black text-secondary">-{fcrImprovement}%</p>
+                 </div>
+              </div>
+            )}
+            {reductionPercentage > 0 && (
+              <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-primary/10">
+                <div className="p-3 bg-green-100 rounded-full">
+                  <TrendingDown className="w-8 h-8 text-green-700" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">CO2e Reduction</p>
+                  <p className="text-3xl font-black text-green-700">-{reductionPercentage}%</p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -135,7 +154,7 @@ export function EmissionsResults({ results, isComparison = false }: Props) {
               {isComparison ? 'Mitigation vs. Baseline' : 'Emission Intensity Metrics'}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {isComparison ? `Comparing ${additiveName} to established baseline` : 'Current environmental impact breakdown'}
+              {isComparison ? `Comparing ${additiveName} (FCR: ${scenarioFcr}) to baseline (FCR: ${baselineFcr})` : 'Current environmental impact breakdown'}
             </p>
           </div>
           <div className="flex gap-2">
@@ -160,7 +179,7 @@ export function EmissionsResults({ results, isComparison = false }: Props) {
 
       <div className="flex gap-4 justify-between items-center">
         <p className="text-xs text-muted-foreground italic">
-          *Calculations based on IPCC Tier 1 defaults and research-backed mitigation factors.
+          *Calculations based on mass balance of Feed Conversion Ratio (FCR) and specified body nitrogen retention constants.
         </p>
         <Button variant="outline" className="flex items-center gap-2" onClick={() => window.print()}>
           <Download className="w-4 h-4" /> Export Technical Report
