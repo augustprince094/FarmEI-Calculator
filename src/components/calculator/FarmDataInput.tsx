@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { FarmData, AnimalType } from '@/lib/calculations';
-import { Bird, Tractor, Settings2, Database, Repeat } from 'lucide-react';
+import { Bird, Tractor, Database, Repeat, Waves } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -38,15 +38,37 @@ export function FarmDataInput({ onCalculate }: Props) {
     }));
   };
 
+  const handleAnimalTypeChange = (val: AnimalType) => {
+    let defaults: Partial<FarmData> = { animalType: val };
+    
+    switch (val) {
+      case 'swine-sow':
+        defaults = { ...defaults, avgWeight: 250, fcr: 3.5, cyclesPerYear: 2.3, count: 100, feedCrudeProtein: 14, manureManagement: 'slurry' };
+        break;
+      case 'swine-nursery':
+        defaults = { ...defaults, avgWeight: 25, fcr: 1.5, cyclesPerYear: 6, count: 1000, feedCrudeProtein: 20, manureManagement: 'slurry' };
+        break;
+      case 'swine-grow-finish':
+        defaults = { ...defaults, avgWeight: 115, fcr: 2.8, cyclesPerYear: 2.8, count: 1000, feedCrudeProtein: 16, manureManagement: 'slurry' };
+        break;
+      case 'broilers':
+      default:
+        defaults = { ...defaults, avgWeight: 2.5, fcr: 1.6, cyclesPerYear: 6.5, count: 1000, feedCrudeProtein: 18, manureManagement: 'solid' };
+        break;
+    }
+    
+    setFormData(prev => ({ ...prev, ...defaults }));
+  };
+
   return (
-    <Card className="shadow-2xl border-none">
-      <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
+    <Card className="shadow-2xl border-none overflow-hidden">
+      <CardHeader className="bg-primary text-primary-foreground">
         <div className="flex items-center gap-2">
           <Database className="w-6 h-6" />
-          <CardTitle>Baseline Configuration</CardTitle>
+          <CardTitle>Farm Baseline Setup</CardTitle>
         </div>
         <CardDescription className="text-primary-foreground/80">
-          Enter your current farm parameters using Feed Conversion Ratio (FCR).
+          Define current production metrics to establish environmental benchmarks.
         </CardDescription>
       </CardHeader>
       <CardContent className="p-8">
@@ -54,31 +76,26 @@ export function FarmDataInput({ onCalculate }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">
               <Label className="flex items-center gap-1 text-primary font-bold">
-                <Bird className="w-4 h-4" /> Animal Species
+                <Bird className="w-4 h-4" /> Animal Production Type
               </Label>
               <Select 
                 value={formData.animalType} 
-                onValueChange={(val: AnimalType) => {
-                  updateField('animalType', val);
-                  if (val === 'swine') {
-                    setFormData(prev => ({ ...prev, avgWeight: 110, fcr: 2.8, cyclesPerYear: 2.5 }));
-                  } else {
-                    setFormData(prev => ({ ...prev, avgWeight: 2.5, fcr: 1.6, cyclesPerYear: 6.5 }));
-                  }
-                }}
+                onValueChange={(val: AnimalType) => handleAnimalTypeChange(val)}
               >
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Select species" />
+                <SelectTrigger className="h-12 border-primary/20">
+                  <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="broilers">Broilers (Poultry)</SelectItem>
-                  <SelectItem value="swine">Swine (Pigs)</SelectItem>
+                  <SelectItem value="broilers">Poultry: Broilers</SelectItem>
+                  <SelectItem value="swine-sow">Swine: Sow and Litter</SelectItem>
+                  <SelectItem value="swine-nursery">Swine: Nursery Pigs</SelectItem>
+                  <SelectItem value="swine-grow-finish">Swine: Grow-to-Finish</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold">Animals per Cycle</Label>
+              <Label className="font-bold">Animals per Cycle (Count)</Label>
               <Input 
                 className="h-12"
                 type="number" 
@@ -89,7 +106,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold text-secondary">Target Market Weight (kg)</Label>
+              <Label className="font-bold text-secondary">Final Weight at Exit (kg)</Label>
               <Input 
                 className="h-12 border-secondary/20"
                 type="number" 
@@ -124,7 +141,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold text-primary/80">Feed Crude Protein (%)</Label>
+              <Label className="font-bold text-primary/80">Diet Crude Protein (%)</Label>
               <Input 
                 className="h-12"
                 type="number" 
@@ -135,7 +152,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold text-primary/80">Feed Phosphorus (%)</Label>
+              <Label className="font-bold text-primary/80">Diet Phosphorus (%)</Label>
               <Input 
                 className="h-12"
                 type="number" 
@@ -145,14 +162,16 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-3 md:col-span-1">
-              <Label className="flex items-center gap-1 font-bold"><Tractor className="w-4 h-4" /> Manure Management</Label>
+            <div className="space-y-3">
+              <Label className="flex items-center gap-1 font-bold">
+                <Waves className="w-4 h-4" /> Manure System
+              </Label>
               <Select 
                 value={formData.manureManagement} 
                 onValueChange={(val) => updateField('manureManagement', val)}
               >
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Select practice" />
+                  <SelectValue placeholder="Select system" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="solid">Solid Storage / Litter</SelectItem>
@@ -164,8 +183,8 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 text-xl shadow-lg">
-            Establish Baseline Results
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 text-xl shadow-lg transition-all active:scale-[0.98]">
+            Establish Environmental Baseline
           </Button>
         </form>
       </CardContent>
