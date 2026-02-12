@@ -1,11 +1,10 @@
-
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ComparativeResults } from '@/lib/calculations';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  Legend
+  Legend, Cell
 } from 'recharts';
 import { Wind, Droplets, Leaf, Download, TrendingDown, Target, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,24 +20,6 @@ interface Props {
 export function EmissionsResults({ results, isComparison = false, baselineFcr, scenarioFcr }: Props) {
   const { baseline, scenario, additiveType } = results;
 
-  const barData = [
-    { 
-      name: 'Nitrogen (kg/yr)', 
-      baseline: Math.round(baseline.nitrogenExcreted), 
-      scenario: Math.round(scenario.nitrogenExcreted),
-    },
-    { 
-      name: 'Phosphorus (kg/yr)', 
-      baseline: Math.round(baseline.phosphorusExcreted), 
-      scenario: Math.round(scenario.phosphorusExcreted),
-    },
-    { 
-      name: 'Carbon (CO2e/yr)', 
-      baseline: Math.round(baseline.totalCarbonEquivalent), 
-      scenario: Math.round(scenario.totalCarbonEquivalent),
-    },
-  ];
-
   const additiveName = additiveType === 'jefo-pro' ? 'Jefo Pro Solution' : additiveType === 'poa-eo' ? 'P(OA+EO)' : 'None';
 
   const formatValue = (val: number) => val.toLocaleString();
@@ -50,6 +31,36 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
   const fcrImprovement = (baselineFcr && scenarioFcr && baselineFcr > 0)
     ? Math.round(((baselineFcr - scenarioFcr) / baselineFcr) * 100)
     : 0;
+
+  // Data for individual charts
+  const nitrogenData = [
+    { name: 'Baseline', value: Math.round(baseline.nitrogenExcreted), fill: '#A0522D' },
+    { name: additiveName, value: Math.round(scenario.nitrogenExcreted), fill: '#3F704D' }
+  ];
+
+  const phosphorusData = [
+    { name: 'Baseline', value: Math.round(baseline.phosphorusExcreted), fill: '#A0522D' },
+    { name: additiveName, value: Math.round(scenario.phosphorusExcreted), fill: '#3F704D' }
+  ];
+
+  const carbonData = [
+    { name: 'Baseline', value: Math.round(baseline.totalCarbonEquivalent), fill: '#A0522D' },
+    { name: additiveName, value: Math.round(scenario.totalCarbonEquivalent), fill: '#3F704D' }
+  ];
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded-lg shadow-lg">
+          <p className="font-bold text-xs mb-1">{label}</p>
+          <p className="text-sm font-black text-primary">
+            {payload[0].value.toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground uppercase">{payload[0].unit || ''}</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-6">
@@ -146,40 +157,83 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         </Card>
       </div>
 
-      <Card className="shadow-lg border-none">
-        <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
-          <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Target className="w-5 h-5 text-primary" />
-              {isComparison ? 'Mitigation vs. Baseline' : 'Emission Intensity Metrics'}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Nitrogen Chart */}
+        <Card className="shadow-lg border-none bg-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <Wind className="w-4 h-4 text-primary" /> Nitrogen (kg N/yr)
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {isComparison ? `Comparing ${additiveName} (FCR: ${scenarioFcr}) to baseline (FCR: ${baselineFcr})` : 'Current environmental impact breakdown'}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Badge variant="outline" className="bg-muted text-muted-foreground">Baseline</Badge>
-            {isComparison && <Badge variant="default" className="bg-primary">{additiveName}</Badge>}
-          </div>
-        </CardHeader>
-        <CardContent className="h-[400px] pt-6">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip cursor={{ fill: '#F5F5DC' }} />
-              <Legend verticalAlign="top" height={36}/>
-              <Bar name="Baseline" dataKey="baseline" fill="#A0522D" radius={[4, 4, 0, 0]} />
-              {isComparison && <Bar name={additiveName} dataKey="scenario" fill="#3F704D" radius={[4, 4, 0, 0]} />}
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={nitrogenData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {nitrogenData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Phosphorus Chart */}
+        <Card className="shadow-lg border-none bg-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <Droplets className="w-4 h-4 text-secondary" /> Phosphorus (kg P/yr)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={phosphorusData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {phosphorusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Carbon Chart */}
+        <Card className="shadow-lg border-none bg-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <Leaf className="w-4 h-4 text-green-700" /> Carbon (kg CO₂e/yr)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={carbonData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {carbonData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="flex gap-4 justify-between items-center">
         <p className="text-xs text-muted-foreground italic">
-          *Calculations based on mass balance of Feed Conversion Ratio (FCR) and specified body nitrogen retention constants.
+          *Scales are normalized per metric to visualize relative efficiency gains. Carbon values include enteric and manure CH4 + N2O.
         </p>
         <Button variant="outline" className="flex items-center gap-2" onClick={() => window.print()}>
           <Download className="w-4 h-4" /> Export Technical Report
