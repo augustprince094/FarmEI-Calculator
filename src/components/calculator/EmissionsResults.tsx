@@ -115,12 +115,13 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {isComparison ? 'N Mitigated/Cycle' : 'N Excreted/Cycle'}
+                  Nitrogen emission
                 </p>
                 <h3 className="text-2xl font-bold text-primary">
                   {formatValue(isComparison ? baseline.nitrogenExcreted - scenario.nitrogenExcreted : baseline.nitrogenExcreted)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
+                {isComparison && <p className="text-[10px] text-muted-foreground mt-1 italic">Reduction achieved</p>}
               </div>
               <Wind className="text-primary/20 w-8 h-8" />
             </div>
@@ -132,12 +133,13 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {isComparison ? 'P Mitigated/Cycle' : 'P Excreted/Cycle'}
+                  Phosphorus emission
                 </p>
                 <h3 className="text-2xl font-bold text-secondary">
                   {formatValue(isComparison ? baseline.phosphorusExcreted - scenario.phosphorusExcreted : baseline.phosphorusExcreted)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
+                {isComparison && <p className="text-[10px] text-muted-foreground mt-1 italic">Reduction achieved</p>}
               </div>
               <Droplets className="text-secondary/20 w-8 h-8" />
             </div>
@@ -149,12 +151,13 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {isComparison ? 'CO2e Mitigated/Cycle' : 'Total CO2e/Cycle'}
+                  Carbon footprint
                 </p>
                 <h3 className="text-2xl font-bold text-green-700">
                   {formatCarbon(isComparison ? baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent : baseline.totalCarbonEquivalent)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
+                {isComparison && <p className="text-[10px] text-muted-foreground mt-1 italic">CO2e Mitigated</p>}
               </div>
               <Leaf className="text-green-700/20 w-8 h-8" />
             </div>
