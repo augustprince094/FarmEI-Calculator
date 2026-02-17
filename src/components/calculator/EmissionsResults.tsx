@@ -34,7 +34,8 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
 
   // Colors
   const baselineColor = '#808080';
-  const scenarioColor = '#FBBC01';
+  // Jefo Pro = #FBBC01, P(OA+EO) = #D38F89
+  const scenarioColor = additiveType === 'poa-eo' ? '#D38F89' : '#FBBC01';
 
   // Data for individual charts
   const nitrogenData = [
@@ -76,7 +77,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
           </h2>
           <p className="text-muted-foreground">
             {isComparison ? (
-              <>Comparing Baseline vs. <span className="font-bold text-secondary">{additiveName}</span> (Per Cycle)</>
+              <>Comparing Baseline vs. <span className="font-bold" style={{ color: scenarioColor }}>{additiveName}</span> (Per Cycle)</>
             ) : (
               'Currently established cycle baseline'
             )}
