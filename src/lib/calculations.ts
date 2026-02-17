@@ -5,15 +5,15 @@ export interface FarmData {
   animalType: AnimalType;
   count: number;
   fcr: number; // Feed Conversion Ratio
-  cyclesPerYear: number; // Number of production cycles per year (used for annual scaling in UI if needed)
+  cyclesPerYear: number; // Number of production cycles per year
   feedCrudeProtein: number; // percentage (used for swine or as fallback)
-  broilerCPStarter?: number; // Broiler specific phase 1
-  broilerCPGrower?: number;  // Broiler specific phase 2
-  broilerCPFinisher?: number; // Broiler specific phase 3
+  broilerCPStarter?: number; // Broiler specific phase 1 (14% of feed)
+  broilerCPGrower?: number;  // Broiler specific phase 2 (45% of feed)
+  broilerCPFinisher?: number; // Broiler specific phase 3 (41% of feed)
   feedPhosphorus: number; // percentage (used for swine or as fallback)
-  broilerPStarter?: number; // Broiler specific phase 1
-  broilerPGrower?: number;  // Broiler specific phase 2
-  broilerPFinisher?: number; // Broiler specific phase 3
+  broilerPStarter?: number; // Broiler specific phase 1 (14% of feed)
+  broilerPGrower?: number;  // Broiler specific phase 2 (45% of feed)
+  broilerPFinisher?: number; // Broiler specific phase 3 (41% of feed)
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
   avgWeight: number; // kg (target market weight at end of cycle)
   additive: FeedAdditive;
@@ -38,6 +38,11 @@ export interface ComparativeResults {
 
 /**
  * Calculates farm emissions per production cycle based on mass balance.
+ * 
+ * NITROGEN EQUATIONS:
+ * 1. Intake = (Feed Mass * CP%) / 6.25
+ * 2. Retention = (29g/kg * Final Weight) / 1000 * Count
+ * 3. Excretion = Intake - Retention
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -48,7 +53,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     animalType, manureManagement, avgWeight, additive 
   } = data;
   
-  // Total feed consumption per cycle
+  // Total feed consumption per cycle (kg Feed)
   const totalFeedPerCycle = count * fcr * avgWeight;
 
   // Additive logic: Direct mitigation impacts on nutrient excretion efficiency
@@ -68,25 +73,29 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     }
   }
 
-  // Determine effective Crude Protein based on production type
+  // Determine effective Crude Protein based on phase distribution
   let effectiveCP = feedCrudeProtein;
   if (animalType === 'broilers' && broilerCPStarter !== undefined && broilerCPGrower !== undefined && broilerCPFinisher !== undefined) {
-    // 14% starter, 45% grower, 41% finisher
+    // Phase distribution: 14% starter, 45% grower, 41% finisher
     effectiveCP = (broilerCPStarter * 0.14) + (broilerCPGrower * 0.45) + (broilerCPFinisher * 0.41);
   }
 
-  // Determine effective Phosphorus based on production type
+  // Determine effective Phosphorus based on phase distribution
   let effectiveP = feedPhosphorus;
   if (animalType === 'broilers' && broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
-    // 14% starter, 45% grower, 41% finisher
+    // Phase distribution: 14% starter, 45% grower, 41% finisher
     effectiveP = (broilerPStarter * 0.14) + (broilerPGrower * 0.45) + (broilerPFinisher * 0.41);
   }
 
   // --- NITROGEN MASS BALANCE (Per Cycle) ---
+  // Nitrogen Intake = (Feed * CP%) / 6.25
   const nitrogenIntakeCycle = (totalFeedPerCycle * (effectiveCP / 100)) / 6.25;
+  
+  // Nitrogen Retention = 29g per kg of body weight gain
   const nitrogenRetentionPerAnimal = (29 * avgWeight) / 1000;
   const totalNitrogenRetentionCycle = nitrogenRetentionPerAnimal * count;
   
+  // Nitrogen Excretion = Intake - Retention
   const baseNitrogenExcreted = Math.max(0, nitrogenIntakeCycle - totalNitrogenRetentionCycle);
   const totalNitrogenExcreted = baseNitrogenExcreted * metabolicNMitigation;
 
@@ -96,9 +105,10 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const totalPhosphorusExcreted = totalPhosphorusIntake * (1 - pRetentionFactor) * metabolicPMitigation;
 
   // --- METHANE CALCULATIONS (Per Cycle) ---
+  // Approximate cycle duration (days)
   const cycleDays = {
     'broilers': 42,
-    'swine-sow': 365, // Sows are usually calculated on annual basis, but we treat it as one cycle
+    'swine-sow': 365,
     'swine-nursery': 49,
     'swine-grow-finish': 115
   }[animalType] || 42;
