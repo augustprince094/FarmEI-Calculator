@@ -32,20 +32,24 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
     ? Math.round(((baselineFcr - scenarioFcr) / baselineFcr) * 100)
     : 0;
 
+  // Colors
+  const baselineColor = '#808080';
+  const scenarioColor = '#FBBC01';
+
   // Data for individual charts
   const nitrogenData = [
-    { name: 'Baseline', value: Number(baseline.nitrogenExcreted.toFixed(1)), fill: '#A0522D', unit: 'kg/cycle' },
-    { name: additiveName, value: Number(scenario.nitrogenExcreted.toFixed(1)), fill: '#3F704D', unit: 'kg/cycle' }
+    { name: 'Baseline', value: Number(baseline.nitrogenExcreted.toFixed(1)), fill: baselineColor, unit: 'kg/cycle' },
+    { name: additiveName, value: Number(scenario.nitrogenExcreted.toFixed(1)), fill: scenarioColor, unit: 'kg/cycle' }
   ];
 
   const phosphorusData = [
-    { name: 'Baseline', value: Number(baseline.phosphorusExcreted.toFixed(1)), fill: '#A0522D', unit: 'kg/cycle' },
-    { name: additiveName, value: Number(scenario.phosphorusExcreted.toFixed(1)), fill: '#3F704D', unit: 'kg/cycle' }
+    { name: 'Baseline', value: Number(baseline.phosphorusExcreted.toFixed(1)), fill: baselineColor, unit: 'kg/cycle' },
+    { name: additiveName, value: Number(scenario.phosphorusExcreted.toFixed(1)), fill: scenarioColor, unit: 'kg/cycle' }
   ];
 
   const carbonData = [
-    { name: 'Baseline', value: Math.round(baseline.totalCarbonEquivalent), fill: '#A0522D', unit: 'kg CO2e/cycle' },
-    { name: additiveName, value: Math.round(scenario.totalCarbonEquivalent), fill: '#3F704D', unit: 'kg CO2e/cycle' }
+    { name: 'Baseline', value: Math.round(baseline.totalCarbonEquivalent), fill: baselineColor, unit: 'kg CO2e/cycle' },
+    { name: additiveName, value: Math.round(scenario.totalCarbonEquivalent), fill: scenarioColor, unit: 'kg CO2e/cycle' }
   ];
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -105,7 +109,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-white border-b-4 border-b-primary shadow-sm">
+        <Card className="bg-white border-b-4 border-b-[#808080] shadow-sm">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
