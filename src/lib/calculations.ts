@@ -37,12 +37,15 @@ export interface ComparativeResults {
 }
 
 /**
- * Calculates farm emissions per production cycle based on mass balance.
+ * Calculates farm emissions per production cycle based on phase-specific mass balance.
  * 
- * NITROGEN EQUATIONS:
- * 1. Intake = (Feed Mass * CP%) / 6.25
+ * NITROGEN EQUATIONS (Per Cycle):
+ * 1. Intake = Σ (Phase Feed Intake * Phase CP%) / 6.25
  * 2. Retention = (29g/kg * Final Weight) / 1000 * Count
  * 3. Excretion = Intake - Retention
+ * 
+ * PHASE DISTRIBUTION (Broilers):
+ * Starter: 14%, Grower: 45%, Finisher: 41%
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -73,39 +76,55 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     }
   }
 
-  // Determine effective Crude Protein based on phase distribution
-  let effectiveCP = feedCrudeProtein;
-  if (animalType === 'broilers' && broilerCPStarter !== undefined && broilerCPGrower !== undefined && broilerCPFinisher !== undefined) {
-    // Phase distribution: 14% starter, 45% grower, 41% finisher
-    effectiveCP = (broilerCPStarter * 0.14) + (broilerCPGrower * 0.45) + (broilerCPFinisher * 0.41);
+  let totalNitrogenIntake = 0;
+  let totalPhosphorusIntake = 0;
+
+  if (animalType === 'broilers' && 
+      broilerCPStarter !== undefined && broilerCPGrower !== undefined && broilerCPFinisher !== undefined &&
+      broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
+    
+    // Phase distributions
+    const pStarter = 0.14;
+    const pGrower = 0.45;
+    const pFinisher = 0.41;
+
+    // Phase feed amounts
+    const starterFeed = totalFeedPerCycle * pStarter;
+    const growerFeed = totalFeedPerCycle * pGrower;
+    const finisherFeed = totalFeedPerCycle * pFinisher;
+
+    // Phase Nitrogen Intake = (Feed * CP% / 100) / 6.25
+    const starterNIntake = (starterFeed * broilerCPStarter / 100) / 6.25;
+    const growerNIntake = (growerFeed * broilerCPGrower / 100) / 6.25;
+    const finisherNIntake = (finisherFeed * broilerCPFinisher / 100) / 6.25;
+    totalNitrogenIntake = starterNIntake + growerNIntake + finisherNIntake;
+
+    // Phase Phosphorus Intake = Feed * P% / 100
+    const starterPIntake = starterFeed * (broilerPStarter / 100);
+    const growerPIntake = growerFeed * (broilerPGrower / 100);
+    const finisherPIntake = finisherFeed * (broilerPFinisher / 100);
+    totalPhosphorusIntake = starterPIntake + growerPIntake + finisherPIntake;
+
+  } else {
+    // Single phase fallback (Swine)
+    totalNitrogenIntake = (totalFeedPerCycle * (feedCrudeProtein / 100)) / 6.25;
+    totalPhosphorusIntake = totalFeedPerCycle * (feedPhosphorus / 100);
   }
 
-  // Determine effective Phosphorus based on phase distribution
-  let effectiveP = feedPhosphorus;
-  if (animalType === 'broilers' && broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
-    // Phase distribution: 14% starter, 45% grower, 41% finisher
-    effectiveP = (broilerPStarter * 0.14) + (broilerPGrower * 0.45) + (broilerPFinisher * 0.41);
-  }
-
-  // --- NITROGEN MASS BALANCE (Per Cycle) ---
-  // Nitrogen Intake = (Feed * CP%) / 6.25
-  const nitrogenIntakeCycle = (totalFeedPerCycle * (effectiveCP / 100)) / 6.25;
-  
-  // Nitrogen Retention = 29g per kg of body weight gain
-  const nitrogenRetentionPerAnimal = (29 * avgWeight) / 1000;
-  const totalNitrogenRetentionCycle = nitrogenRetentionPerAnimal * count;
+  // --- NITROGEN RETENTION ---
+  // Constant 29g N per kg body weight gain (assume gain = final weight for simplicity of batch)
+  const totalNitrogenRetention = (29 * avgWeight / 1000) * count;
   
   // Nitrogen Excretion = Intake - Retention
-  const baseNitrogenExcreted = Math.max(0, nitrogenIntakeCycle - totalNitrogenRetentionCycle);
+  const baseNitrogenExcreted = Math.max(0, totalNitrogenIntake - totalNitrogenRetention);
   const totalNitrogenExcreted = baseNitrogenExcreted * metabolicNMitigation;
 
-  // --- PHOSPHORUS MASS BALANCE (Per Cycle) ---
+  // --- PHOSPHORUS RETENTION ---
   const pRetentionFactor = animalType === 'broilers' ? 0.35 : 0.25;
-  const totalPhosphorusIntake = totalFeedPerCycle * (effectiveP / 100);
-  const totalPhosphorusExcreted = totalPhosphorusIntake * (1 - pRetentionFactor) * metabolicPMitigation;
+  const totalPhosphorusRetention = totalPhosphorusIntake * pRetentionFactor;
+  const totalPhosphorusExcreted = (totalPhosphorusIntake - totalPhosphorusRetention) * metabolicPMitigation;
 
   // --- METHANE CALCULATIONS (Per Cycle) ---
-  // Approximate cycle duration (days)
   const cycleDays = {
     'broilers': 42,
     'swine-sow': 365,
