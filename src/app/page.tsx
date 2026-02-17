@@ -254,16 +254,18 @@ export default function Home() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
-                          { label: 'Enteric Methane', val: (comparisonResults?.scenario || baselineResults).entericMethane, unit: 'kg CH4' },
-                          { label: 'Manure Methane', val: (comparisonResults?.scenario || baselineResults).manureMethane, unit: 'kg CH4' },
-                          { label: 'Direct N2O', val: (comparisonResults?.scenario || baselineResults).directN2O, unit: 'kg N2O' },
-                          { label: 'Indirect N2O', val: (comparisonResults?.scenario || baselineResults).indirectN2O, unit: 'kg N2O' },
-                          { label: 'Phosphorus Runoff', val: (comparisonResults?.scenario || baselineResults).phosphorusRunoff, unit: 'kg P' },
-                          { label: 'Cycle Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0), unit: 'kg Feed' },
+                          { label: 'Nitrogen Excreted', val: (comparisonResults?.scenario || baselineResults).nitrogenExcreted, unit: 'kg N', precision: 1 },
+                          { label: 'Phosphorus Excreted', val: (comparisonResults?.scenario || baselineResults).phosphorusExcreted, unit: 'kg P', precision: 1 },
+                          { label: 'Enteric Methane', val: (comparisonResults?.scenario || baselineResults).entericMethane, unit: 'kg CH4', precision: 2 },
+                          { label: 'Manure Methane', val: (comparisonResults?.scenario || baselineResults).manureMethane, unit: 'kg CH4', precision: 2 },
+                          { label: 'Direct N2O', val: (comparisonResults?.scenario || baselineResults).directN2O, unit: 'kg N2O', precision: 2 },
+                          { label: 'Indirect N2O', val: (comparisonResults?.scenario || baselineResults).indirectN2O, unit: 'kg N2O', precision: 2 },
+                          { label: 'Phosphorus Runoff', val: (comparisonResults?.scenario || baselineResults).phosphorusRunoff, unit: 'kg P', precision: 2 },
+                          { label: 'Cycle Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0), unit: 'kg Feed', precision: 0 },
                         ].map((item, i) => (
                           <div key={i} className="p-4 bg-muted/30 rounded-lg flex justify-between items-center border border-transparent hover:border-primary/20 transition-colors">
                             <span className="text-sm font-medium">{item.label}</span>
-                            <span className="font-bold">{item.val.toFixed(2)} <span className="text-[10px] text-muted-foreground">{item.unit}</span></span>
+                            <span className="font-bold">{item.val.toFixed(item.precision)} <span className="text-[10px] text-muted-foreground">{item.unit}</span></span>
                           </div>
                         ))}
                       </div>

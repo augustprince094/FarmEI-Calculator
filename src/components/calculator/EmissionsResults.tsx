@@ -21,7 +21,8 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
 
   const additiveName = additiveType === 'jefo-pro' ? 'Jefo Pro' : additiveType === 'poa-eo' ? 'P(OA+EO)' : 'None';
 
-  const formatValue = (val: number) => val.toLocaleString();
+  const formatValue = (val: number) => val.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const formatCarbon = (val: number) => Math.round(val).toLocaleString();
 
   const reductionPercentage = baseline.totalCarbonEquivalent > 0 
     ? Math.round(((baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent) / baseline.totalCarbonEquivalent) * 100)
@@ -33,13 +34,13 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
 
   // Data for individual charts
   const nitrogenData = [
-    { name: 'Baseline', value: Math.round(baseline.nitrogenExcreted), fill: '#A0522D', unit: 'kg/cycle' },
-    { name: additiveName, value: Math.round(scenario.nitrogenExcreted), fill: '#3F704D', unit: 'kg/cycle' }
+    { name: 'Baseline', value: Number(baseline.nitrogenExcreted.toFixed(1)), fill: '#A0522D', unit: 'kg/cycle' },
+    { name: additiveName, value: Number(scenario.nitrogenExcreted.toFixed(1)), fill: '#3F704D', unit: 'kg/cycle' }
   ];
 
   const phosphorusData = [
-    { name: 'Baseline', value: Math.round(baseline.phosphorusExcreted), fill: '#A0522D', unit: 'kg/cycle' },
-    { name: additiveName, value: Math.round(scenario.phosphorusExcreted), fill: '#3F704D', unit: 'kg/cycle' }
+    { name: 'Baseline', value: Number(baseline.phosphorusExcreted.toFixed(1)), fill: '#A0522D', unit: 'kg/cycle' },
+    { name: additiveName, value: Number(scenario.phosphorusExcreted.toFixed(1)), fill: '#3F704D', unit: 'kg/cycle' }
   ];
 
   const carbonData = [
@@ -112,7 +113,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   {isComparison ? 'N Mitigated/Cycle' : 'N Excreted/Cycle'}
                 </p>
                 <h3 className="text-2xl font-bold text-primary">
-                  {formatValue(Math.round(isComparison ? baseline.nitrogenExcreted - scenario.nitrogenExcreted : baseline.nitrogenExcreted))} 
+                  {formatValue(isComparison ? baseline.nitrogenExcreted - scenario.nitrogenExcreted : baseline.nitrogenExcreted)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
               </div>
@@ -129,7 +130,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   {isComparison ? 'P Mitigated/Cycle' : 'P Excreted/Cycle'}
                 </p>
                 <h3 className="text-2xl font-bold text-secondary">
-                  {formatValue(Math.round(isComparison ? baseline.phosphorusExcreted - scenario.phosphorusExcreted : baseline.phosphorusExcreted))} 
+                  {formatValue(isComparison ? baseline.phosphorusExcreted - scenario.phosphorusExcreted : baseline.phosphorusExcreted)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
               </div>
@@ -146,7 +147,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   {isComparison ? 'CO2e Mitigated/Cycle' : 'Total CO2e/Cycle'}
                 </p>
                 <h3 className="text-2xl font-bold text-green-700">
-                  {formatValue(Math.round(isComparison ? baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent : baseline.totalCarbonEquivalent))} 
+                  {formatCarbon(isComparison ? baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent : baseline.totalCarbonEquivalent)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
               </div>
