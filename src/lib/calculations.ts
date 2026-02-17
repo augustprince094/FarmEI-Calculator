@@ -7,13 +7,13 @@ export interface FarmData {
   fcr: number; // Feed Conversion Ratio
   cyclesPerYear: number; // Number of production cycles per year
   feedCrudeProtein: number; // percentage (used for swine or as fallback)
-  broilerCPStarter?: number; // Broiler specific phase 1 (14% of feed)
-  broilerCPGrower?: number;  // Broiler specific phase 2 (45% of feed)
-  broilerCPFinisher?: number; // Broiler specific phase 3 (41% of feed)
+  broilerCPStarter?: number; // Broiler specific phase 1
+  broilerCPGrower?: number;  // Broiler specific phase 2
+  broilerCPFinisher?: number; // Broiler specific phase 3
   feedPhosphorus: number; // percentage (used for swine or as fallback)
-  broilerPStarter?: number; // Broiler specific phase 1 (14% of feed)
-  broilerPGrower?: number;  // Broiler specific phase 2 (45% of feed)
-  broilerPFinisher?: number; // Broiler specific phase 3 (41% of feed)
+  broilerPStarter?: number; // Broiler specific phase 1
+  broilerPGrower?: number;  // Broiler specific phase 2
+  broilerPFinisher?: number; // Broiler specific phase 3
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
   avgWeight: number; // kg (target market weight at end of cycle)
   additive: FeedAdditive;
@@ -44,10 +44,9 @@ export interface ComparativeResults {
  * 2. Phase Retention = (29g/kg * Phase Weight Gain) / 1000 * Count
  * 3. Total Excretion = (Σ Intake) - (Σ Retention)
  * 
- * PHASE DISTRIBUTION (Broilers):
- * Feed: Starter (14%), Grower (45%), Finisher (41%)
- * Weight Gain (approximate distribution for mass balance partitioning):
- * Starter (15%), Grower (45%), Finisher (40%)
+ * BROILER PHASE PARTITIONING (Standard 42-day cycle):
+ * - Feed Intake: Starter (14%), Grower (45%), Finisher (41%)
+ * - Weight Gain: Starter (15%), Grower (45%), Finisher (40%)
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -88,9 +87,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       broilerCPStarter !== undefined && broilerCPGrower !== undefined && broilerCPFinisher !== undefined &&
       broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
     
-    // Phase distributions (Feed)
+    // Industry standard distributions for a 42-day broiler cycle
     const feedDist = { starter: 0.14, grower: 0.45, finisher: 0.41 };
-    // Phase distributions (Weight Gain partitioning for retention calculation)
     const gainDist = { starter: 0.15, grower: 0.45, finisher: 0.40 };
 
     // --- PHASE 1: STARTER ---
@@ -99,7 +97,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const sNIntake = (sFeed * broilerCPStarter / 100) / 6.25;
     const sNRetention = (29 * sGain / 1000) * count;
     const sPIntake = sFeed * (broilerPStarter / 100);
-    const sPRetention = sPIntake * 0.35; // Standard broiler P retention factor
+    const sPRetention = sPIntake * 0.35; // Standard broiler P retention factor (35% of intake)
 
     // --- PHASE 2: GROWER ---
     const gFeed = totalFeedPerCycle * feedDist.grower;
@@ -117,7 +115,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const fPIntake = fFeed * (broilerPFinisher / 100);
     const fPRetention = fPIntake * 0.35;
 
-    // Sum of phases
+    // Sum of phases to get total cycle mass balance
     totalNitrogenIntake = sNIntake + gNIntake + fNIntake;
     totalNitrogenRetention = sNRetention + gNRetention + fNRetention;
     totalPhosphorusIntake = sPIntake + gPIntake + fPIntake;
