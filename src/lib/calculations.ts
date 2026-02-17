@@ -10,7 +10,10 @@ export interface FarmData {
   broilerCPStarter?: number; // Broiler specific phase 1
   broilerCPGrower?: number;  // Broiler specific phase 2
   broilerCPFinisher?: number; // Broiler specific phase 3
-  feedPhosphorus: number;
+  feedPhosphorus: number; // percentage (used for swine or as fallback)
+  broilerPStarter?: number; // Broiler specific phase 1
+  broilerPGrower?: number;  // Broiler specific phase 2
+  broilerPFinisher?: number; // Broiler specific phase 3
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
   avgWeight: number; // kg (target market weight)
   additive: FeedAdditive;
@@ -35,15 +38,14 @@ export interface ComparativeResults {
 
 /**
  * Calculates farm emissions based on mass balance and user-provided nitrogen formulas.
- * 
- * Nitrogen Formulas:
- * - Feed Intake (per animal) = FCR * Market Weight
- * - Nitrogen Intake = (Feed Intake * Crude Protein %) / 100 / 6.25
- * - Nitrogen Retention = (29 g/kg * Market Weight) / 1000
- * - Nitrogen Excreted = Nitrogen Intake - Nitrogen Retention
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
-  const { count, fcr, cyclesPerYear, feedCrudeProtein, broilerCPStarter, broilerCPGrower, broilerCPFinisher, feedPhosphorus, animalType, manureManagement, avgWeight, additive } = data;
+  const { 
+    count, fcr, cyclesPerYear, feedCrudeProtein, 
+    broilerCPStarter, broilerCPGrower, broilerCPFinisher,
+    feedPhosphorus, broilerPStarter, broilerPGrower, broilerPFinisher,
+    animalType, manureManagement, avgWeight, additive 
+  } = data;
   
   // Total yearly feed consumption calculation based on provided FCR
   const totalAnimalsYearly = count * cyclesPerYear;
@@ -74,6 +76,13 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     effectiveCP = (broilerCPStarter * 0.14) + (broilerCPGrower * 0.45) + (broilerCPFinisher * 0.41);
   }
 
+  // Determine effective Phosphorus based on production type
+  let effectiveP = feedPhosphorus;
+  if (animalType === 'broilers' && broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
+    // 14% starter, 45% grower, 41% finisher
+    effectiveP = (broilerPStarter * 0.14) + (broilerPGrower * 0.45) + (broilerPFinisher * 0.41);
+  }
+
   // --- NITROGEN MASS BALANCE (User Provided Formulas) ---
   const nitrogenIntakeYearly = (totalFeedPerYear * (effectiveCP / 100)) / 6.25;
   const nitrogenRetentionPerAnimal = (29 * avgWeight) / 1000;
@@ -83,13 +92,11 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const totalNitrogenExcreted = baseNitrogenExcreted * metabolicNMitigation;
 
   // --- PHOSPHORUS MASS BALANCE ---
-  const isSwine = animalType.startsWith('swine');
   const pRetentionFactor = animalType === 'broilers' ? 0.35 : 0.25;
-  const totalPhosphorusIntake = totalFeedPerYear * (feedPhosphorus / 100);
+  const totalPhosphorusIntake = totalFeedPerYear * (effectiveP / 100);
   const totalPhosphorusExcreted = totalPhosphorusIntake * (1 - pRetentionFactor) * metabolicPMitigation;
 
   // --- METHANE CALCULATIONS ---
-  // Sows have higher enteric factors due to body size and residence time
   let entericMultiplier = 0.03;
   if (animalType === 'swine-sow') entericMultiplier = 0.05;
   if (animalType === 'swine-nursery') entericMultiplier = 0.015;
