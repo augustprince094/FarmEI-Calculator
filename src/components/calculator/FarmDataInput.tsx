@@ -18,7 +18,7 @@ export function FarmDataInput({ onCalculate }: Props) {
     animalType: 'broilers',
     count: 1000,
     fcr: 1.6,
-    cyclesPerYear: 6.5,
+    cyclesPerYear: 1,
     feedCrudeProtein: 18,
     broilerCPStarter: 22,
     broilerCPGrower: 20,
@@ -49,13 +49,13 @@ export function FarmDataInput({ onCalculate }: Props) {
     
     switch (val) {
       case 'swine-sow':
-        defaults = { ...defaults, avgWeight: 250, fcr: 3.5, cyclesPerYear: 2.3, count: 100, feedCrudeProtein: 14, feedPhosphorus: 0.55, manureManagement: 'slurry' };
+        defaults = { ...defaults, avgWeight: 250, fcr: 3.5, cyclesPerYear: 1, count: 100, feedCrudeProtein: 14, feedPhosphorus: 0.55, manureManagement: 'slurry' };
         break;
       case 'swine-nursery':
-        defaults = { ...defaults, avgWeight: 25, fcr: 1.5, cyclesPerYear: 6, count: 1000, feedCrudeProtein: 20, feedPhosphorus: 0.65, manureManagement: 'slurry' };
+        defaults = { ...defaults, avgWeight: 25, fcr: 1.5, cyclesPerYear: 1, count: 1000, feedCrudeProtein: 20, feedPhosphorus: 0.65, manureManagement: 'slurry' };
         break;
       case 'swine-grow-finish':
-        defaults = { ...defaults, avgWeight: 115, fcr: 2.8, cyclesPerYear: 2.8, count: 1000, feedCrudeProtein: 16, feedPhosphorus: 0.5, manureManagement: 'slurry' };
+        defaults = { ...defaults, avgWeight: 115, fcr: 2.8, cyclesPerYear: 1, count: 1000, feedCrudeProtein: 16, feedPhosphorus: 0.5, manureManagement: 'slurry' };
         break;
       case 'broilers':
       default:
@@ -63,7 +63,7 @@ export function FarmDataInput({ onCalculate }: Props) {
           ...defaults, 
           avgWeight: 2.5, 
           fcr: 1.6, 
-          cyclesPerYear: 6.5, 
+          cyclesPerYear: 1, 
           count: 1000, 
           broilerCPStarter: 22, 
           broilerCPGrower: 20, 
@@ -148,7 +148,7 @@ export function FarmDataInput({ onCalculate }: Props) {
 
             <div className="space-y-3">
               <Label className="flex items-center gap-1 font-bold text-primary/80">
-                <Repeat className="w-4 h-4" /> Cycles per Year
+                <Repeat className="w-4 h-4" /> Production Cycles
               </Label>
               <Input 
                 className="h-12"
@@ -157,6 +157,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                 value={formData.cyclesPerYear} 
                 onChange={(e) => updateField('cyclesPerYear', e.target.value)} 
               />
+              <p className="text-[10px] text-muted-foreground italic">Set to 1 for a single batch analysis (e.g. 42 days for broilers).</p>
             </div>
 
             <div className="space-y-3">

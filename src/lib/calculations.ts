@@ -20,14 +20,14 @@ export interface FarmData {
 }
 
 export interface EmissionResults {
-  nitrogenExcreted: number; // kg/year
-  phosphorusExcreted: number; // kg/year
-  entericMethane: number; // kg CH4/year
-  manureMethane: number; // kg CH4/year
-  phosphorusRunoff: number; // kg/year
-  directN2O: number; // kg N2O/year
-  indirectN2O: number; // kg N2O/year
-  totalCarbonEquivalent: number; // kg CO2e/year
+  nitrogenExcreted: number; // kg/period
+  phosphorusExcreted: number; // kg/period
+  entericMethane: number; // kg CH4/period
+  manureMethane: number; // kg CH4/period
+  phosphorusRunoff: number; // kg/period
+  directN2O: number; // kg N2O/period
+  indirectN2O: number; // kg N2O/period
+  totalCarbonEquivalent: number; // kg CO2e/period
 }
 
 export interface ComparativeResults {
@@ -97,12 +97,23 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const totalPhosphorusExcreted = totalPhosphorusIntake * (1 - pRetentionFactor) * metabolicPMitigation;
 
   // --- METHANE CALCULATIONS ---
+  // Standard production durations (days) per cycle
+  const cycleDays = {
+    'broilers': 42,
+    'swine-sow': 365, // Continuous
+    'swine-nursery': 49,
+    'swine-grow-finish': 115
+  }[animalType] || 42;
+
+  const totalProductionDays = animalType === 'swine-sow' ? 365 : (cycleDays * cyclesPerYear);
+
   let entericMultiplier = 0.03;
   if (animalType === 'swine-sow') entericMultiplier = 0.05;
   if (animalType === 'swine-nursery') entericMultiplier = 0.015;
 
-  const entericEmissionFactor = animalType === 'broilers' ? 0 : (avgWeight * entericMultiplier);
-  const totalEntericMethane = entericEmissionFactor * totalAnimalsYearly * ch4MitigationFactor;
+  // Enteric methane is daily factor * weight * days
+  const entericEmissionFactor = animalType === 'broilers' ? 0 : (avgWeight * entericMultiplier / 365);
+  const totalEntericMethane = entericEmissionFactor * totalAnimalsYearly * (animalType === 'swine-sow' ? 365 : cycleDays) * ch4MitigationFactor;
 
   const mcf = {
     'lagoon': 0.7,
@@ -112,7 +123,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }[manureManagement] || 0.1;
   
   const vsPerDay = animalType === 'broilers' ? (avgWeight * 0.01) : (avgWeight * 0.005);
-  const manureMethane = vsPerDay * count * 365 * mcf * 0.6 * ch4MitigationFactor;
+  const manureMethane = vsPerDay * count * totalProductionDays * mcf * 0.6 * ch4MitigationFactor;
 
   // --- OTHER METRICS ---
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.05;

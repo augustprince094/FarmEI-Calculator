@@ -86,6 +86,8 @@ export default function Home() {
     setStep('input');
   };
 
+  const isAnnual = baselineData && baselineData.cyclesPerYear > 1;
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary py-8 border-b border-primary/20">
@@ -113,7 +115,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-primary mb-3">Environmental Footprint Baseline</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Establish your baseline by defining efficiency metrics. For broilers, intake is calculated across starter, grower, and finisher phases for both Protein and Phosphorus.
+                Establish your baseline by defining efficiency metrics. For broilers, the standard production cycle is 42 days.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -162,8 +164,12 @@ export default function Home() {
                     <span className="font-bold">{baselineData?.avgWeight} kg</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Annual Count:</span>
-                    <span className="font-bold">{(baselineData?.count || 0) * (baselineData?.cyclesPerYear || 0)} head</span>
+                    <span className="text-muted-foreground">Cycle Count:</span>
+                    <span className="font-bold">{baselineData?.count} head</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Cycles Defined:</span>
+                    <span className="font-bold">{baselineData?.cyclesPerYear}</span>
                   </div>
                 </div>
               </div>
@@ -233,7 +239,7 @@ export default function Home() {
                       {comparisonResults ? 'Comparative Summary' : 'Baseline Results'}
                     </TabsTrigger>
                     <TabsTrigger value="details" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                      Detailed Metrics
+                      Technical Metrics
                     </TabsTrigger>
                   </TabsList>
                   
@@ -249,7 +255,7 @@ export default function Home() {
                   <TabsContent value="details" className="mt-0">
                     <div className="bg-white p-8 rounded-2xl border shadow-sm">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold">Annual Technical Breakdown</h3>
+                        <h3 className="text-xl font-bold">Technical Breakdown</h3>
                         <Badge variant="outline" className="text-xs font-normal">Calculated via Mass Balance</Badge>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,7 +265,7 @@ export default function Home() {
                           { label: 'Direct N2O', val: (comparisonResults?.scenario || baselineResults).directN2O, unit: 'kg N2O' },
                           { label: 'Indirect N2O', val: (comparisonResults?.scenario || baselineResults).indirectN2O, unit: 'kg N2O' },
                           { label: 'Phosphorus Runoff', val: (comparisonResults?.scenario || baselineResults).phosphorusRunoff, unit: 'kg P' },
-                          { label: 'Annual Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0) * (baselineData?.cyclesPerYear || 0), unit: 'kg Feed' },
+                          { label: 'Total Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0) * (baselineData?.cyclesPerYear || 0), unit: 'kg Feed' },
                         ].map((item, i) => (
                           <div key={i} className="p-4 bg-muted/30 rounded-lg flex justify-between items-center border border-transparent hover:border-primary/20 transition-colors">
                             <span className="text-sm font-medium">{item.label}</span>
