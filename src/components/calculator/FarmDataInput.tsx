@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { FarmData, AnimalType } from '@/lib/calculations';
-import { Bird, Tractor, Database, Repeat, Waves } from 'lucide-react';
+import { Bird, Tractor, Database, Repeat, Waves, Calculator } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -20,6 +20,9 @@ export function FarmDataInput({ onCalculate }: Props) {
     fcr: 1.6,
     cyclesPerYear: 6.5,
     feedCrudeProtein: 18,
+    broilerCPStarter: 22,
+    broilerCPGrower: 20,
+    broilerCPFinisher: 18.5,
     feedPhosphorus: 0.6,
     manureManagement: 'solid',
     avgWeight: 2.5,
@@ -34,7 +37,7 @@ export function FarmDataInput({ onCalculate }: Props) {
   const updateField = (field: keyof FarmData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: typeof value === 'string' && !isNaN(Number(value)) && field !== 'animalType' && field !== 'manureManagement' && field !== 'additive' ? Number(value) : value
+      [field]: typeof value === 'string' && !isNaN(Number(value)) && !['animalType', 'manureManagement', 'additive'].includes(field) ? Number(value) : value
     }));
   };
 
@@ -53,7 +56,17 @@ export function FarmDataInput({ onCalculate }: Props) {
         break;
       case 'broilers':
       default:
-        defaults = { ...defaults, avgWeight: 2.5, fcr: 1.6, cyclesPerYear: 6.5, count: 1000, feedCrudeProtein: 18, manureManagement: 'solid' };
+        defaults = { 
+          ...defaults, 
+          avgWeight: 2.5, 
+          fcr: 1.6, 
+          cyclesPerYear: 6.5, 
+          count: 1000, 
+          broilerCPStarter: 22, 
+          broilerCPGrower: 20, 
+          broilerCPFinisher: 18.5,
+          manureManagement: 'solid' 
+        };
         break;
     }
     
@@ -140,16 +153,42 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-3">
-              <Label className="font-bold text-primary/80">Diet Crude Protein (%)</Label>
-              <Input 
-                className="h-12"
-                type="number" 
-                step="0.1"
-                value={formData.feedCrudeProtein} 
-                onChange={(e) => updateField('feedCrudeProtein', e.target.value)} 
-              />
-            </div>
+            {formData.animalType === 'broilers' ? (
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-primary/5 rounded-xl border border-primary/10">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-primary">Starter CP (%) <span className="text-[10px] opacity-60">(14% feed)</span></Label>
+                  <Input 
+                    type="number" step="0.1" value={formData.broilerCPStarter} 
+                    onChange={(e) => updateField('broilerCPStarter', e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-primary">Grower CP (%) <span className="text-[10px] opacity-60">(45% feed)</span></Label>
+                  <Input 
+                    type="number" step="0.1" value={formData.broilerCPGrower} 
+                    onChange={(e) => updateField('broilerCPGrower', e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-primary">Finisher CP (%) <span className="text-[10px] opacity-60">(41% feed)</span></Label>
+                  <Input 
+                    type="number" step="0.1" value={formData.broilerCPFinisher} 
+                    onChange={(e) => updateField('broilerCPFinisher', e.target.value)} 
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Label className="font-bold text-primary/80">Diet Crude Protein (%)</Label>
+                <Input 
+                  className="h-12"
+                  type="number" 
+                  step="0.1"
+                  value={formData.feedCrudeProtein} 
+                  onChange={(e) => updateField('feedCrudeProtein', e.target.value)} 
+                />
+              </div>
+            )}
 
             <div className="space-y-3">
               <Label className="font-bold text-primary/80">Diet Phosphorus (%)</Label>

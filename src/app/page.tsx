@@ -44,7 +44,7 @@ export default function Home() {
     setSelectedAdditive(additive);
     
     let targetFcr = scenarioFcr;
-    // Suggest a default improvement of 3-5% if FCR hasn't been manually adjusted yet
+    // Suggest a default improvement if FCR hasn't been manually adjusted yet
     if (additive !== 'none' && targetFcr === baselineData.fcr) {
       const reduction = additive === 'jefo-pro' ? 0.97 : 0.95;
       targetFcr = parseFloat((baselineData.fcr * reduction).toFixed(2));
@@ -113,7 +113,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-primary mb-3">Environmental Footprint Baseline</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                First, establish your baseline by defining current efficiency metrics. FCR drives the volume of feed and total nutrient load.
+                Establish your baseline by defining efficiency metrics. FCR drives feed volume and nutrient load. For broilers, intake is calculated across starter, grower, and finisher phases.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -143,6 +143,19 @@ export default function Home() {
                     <span className="text-muted-foreground">Baseline FCR:</span>
                     <span className="font-bold text-secondary">{baselineData?.fcr}</span>
                   </div>
+                  {baselineData?.animalType === 'broilers' && (
+                    <div className="p-2 bg-primary/5 rounded border border-primary/10 text-[10px] space-y-1">
+                      <div className="flex justify-between">
+                        <span>Starter CP:</span><span>{baselineData.broilerCPStarter}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Grower CP:</span><span>{baselineData.broilerCPGrower}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Finisher CP:</span><span>{baselineData.broilerCPFinisher}%</span>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-muted-foreground">Cycle Weight:</span>
                     <span className="font-bold">{baselineData?.avgWeight} kg</span>
@@ -245,7 +258,7 @@ export default function Home() {
                           { label: 'Direct N2O', val: (comparisonResults?.scenario || baselineResults).directN2O, unit: 'kg N2O' },
                           { label: 'Indirect N2O', val: (comparisonResults?.scenario || baselineResults).indirectN2O, unit: 'kg N2O' },
                           { label: 'Phosphorus Runoff', val: (comparisonResults?.scenario || baselineResults).phosphorusRunoff, unit: 'kg P' },
-                          { label: 'Annual Feed Mass', val: (baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0) * (baselineData?.cyclesPerYear || 0), unit: 'kg Feed' },
+                          { label: 'Annual Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0) * (baselineData?.cyclesPerYear || 0), unit: 'kg Feed' },
                         ].map((item, i) => (
                           <div key={i} className="p-4 bg-muted/30 rounded-lg flex justify-between items-center border border-transparent hover:border-primary/20 transition-colors">
                             <span className="text-sm font-medium">{item.label}</span>

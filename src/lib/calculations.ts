@@ -6,8 +6,11 @@ export interface FarmData {
   count: number;
   fcr: number; // Feed Conversion Ratio
   cyclesPerYear: number; // Number of production cycles per year
-  feedCrudeProtein: number; // percentage (e.g., 18)
-  feedPhosphorus: number; // percentage (e.g., 0.6)
+  feedCrudeProtein: number; // percentage (used for swine or as fallback)
+  broilerCPStarter?: number; // Broiler specific phase 1
+  broilerCPGrower?: number;  // Broiler specific phase 2
+  broilerCPFinisher?: number; // Broiler specific phase 3
+  feedPhosphorus: number;
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
   avgWeight: number; // kg (target market weight)
   additive: FeedAdditive;
@@ -40,7 +43,7 @@ export interface ComparativeResults {
  * - Nitrogen Excreted = Nitrogen Intake - Nitrogen Retention
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
-  const { count, fcr, cyclesPerYear, feedCrudeProtein, feedPhosphorus, animalType, manureManagement, avgWeight, additive } = data;
+  const { count, fcr, cyclesPerYear, feedCrudeProtein, broilerCPStarter, broilerCPGrower, broilerCPFinisher, feedPhosphorus, animalType, manureManagement, avgWeight, additive } = data;
   
   // Total yearly feed consumption calculation based on provided FCR
   const totalAnimalsYearly = count * cyclesPerYear;
@@ -64,8 +67,15 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     }
   }
 
+  // Determine effective Crude Protein based on production type
+  let effectiveCP = feedCrudeProtein;
+  if (animalType === 'broilers' && broilerCPStarter !== undefined && broilerCPGrower !== undefined && broilerCPFinisher !== undefined) {
+    // 14% starter, 45% grower, 41% finisher
+    effectiveCP = (broilerCPStarter * 0.14) + (broilerCPGrower * 0.45) + (broilerCPFinisher * 0.41);
+  }
+
   // --- NITROGEN MASS BALANCE (User Provided Formulas) ---
-  const nitrogenIntakeYearly = (totalFeedPerYear * (feedCrudeProtein / 100)) / 6.25;
+  const nitrogenIntakeYearly = (totalFeedPerYear * (effectiveCP / 100)) / 6.25;
   const nitrogenRetentionPerAnimal = (29 * avgWeight) / 1000;
   const totalNitrogenRetentionYearly = nitrogenRetentionPerAnimal * totalAnimalsYearly;
   
