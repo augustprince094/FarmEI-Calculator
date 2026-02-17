@@ -44,6 +44,11 @@ export interface ComparativeResults {
  * 2. Phase Retention = (29g/kg * Phase Weight Gain) / 1000 * Count
  * 3. Total Excretion = (Σ Intake) - (Σ Retention)
  * 
+ * PHOSPHORUS EQUATIONS (Per Phase -> Total Cycle):
+ * 1. Phase Intake = (Phase Feed Intake * Phase P%) / 100
+ * 2. Phase Retention = (0.6% * Phase Weight Gain) / 100 * Count  => (6g/kg * Phase Weight Gain) / 1000 * Count
+ * 3. Total Excretion = (Σ Intake) - (Σ Retention)
+ * 
  * BROILER PHASE PARTITIONING (Standard 42-day cycle):
  * - Feed Intake: Starter (14%), Grower (45%), Finisher (41%)
  * - Weight Gain: Starter (14%), Grower (45%), Finisher (41%)
@@ -87,16 +92,16 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       broilerCPStarter !== undefined && broilerCPGrower !== undefined && broilerCPFinisher !== undefined &&
       broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
     
-    // Industry standard distributions for a 42-day broiler cycle
+    // Distribution for a 42-day broiler cycle (both feed and weight gain)
     const phaseDist = { starter: 0.14, grower: 0.45, finisher: 0.41 };
 
     // --- PHASE 1: STARTER ---
     const sFeed = totalFeedPerCycle * phaseDist.starter;
     const sGain = totalGain * phaseDist.starter;
     const sNIntake = (sFeed * broilerCPStarter / 100) / 6.25;
-    const sNRetention = (29 * sGain / 1000) * count;
+    const sNRetention = (29 * sGain / 1000) * count; // 29 g/kg N retention
     const sPIntake = sFeed * (broilerPStarter / 100);
-    const sPRetention = sPIntake * 0.35; // Standard broiler P retention factor (35% of intake)
+    const sPRetention = (6 * sGain / 1000) * count; // 0.6% P retention (6 g/kg)
 
     // --- PHASE 2: GROWER ---
     const gFeed = totalFeedPerCycle * phaseDist.grower;
@@ -104,7 +109,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const gNIntake = (gFeed * broilerCPGrower / 100) / 6.25;
     const gNRetention = (29 * gGain / 1000) * count;
     const gPIntake = gFeed * (broilerPGrower / 100);
-    const gPRetention = gPIntake * 0.35;
+    const gPRetention = (6 * gGain / 1000) * count;
 
     // --- PHASE 3: FINISHER ---
     const fFeed = totalFeedPerCycle * phaseDist.finisher;
@@ -112,7 +117,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const fNIntake = (fFeed * broilerCPFinisher / 100) / 6.25;
     const fNRetention = (29 * fGain / 1000) * count;
     const fPIntake = fFeed * (broilerPFinisher / 100);
-    const fPRetention = fPIntake * 0.35;
+    const fPRetention = (6 * fGain / 1000) * count;
 
     // Sum of phases to get total cycle mass balance
     totalNitrogenIntake = sNIntake + gNIntake + fNIntake;
@@ -126,12 +131,13 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenRetention = (29 * avgWeight / 1000) * count;
     
     totalPhosphorusIntake = totalFeedPerCycle * (feedPhosphorus / 100);
-    const pRetentionFactor = animalType.startsWith('swine') ? 0.25 : 0.35;
-    totalPhosphorusRetention = totalPhosphorusIntake * pRetentionFactor;
+    // Swine fallback retention: also use a mass balance approach if data is generic
+    // Using 0.5% for swine as a reasonable estimate if not specified
+    const swinePRetentionFactor = 5; // g/kg
+    totalPhosphorusRetention = (swinePRetentionFactor * avgWeight / 1000) * count;
   }
 
   // --- EXCRETION CALCULATION ---
-  // Excretion = (Σ Intake) - (Σ Retention)
   const baseNitrogenExcreted = Math.max(0, totalNitrogenIntake - totalNitrogenRetention);
   const totalNitrogenExcreted = baseNitrogenExcreted * metabolicNMitigation;
 
