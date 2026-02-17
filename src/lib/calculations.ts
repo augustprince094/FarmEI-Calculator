@@ -46,7 +46,7 @@ export interface ComparativeResults {
  * 
  * BROILER PHASE PARTITIONING (Standard 42-day cycle):
  * - Feed Intake: Starter (14%), Grower (45%), Finisher (41%)
- * - Weight Gain: Starter (15%), Grower (45%), Finisher (40%)
+ * - Weight Gain: Starter (14%), Grower (45%), Finisher (41%)
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -88,28 +88,27 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
     
     // Industry standard distributions for a 42-day broiler cycle
-    const feedDist = { starter: 0.14, grower: 0.45, finisher: 0.41 };
-    const gainDist = { starter: 0.15, grower: 0.45, finisher: 0.40 };
+    const phaseDist = { starter: 0.14, grower: 0.45, finisher: 0.41 };
 
     // --- PHASE 1: STARTER ---
-    const sFeed = totalFeedPerCycle * feedDist.starter;
-    const sGain = totalGain * gainDist.starter;
+    const sFeed = totalFeedPerCycle * phaseDist.starter;
+    const sGain = totalGain * phaseDist.starter;
     const sNIntake = (sFeed * broilerCPStarter / 100) / 6.25;
     const sNRetention = (29 * sGain / 1000) * count;
     const sPIntake = sFeed * (broilerPStarter / 100);
     const sPRetention = sPIntake * 0.35; // Standard broiler P retention factor (35% of intake)
 
     // --- PHASE 2: GROWER ---
-    const gFeed = totalFeedPerCycle * feedDist.grower;
-    const gGain = totalGain * gainDist.grower;
+    const gFeed = totalFeedPerCycle * phaseDist.grower;
+    const gGain = totalGain * phaseDist.grower;
     const gNIntake = (gFeed * broilerCPGrower / 100) / 6.25;
     const gNRetention = (29 * gGain / 1000) * count;
     const gPIntake = gFeed * (broilerPGrower / 100);
     const gPRetention = gPIntake * 0.35;
 
     // --- PHASE 3: FINISHER ---
-    const fFeed = totalFeedPerCycle * feedDist.finisher;
-    const fGain = totalGain * gainDist.finisher;
+    const fFeed = totalFeedPerCycle * phaseDist.finisher;
+    const fGain = totalGain * phaseDist.finisher;
     const fNIntake = (fFeed * broilerCPFinisher / 100) / 6.25;
     const fNRetention = (29 * fGain / 1000) * count;
     const fPIntake = fFeed * (broilerPFinisher / 100);
