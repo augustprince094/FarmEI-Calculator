@@ -4,11 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ComparativeResults } from '@/lib/calculations';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  Legend, Cell
+  Cell
 } from 'recharts';
-import { Wind, Droplets, Leaf, Download, TrendingDown, Target, Calculator } from 'lucide-react';
+import { Wind, Droplets, Leaf, Download, TrendingDown, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface Props {
   results: ComparativeResults;
@@ -20,7 +19,7 @@ interface Props {
 export function EmissionsResults({ results, isComparison = false, baselineFcr, scenarioFcr }: Props) {
   const { baseline, scenario, additiveType } = results;
 
-  const additiveName = additiveType === 'jefo-pro' ? 'Jefo Pro Solution' : additiveType === 'poa-eo' ? 'P(OA+EO)' : 'None';
+  const additiveName = additiveType === 'jefo-pro' ? 'Jefo Pro' : additiveType === 'poa-eo' ? 'P(OA+EO)' : 'None';
 
   const formatValue = (val: number) => val.toLocaleString();
 
@@ -34,18 +33,18 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
 
   // Data for individual charts
   const nitrogenData = [
-    { name: 'Baseline', value: Math.round(baseline.nitrogenExcreted), fill: '#A0522D' },
-    { name: additiveName, value: Math.round(scenario.nitrogenExcreted), fill: '#3F704D' }
+    { name: 'Baseline', value: Math.round(baseline.nitrogenExcreted), fill: '#A0522D', unit: 'kg/cycle' },
+    { name: additiveName, value: Math.round(scenario.nitrogenExcreted), fill: '#3F704D', unit: 'kg/cycle' }
   ];
 
   const phosphorusData = [
-    { name: 'Baseline', value: Math.round(baseline.phosphorusExcreted), fill: '#A0522D' },
-    { name: additiveName, value: Math.round(scenario.phosphorusExcreted), fill: '#3F704D' }
+    { name: 'Baseline', value: Math.round(baseline.phosphorusExcreted), fill: '#A0522D', unit: 'kg/cycle' },
+    { name: additiveName, value: Math.round(scenario.phosphorusExcreted), fill: '#3F704D', unit: 'kg/cycle' }
   ];
 
   const carbonData = [
-    { name: 'Baseline', value: Math.round(baseline.totalCarbonEquivalent), fill: '#A0522D' },
-    { name: additiveName, value: Math.round(scenario.totalCarbonEquivalent), fill: '#3F704D' }
+    { name: 'Baseline', value: Math.round(baseline.totalCarbonEquivalent), fill: '#A0522D', unit: 'kg CO2e/cycle' },
+    { name: additiveName, value: Math.round(scenario.totalCarbonEquivalent), fill: '#3F704D', unit: 'kg CO2e/cycle' }
   ];
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -54,7 +53,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         <div className="bg-white p-3 border rounded-lg shadow-lg">
           <p className="font-bold text-xs mb-1">{label}</p>
           <p className="text-sm font-black text-primary">
-            {payload[0].value.toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground uppercase">{payload[0].unit || ''}</span>
+            {payload[0].value.toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground uppercase">{payload[0].payload.unit || ''}</span>
           </p>
         </div>
       );
@@ -68,13 +67,13 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
       <div className="bg-primary/10 p-6 rounded-2xl border border-primary/20 flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <h2 className="text-2xl font-bold text-primary">
-            {isComparison ? 'Mitigation Comparative Summary' : 'Baseline Environmental Profile'}
+            {isComparison ? 'Mitigation Comparative Summary' : 'Cycle Environmental Profile'}
           </h2>
           <p className="text-muted-foreground">
             {isComparison ? (
-              <>Comparing Baseline vs. <span className="font-bold text-secondary">{additiveName}</span></>
+              <>Comparing Baseline vs. <span className="font-bold text-secondary">{additiveName}</span> (Per Cycle)</>
             ) : (
-              'Currently established farm baseline'
+              'Currently established cycle baseline'
             )}
           </p>
         </div>
@@ -95,7 +94,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   <TrendingDown className="w-8 h-8 text-green-700" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">CO2e Reduction</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cycle CO2e Mitigation</p>
                   <p className="text-3xl font-black text-green-700">-{reductionPercentage}%</p>
                 </div>
               </div>
@@ -110,11 +109,11 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {isComparison ? 'Nitrogen Saved' : 'Nitrogen Excreted'}
+                  {isComparison ? 'N Mitigated/Cycle' : 'N Excreted/Cycle'}
                 </p>
                 <h3 className="text-2xl font-bold text-primary">
                   {formatValue(Math.round(isComparison ? baseline.nitrogenExcreted - scenario.nitrogenExcreted : baseline.nitrogenExcreted))} 
-                  <span className="text-sm font-normal ml-1 text-muted-foreground">kg/yr</span>
+                  <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
               </div>
               <Wind className="text-primary/20 w-8 h-8" />
@@ -127,11 +126,11 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {isComparison ? 'Phosphorus Saved' : 'Phosphorus Excreted'}
+                  {isComparison ? 'P Mitigated/Cycle' : 'P Excreted/Cycle'}
                 </p>
                 <h3 className="text-2xl font-bold text-secondary">
                   {formatValue(Math.round(isComparison ? baseline.phosphorusExcreted - scenario.phosphorusExcreted : baseline.phosphorusExcreted))} 
-                  <span className="text-sm font-normal ml-1 text-muted-foreground">kg/yr</span>
+                  <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
               </div>
               <Droplets className="text-secondary/20 w-8 h-8" />
@@ -144,11 +143,11 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {isComparison ? 'Carbon Mitigated' : 'Total CO₂ Equivalent'}
+                  {isComparison ? 'CO2e Mitigated/Cycle' : 'Total CO2e/Cycle'}
                 </p>
                 <h3 className="text-2xl font-bold text-green-700">
                   {formatValue(Math.round(isComparison ? baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent : baseline.totalCarbonEquivalent))} 
-                  <span className="text-sm font-normal ml-1 text-muted-foreground">kg/yr</span>
+                  <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
               </div>
               <Leaf className="text-green-700/20 w-8 h-8" />
@@ -162,7 +161,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         <Card className="shadow-lg border-none bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Wind className="w-4 h-4 text-primary" /> Nitrogen (kg N/yr)
+              <Wind className="w-4 h-4 text-primary" /> Nitrogen (kg N/cycle)
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[250px]">
@@ -186,7 +185,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         <Card className="shadow-lg border-none bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Droplets className="w-4 h-4 text-secondary" /> Phosphorus (kg P/yr)
+              <Droplets className="w-4 h-4 text-secondary" /> Phosphorus (kg P/cycle)
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[250px]">
@@ -210,7 +209,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         <Card className="shadow-lg border-none bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Leaf className="w-4 h-4 text-green-700" /> Carbon (kg CO₂e/yr)
+              <Leaf className="w-4 h-4 text-green-700" /> Carbon (kg CO2e/cycle)
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[250px]">
@@ -233,10 +232,10 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
 
       <div className="flex gap-4 justify-between items-center">
         <p className="text-xs text-muted-foreground italic">
-          *Scales are normalized per metric to visualize relative efficiency gains. Carbon values include enteric and manure CH4 + N2O.
+          *Results displayed per production cycle. Intensity includes N and P excretion plus CH4 and N2O carbon equivalents.
         </p>
         <Button variant="outline" className="flex items-center gap-2" onClick={() => window.print()}>
-          <Download className="w-4 h-4" /> Export Technical Report
+          <Download className="w-4 h-4" /> Export Cycle Report
         </Button>
       </div>
     </div>

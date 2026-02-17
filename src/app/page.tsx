@@ -86,8 +86,6 @@ export default function Home() {
     setStep('input');
   };
 
-  const isAnnual = baselineData && baselineData.cyclesPerYear > 1;
-
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary py-8 border-b border-primary/20">
@@ -130,7 +128,7 @@ export default function Home() {
               <div className="bg-white p-6 rounded-2xl border border-primary/10 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-bold text-primary flex items-center gap-2">
-                    <Layers className="w-4 h-4" /> Production Baseline
+                    <Layers className="w-4 h-4" /> Cycle Baseline
                   </h3>
                   <Button variant="ghost" size="sm" onClick={reset} className="text-xs h-8">
                     <RefreshCw className="w-3 h-3 mr-1" /> Edit Params
@@ -160,26 +158,22 @@ export default function Home() {
                   )}
                   
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Cycle Weight:</span>
+                    <span className="text-muted-foreground">Exit Weight:</span>
                     <span className="font-bold">{baselineData?.avgWeight} kg</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Cycle Count:</span>
+                    <span className="text-muted-foreground">Animal Count:</span>
                     <span className="font-bold">{baselineData?.count} head</span>
-                  </div>
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Cycles Defined:</span>
-                    <span className="font-bold">{baselineData?.cyclesPerYear}</span>
                   </div>
                 </div>
               </div>
 
               <div className="bg-primary/5 p-6 rounded-2xl border-2 border-primary/20">
                 <h3 className="font-bold text-primary mb-4 flex items-center gap-2">
-                  <ArrowRight className="w-4 h-4" /> Compare with Additive
+                  <ArrowRight className="w-4 h-4" /> Mitigation Scenario
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Supplementing the system can improve FCR and metabolic efficiency. Select a solution to see the mitigated footprint.
+                  Adjust FCR for the mitigated cycle to see impact on total emissions.
                 </p>
                 <div className="grid grid-cols-1 gap-3 mb-6">
                   <Button 
@@ -207,7 +201,7 @@ export default function Home() {
                 {selectedAdditive !== 'none' && (
                   <div className="space-y-3 p-4 bg-white rounded-xl border border-primary/20 animate-in zoom-in-95 duration-200">
                     <Label className="text-xs font-bold text-primary flex items-center gap-1">
-                      <Calculator className="w-3 h-3" /> Improved FCR with Supplement
+                      <Calculator className="w-3 h-3" /> Improved Cycle FCR
                     </Label>
                     <Input 
                       type="number"
@@ -217,7 +211,7 @@ export default function Home() {
                       className="h-10 border-primary/30 focus:ring-primary font-bold text-secondary"
                     />
                     <p className="text-[10px] text-muted-foreground italic">
-                      Adjust expected FCR to see impact on total feed mass.
+                      Adjust expected FCR for this cycle.
                     </p>
                   </div>
                 )}
@@ -255,7 +249,7 @@ export default function Home() {
                   <TabsContent value="details" className="mt-0">
                     <div className="bg-white p-8 rounded-2xl border shadow-sm">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold">Technical Breakdown</h3>
+                        <h3 className="text-xl font-bold">Cycle Technical Breakdown</h3>
                         <Badge variant="outline" className="text-xs font-normal">Calculated via Mass Balance</Badge>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,7 +259,7 @@ export default function Home() {
                           { label: 'Direct N2O', val: (comparisonResults?.scenario || baselineResults).directN2O, unit: 'kg N2O' },
                           { label: 'Indirect N2O', val: (comparisonResults?.scenario || baselineResults).indirectN2O, unit: 'kg N2O' },
                           { label: 'Phosphorus Runoff', val: (comparisonResults?.scenario || baselineResults).phosphorusRunoff, unit: 'kg P' },
-                          { label: 'Total Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0) * (baselineData?.cyclesPerYear || 0), unit: 'kg Feed' },
+                          { label: 'Cycle Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0), unit: 'kg Feed' },
                         ].map((item, i) => (
                           <div key={i} className="p-4 bg-muted/30 rounded-lg flex justify-between items-center border border-transparent hover:border-primary/20 transition-colors">
                             <span className="text-sm font-medium">{item.label}</span>
@@ -289,7 +283,7 @@ export default function Home() {
             <span className="font-bold text-lg text-primary">FarmEI Estimator</span>
           </div>
           <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Methodology follows user-defined mass balance formulas. Retention constant at 29g/kg. Carbon equivalents use IPCC GWP-100 factors (CH4: 28, N2O: 265).
+            Methodology follows user-defined mass balance formulas per production cycle. Retention constant at 29g/kg. Carbon equivalents use IPCC GWP-100 factors.
           </p>
           <div className="mt-6 text-[10px] text-muted-foreground">
             © {new Date().getFullYear()} FarmEI Environmental intensity comparative tool.
