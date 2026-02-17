@@ -131,8 +131,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenRetention = (29 * avgWeight / 1000) * count;
     
     totalPhosphorusIntake = totalFeedPerCycle * (feedPhosphorus / 100);
-    // Swine fallback retention: also use a mass balance approach if data is generic
-    // Using 0.5% for swine as a reasonable estimate if not specified
+    // Swine fallback retention
     const swinePRetentionFactor = 5; // g/kg
     totalPhosphorusRetention = (swinePRetentionFactor * avgWeight / 1000) * count;
   }
