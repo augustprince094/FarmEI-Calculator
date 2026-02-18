@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,13 +29,12 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
     ? Math.round(((baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent) / baseline.totalCarbonEquivalent) * 100)
     : 0;
 
-  const fcrImprovement = (baselineFcr && scenarioFcr && baselineFcr > 0)
+  const fcrImprovement = (baselineFcr && scenarioFcr && baselineFcr > scenarioFcr)
     ? Math.round(((baselineFcr - scenarioFcr) / baselineFcr) * 100)
     : 0;
 
   // Colors
   const baselineColor = '#808080';
-  // Jefo Pro = #FBBC01, P(OA+EO) = #D38F89
   const scenarioColor = additiveType === 'poa-eo' ? '#D38F89' : '#FBBC01';
 
   // Data for individual charts
@@ -69,7 +69,6 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
 
   return (
     <div className="space-y-6">
-      {/* Summary Header */}
       <div className="bg-primary/10 p-6 rounded-2xl border border-primary/20 flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <h2 className="text-2xl font-bold text-primary">
@@ -166,7 +165,6 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Nitrogen Chart */}
         <Card className="shadow-lg border-none bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -190,7 +188,6 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
           </CardContent>
         </Card>
 
-        {/* Phosphorus Chart */}
         <Card className="shadow-lg border-none bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -214,7 +211,6 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
           </CardContent>
         </Card>
 
-        {/* Carbon Chart */}
         <Card className="shadow-lg border-none bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
