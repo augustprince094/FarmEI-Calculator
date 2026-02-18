@@ -44,7 +44,6 @@ export default function Home() {
     setSelectedAdditive(additive);
     
     let targetFcr = scenarioFcr;
-    // Suggest a default improvement if FCR hasn't been manually adjusted yet
     if (additive !== 'none' && targetFcr === baselineData.fcr) {
       const reduction = additive === 'jefo-pro' ? 0.97 : 0.95;
       targetFcr = parseFloat((baselineData.fcr * reduction).toFixed(2));
@@ -86,6 +85,8 @@ export default function Home() {
     setStep('input');
   };
 
+  const isPhased = baselineData?.animalType === 'broilers' || baselineData?.animalType === 'swine-nursery';
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary py-8 border-b border-primary/20">
@@ -113,7 +114,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-primary mb-3">Environmental Footprint Baseline</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Establish your baseline by defining efficiency metrics. For broilers, the standard production cycle is 42 days.
+                Establish your baseline by defining efficiency metrics. Standard cycles are analyzed per production batch.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -144,15 +145,15 @@ export default function Home() {
                     <span className="font-bold text-secondary">{baselineData?.fcr}</span>
                   </div>
                   
-                  {baselineData?.animalType === 'broilers' && (
+                  {isPhased && baselineData && (
                     <div className="p-3 bg-primary/5 rounded border border-primary/10 space-y-2">
-                      <div className="text-[10px] font-bold uppercase text-primary/60 border-b pb-1">Dietary Phases</div>
+                      <div className="text-[10px] font-bold uppercase text-primary/60 border-b pb-1">Dietary Phases (I/II/III)</div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
-                        <span className="text-muted-foreground">CP Starter/Gr/Fin:</span>
-                        <span className="font-bold text-right">{baselineData.broilerCPStarter}/{baselineData.broilerCPGrower}/{baselineData.broilerCPFinisher}%</span>
+                        <span className="text-muted-foreground">Crude Protein:</span>
+                        <span className="font-bold text-right">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}%</span>
                         
-                        <span className="text-muted-foreground">P Starter/Gr/Fin:</span>
-                        <span className="font-bold text-right">{baselineData.broilerPStarter}/{baselineData.broilerPGrower}/{baselineData.broilerPFinisher}%</span>
+                        <span className="text-muted-foreground">Phosphorus:</span>
+                        <span className="font-bold text-right">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}%</span>
                       </div>
                     </div>
                   )}
@@ -285,10 +286,10 @@ export default function Home() {
             <span className="font-bold text-lg text-primary">FarmEI Estimator</span>
           </div>
           <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Methodology follows user-defined mass balance formulas per production cycle. Retention constant at 29g/kg. Carbon equivalents use IPCC GWP-100 factors.
+            Methodology follows user-defined mass balance formulas per production cycle. Intensity includes N and P excretion plus CH4 and N2O carbon equivalents.
           </p>
           <div className="mt-6 text-[10px] text-muted-foreground">
-            © {new Date().getFullYear()} FarmEI Environmental intensity comparative tool.
+            © {new Date().getFullYear()} FarmEI Environmental intensity tool.
           </div>
         </div>
       </footer>

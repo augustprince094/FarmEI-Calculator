@@ -20,13 +20,13 @@ export function FarmDataInput({ onCalculate }: Props) {
     fcr: 1.6,
     cyclesPerYear: 1,
     feedCrudeProtein: 18,
-    broilerCPStarter: 22,
-    broilerCPGrower: 20,
-    broilerCPFinisher: 18.5,
+    phase1CP: 22,
+    phase2CP: 20,
+    phase3CP: 18.5,
     feedPhosphorus: 0.6,
-    broilerPStarter: 0.65,
-    broilerPGrower: 0.6,
-    broilerPFinisher: 0.55,
+    phase1P: 0.65,
+    phase2P: 0.6,
+    phase3P: 0.55,
     manureManagement: 'solid',
     avgWeight: 2.5,
     additive: 'none'
@@ -52,7 +52,20 @@ export function FarmDataInput({ onCalculate }: Props) {
         defaults = { ...defaults, avgWeight: 250, fcr: 3.5, cyclesPerYear: 1, count: 100, feedCrudeProtein: 14, feedPhosphorus: 0.55, manureManagement: 'slurry' };
         break;
       case 'swine-nursery':
-        defaults = { ...defaults, avgWeight: 25, fcr: 1.5, cyclesPerYear: 1, count: 1000, feedCrudeProtein: 20, feedPhosphorus: 0.65, manureManagement: 'slurry' };
+        defaults = { 
+          ...defaults, 
+          avgWeight: 25, 
+          fcr: 1.5, 
+          cyclesPerYear: 1, 
+          count: 1000, 
+          phase1CP: 22, 
+          phase2CP: 20, 
+          phase3CP: 18,
+          phase1P: 0.75,
+          phase2P: 0.65,
+          phase3P: 0.6,
+          manureManagement: 'slurry' 
+        };
         break;
       case 'swine-grow-finish':
         defaults = { ...defaults, avgWeight: 115, fcr: 2.8, cyclesPerYear: 1, count: 1000, feedCrudeProtein: 16, feedPhosphorus: 0.5, manureManagement: 'slurry' };
@@ -65,12 +78,12 @@ export function FarmDataInput({ onCalculate }: Props) {
           fcr: 1.6, 
           cyclesPerYear: 1, 
           count: 1000, 
-          broilerCPStarter: 22, 
-          broilerCPGrower: 20, 
-          broilerCPFinisher: 18.5,
-          broilerPStarter: 0.65,
-          broilerPGrower: 0.6,
-          broilerPFinisher: 0.55,
+          phase1CP: 22, 
+          phase2CP: 20, 
+          phase3CP: 18.5,
+          phase1P: 0.65,
+          phase2P: 0.6,
+          phase3P: 0.55,
           manureManagement: 'solid' 
         };
         break;
@@ -78,6 +91,8 @@ export function FarmDataInput({ onCalculate }: Props) {
     
     setFormData(prev => ({ ...prev, ...defaults }));
   };
+
+  const isPhased = formData.animalType === 'broilers' || formData.animalType === 'swine-nursery';
 
   return (
     <Card className="shadow-2xl border-none overflow-hidden">
@@ -157,7 +172,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                 value={formData.cyclesPerYear} 
                 onChange={(e) => updateField('cyclesPerYear', e.target.value)} 
               />
-              <p className="text-[10px] text-muted-foreground italic">Set to 1 for a single batch analysis (e.g. 42 days for broilers).</p>
+              <p className="text-[10px] text-muted-foreground italic">Set to 1 for a single batch analysis.</p>
             </div>
 
             <div className="space-y-3">
@@ -180,54 +195,52 @@ export function FarmDataInput({ onCalculate }: Props) {
               </Select>
             </div>
 
-            {formData.animalType === 'broilers' ? (
+            {isPhased ? (
               <div className="md:col-span-2 space-y-6">
                 <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
                   <h4 className="text-sm font-bold text-primary mb-4">Phase Specific Nutrients (%)</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Crude Protein Phases */}
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Starter CP (%) <span className="text-[10px] opacity-60">(14%)</span></Label>
+                      <Label className="text-xs font-bold text-primary">Phase I CP (%)</Label>
                       <Input 
-                        type="number" step="0.1" value={formData.broilerCPStarter} 
-                        onChange={(e) => updateField('broilerCPStarter', e.target.value)} 
+                        type="number" step="0.1" value={formData.phase1CP} 
+                        onChange={(e) => updateField('phase1CP', e.target.value)} 
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Grower CP (%) <span className="text-[10px] opacity-60">(45%)</span></Label>
+                      <Label className="text-xs font-bold text-primary">Phase II CP (%)</Label>
                       <Input 
-                        type="number" step="0.1" value={formData.broilerCPGrower} 
-                        onChange={(e) => updateField('broilerCPGrower', e.target.value)} 
+                        type="number" step="0.1" value={formData.phase2CP} 
+                        onChange={(e) => updateField('phase2CP', e.target.value)} 
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Finisher CP (%) <span className="text-[10px] opacity-60">(41%)</span></Label>
+                      <Label className="text-xs font-bold text-primary">Phase III CP (%)</Label>
                       <Input 
-                        type="number" step="0.1" value={formData.broilerCPFinisher} 
-                        onChange={(e) => updateField('broilerCPFinisher', e.target.value)} 
+                        type="number" step="0.1" value={formData.phase3CP} 
+                        onChange={(e) => updateField('phase3CP', e.target.value)} 
                       />
                     </div>
                     
-                    {/* Phosphorus Phases */}
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Starter P (%) <span className="text-[10px] opacity-60">(14%)</span></Label>
+                      <Label className="text-xs font-bold text-primary">Phase I P (%)</Label>
                       <Input 
-                        type="number" step="0.01" value={formData.broilerPStarter} 
-                        onChange={(e) => updateField('broilerPStarter', e.target.value)} 
+                        type="number" step="0.01" value={formData.phase1P} 
+                        onChange={(e) => updateField('phase1P', e.target.value)} 
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Grower P (%) <span className="text-[10px] opacity-60">(45%)</span></Label>
+                      <Label className="text-xs font-bold text-primary">Phase II P (%)</Label>
                       <Input 
-                        type="number" step="0.01" value={formData.broilerPGrower} 
-                        onChange={(e) => updateField('broilerPGrower', e.target.value)} 
+                        type="number" step="0.01" value={formData.phase2P} 
+                        onChange={(e) => updateField('phase2P', e.target.value)} 
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Finisher P (%) <span className="text-[10px] opacity-60">(41%)</span></Label>
+                      <Label className="text-xs font-bold text-primary">Phase III P (%)</Label>
                       <Input 
-                        type="number" step="0.01" value={formData.broilerPFinisher} 
-                        onChange={(e) => updateField('broilerPFinisher', e.target.value)} 
+                        type="number" step="0.01" value={formData.phase3P} 
+                        onChange={(e) => updateField('phase3P', e.target.value)} 
                       />
                     </div>
                   </div>
