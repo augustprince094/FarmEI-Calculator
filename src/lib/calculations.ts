@@ -65,21 +65,34 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const totalFeedPerCycle = count * fcr * avgWeight;
   const totalGain = avgWeight; // Simplified: Gain = Final weight for the batch
 
-  // Additive logic: Metabolic efficiency improvements
-  // These factors model the reduction in excretion/gas production independent of FCR
+  /**
+   * Additive Mitigation Factors:
+   * These factors represent the metabolic improvement in nutrient utilization
+   * and gas suppression independent of FCR gains.
+   * 
+   * Jefo Pro (Enzymatic): 
+   * - N: 5% reduction (protease-driven amino acid digestibility)
+   * - P: 2% reduction (minor mineral solubility gains)
+   * - CH4: 5% suppression (improved gut fermentation efficiency)
+   * 
+   * P(OA+EO) (Organic Acid + Essential Oil):
+   * - N: 8% reduction (OA improves protein bypass/solubility)
+   * - P: 5% reduction (OA lowers gut pH, improving P availability)
+   * - CH4: 12% suppression (EO modulators specifically target methanogenic pathways)
+   */
   let metabolicNMitigation = 1.0;
   let metabolicPMitigation = 1.0;
   let ch4MitigationFactor = 1.0;
 
   if (useAdditive && additive !== 'none') {
     if (additive === 'jefo-pro') {
-      metabolicNMitigation = 0.95; // 5% metabolic N reduction
-      metabolicPMitigation = 0.98; // 2% metabolic P reduction
-      ch4MitigationFactor = 0.95;  // 5% methane suppression
+      metabolicNMitigation = 0.95; 
+      metabolicPMitigation = 0.98;
+      ch4MitigationFactor = 0.95; 
     } else if (additive === 'poa-eo') {
-      metabolicNMitigation = 0.92; // 8% metabolic N reduction
-      metabolicPMitigation = 0.95; // 5% metabolic P reduction
-      ch4MitigationFactor = 0.88;  // 12% methane suppression
+      metabolicNMitigation = 0.92;
+      metabolicPMitigation = 0.95;
+      ch4MitigationFactor = 0.88;
     }
   }
 
@@ -92,7 +105,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       broilerCPStarter !== undefined && broilerCPGrower !== undefined && broilerCPFinisher !== undefined &&
       broilerPStarter !== undefined && broilerPGrower !== undefined && broilerPFinisher !== undefined) {
     
-    // Distribution for a 42-day broiler cycle (both feed and weight gain aligned)
+    // Distribution for a 42-day broiler cycle
     const phaseDist = { starter: 0.14, grower: 0.45, finisher: 0.41 };
 
     // --- PHASE 1: STARTER ---
@@ -101,7 +114,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const sNIntake = (sFeed * broilerCPStarter / 100) / 6.25;
     const sNRetention = (29 * sGain / 1000) * count; 
     const sPIntake = sFeed * (broilerPStarter / 100);
-    const sPRetention = (6 * sGain / 1000) * count; // 0.6% P retention
+    const sPRetention = (6 * sGain / 1000) * count;
 
     // --- PHASE 2: GROWER ---
     const gFeed = totalFeedPerCycle * phaseDist.grower;
@@ -119,14 +132,12 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const fPIntake = fFeed * (broilerPFinisher / 100);
     const fPRetention = (6 * fGain / 1000) * count;
 
-    // Sum of phases to get total cycle mass balance
     totalNitrogenIntake = sNIntake + gNIntake + fNIntake;
     totalNitrogenRetention = sNRetention + gNRetention + fNRetention;
     totalPhosphorusIntake = sPIntake + gPIntake + fPIntake;
     totalPhosphorusRetention = sPRetention + gPRetention + fPRetention;
 
   } else {
-    // Single phase fallback (Swine)
     totalNitrogenIntake = (totalFeedPerCycle * (feedCrudeProtein / 100)) / 6.25;
     totalNitrogenRetention = (29 * avgWeight / 1000) * count;
     
@@ -135,7 +146,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalPhosphorusRetention = (swinePRetentionFactor * avgWeight / 1000) * count;
   }
 
-  // --- EXCRETION CALCULATION ---
   const baseNitrogenExcreted = Math.max(0, totalNitrogenIntake - totalNitrogenRetention);
   const totalNitrogenExcreted = baseNitrogenExcreted * metabolicNMitigation;
 
@@ -155,7 +165,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   if (animalType === 'swine-nursery') entericMultiplier = 0.015;
 
   const entericEmissionFactor = animalType === 'broilers' ? 0 : (avgWeight * entericMultiplier / 365);
-  // Applied ch4MitigationFactor here
   const totalEntericMethane = entericEmissionFactor * count * cycleDays * ch4MitigationFactor;
 
   const mcf = {
@@ -166,10 +175,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }[manureManagement] || 0.1;
   
   const vsPerDay = animalType === 'broilers' ? (avgWeight * 0.01) : (avgWeight * 0.005);
-  // Applied ch4MitigationFactor here as well
   const manureMethane = vsPerDay * count * cycleDays * mcf * 0.6 * ch4MitigationFactor;
 
-  // --- OTHER METRICS ---
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.05;
 
   const directN2oFactor = {
