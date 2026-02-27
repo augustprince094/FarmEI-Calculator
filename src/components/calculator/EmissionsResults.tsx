@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +19,17 @@ interface Props {
 export function EmissionsResults({ results, isComparison = false, baselineFcr, scenarioFcr }: Props) {
   const { baseline, scenario, additiveType } = results;
 
-  const additiveName = additiveType === 'jefo-pro' ? 'Jefo Pro' : additiveType === 'poa-eo' ? 'P(OA+EO)' : 'None';
+  const getAdditiveName = (type: string) => {
+    switch (type) {
+      case 'jefo-pro': return 'Jefo Pro';
+      case 'poa-eo': return 'P(OA+EO)';
+      case 'xylanase': return 'Xylanase';
+      case 'jefo-combo': return 'Jefo Combo (Xyl+Pro)';
+      default: return 'None';
+    }
+  };
+
+  const additiveName = getAdditiveName(additiveType);
 
   const formatValue = (val: number) => val.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const formatCarbon = (val: number) => Math.round(val).toLocaleString();
@@ -35,7 +44,15 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
 
   // Colors
   const baselineColor = '#808080';
-  const scenarioColor = additiveType === 'poa-eo' ? '#D38F89' : '#FBBC01';
+  const getScenarioColor = (type: string) => {
+    switch (type) {
+      case 'poa-eo': return '#D38F89';
+      case 'xylanase': return '#4A90E2';
+      case 'jefo-combo': return '#F5A623';
+      default: return '#FBBC01'; // Jefo Pro
+    }
+  };
+  const scenarioColor = getScenarioColor(additiveType);
 
   // Data for individual charts
   const nitrogenData = [
@@ -117,10 +134,16 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   Nitrogen emission
                 </p>
                 <h3 className="text-2xl font-bold text-primary">
-                  {formatValue(isComparison ? baseline.nitrogenExcreted - scenario.nitrogenExcreted : baseline.nitrogenExcreted)} 
+                  {formatValue(isComparison ? scenario.nitrogenExcreted : baseline.nitrogenExcreted)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
-                {isComparison && <p className="text-[10px] text-muted-foreground mt-1 italic">Reduction achieved</p>}
+                {isComparison && (
+                  <p className="text-[10px] text-green-700 mt-1 font-bold">
+                    {baseline.nitrogenExcreted > scenario.nitrogenExcreted 
+                      ? `-${formatValue(baseline.nitrogenExcreted - scenario.nitrogenExcreted)} kg reduction` 
+                      : 'No change'}
+                  </p>
+                )}
               </div>
               <Wind className="text-primary/20 w-8 h-8" />
             </div>
@@ -135,10 +158,16 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   Phosphorus emission
                 </p>
                 <h3 className="text-2xl font-bold text-secondary">
-                  {formatValue(isComparison ? baseline.phosphorusExcreted - scenario.phosphorusExcreted : baseline.phosphorusExcreted)} 
+                  {formatValue(isComparison ? scenario.phosphorusExcreted : baseline.phosphorusExcreted)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
-                {isComparison && <p className="text-[10px] text-muted-foreground mt-1 italic">Reduction achieved</p>}
+                {isComparison && (
+                  <p className="text-[10px] text-green-700 mt-1 font-bold">
+                    {baseline.phosphorusExcreted > scenario.phosphorusExcreted 
+                      ? `-${formatValue(baseline.phosphorusExcreted - scenario.phosphorusExcreted)} kg reduction` 
+                      : 'No change'}
+                  </p>
+                )}
               </div>
               <Droplets className="text-secondary/20 w-8 h-8" />
             </div>
@@ -153,10 +182,16 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   Carbon footprint
                 </p>
                 <h3 className="text-2xl font-bold text-green-700">
-                  {formatCarbon(isComparison ? baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent : baseline.totalCarbonEquivalent)} 
+                  {formatCarbon(isComparison ? scenario.totalCarbonEquivalent : baseline.totalCarbonEquivalent)} 
                   <span className="text-sm font-normal ml-1 text-muted-foreground">kg</span>
                 </h3>
-                {isComparison && <p className="text-[10px] text-muted-foreground mt-1 italic">CO2e Mitigated</p>}
+                {isComparison && (
+                  <p className="text-[10px] text-green-700 mt-1 font-bold">
+                    {baseline.totalCarbonEquivalent > scenario.totalCarbonEquivalent 
+                      ? `-${formatCarbon(baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent)} kg CO2e mitigated` 
+                      : 'No change'}
+                  </p>
+                )}
               </div>
               <Leaf className="text-green-700/20 w-8 h-8" />
             </div>

@@ -1,5 +1,5 @@
 export type AnimalType = 'broilers' | 'swine-sow' | 'swine-nursery' | 'swine-grow-finish';
-export type FeedAdditive = 'none' | 'jefo-pro' | 'poa-eo';
+export type FeedAdditive = 'none' | 'jefo-pro' | 'poa-eo' | 'xylanase' | 'jefo-combo';
 
 export interface FarmData {
   animalType: AnimalType;
@@ -39,9 +39,10 @@ export interface ComparativeResults {
 /**
  * Calculates farm emissions per production cycle based on phase-specific mass balance.
  * 
- * PHASING LOGIC:
- * - Broilers: Starter (14%), Grower (45%), Finisher (41%)
- * - Nursery Pigs: Phase I (15%), Phase II (35%), Phase III (50%)
+ * PHASING LOGIC (14/45/41 Distribution):
+ * - Broilers & Nursery Pigs use 3 phases for both Feed Intake and Weight Gain.
+ * - Nitrogen retention constant: 29g N / kg weight gain.
+ * - Phosphorus retention constant: 6g P / kg weight gain (0.6% tissue/bone content).
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -61,13 +62,21 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
   if (useAdditive && additive !== 'none') {
     if (additive === 'jefo-pro') {
-      metabolicNMitigation = 0.95; 
+      metabolicNMitigation = 0.95; // 5% improvement in N digestibility
       metabolicPMitigation = 0.98;
       ch4MitigationFactor = 0.95; 
     } else if (additive === 'poa-eo') {
-      metabolicNMitigation = 0.92;
+      metabolicNMitigation = 0.92; // 8% improvement
       metabolicPMitigation = 0.95;
-      ch4MitigationFactor = 0.88;
+      ch4MitigationFactor = 0.88; // 12% CH4 reduction
+    } else if (additive === 'xylanase') {
+      metabolicNMitigation = 0.98; // 2% improvement
+      metabolicPMitigation = 0.99;
+      ch4MitigationFactor = 0.98;
+    } else if (additive === 'jefo-combo') {
+      metabolicNMitigation = 0.93; // 7% synergistic improvement
+      metabolicPMitigation = 0.96;
+      ch4MitigationFactor = 0.93;
     }
   }
 
@@ -81,12 +90,10 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
                    phase1P !== undefined && phase2P !== undefined && phase3P !== undefined;
 
   if (isPhased) {
-    const phaseDist = animalType === 'broilers' 
-      ? { p1: 0.14, p2: 0.45, p3: 0.41 } 
-      : { p1: 0.15, p2: 0.35, p3: 0.50 };
+    const phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 }; // 14/45/41 Industry Standard
 
     const nRetentionFactor = 29; // g/kg (Standard N retention)
-    const pRetentionFactor = animalType === 'broilers' ? 6 : 5.5; // g/kg (6 for broilers, 5.5 for nursery pigs)
+    const pRetentionFactor = 6; // g/kg (0.6% assumption for tissue/bones)
 
     // Phase 1
     const p1Feed = totalFeedPerCycle * phaseDist.p1;
@@ -117,7 +124,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenRetention = (29 * avgWeight / 1000) * count;
     
     totalPhosphorusIntake = totalFeedPerCycle * (feedPhosphorus / 100);
-    const genericPRetentionFactor = 5; // g/kg
+    const genericPRetentionFactor = 6; // g/kg
     totalPhosphorusRetention = (genericPRetentionFactor * avgWeight / 1000) * count;
   }
 

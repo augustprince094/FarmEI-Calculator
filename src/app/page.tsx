@@ -45,7 +45,8 @@ export default function Home() {
     
     let targetFcr = scenarioFcr;
     if (additive !== 'none' && targetFcr === baselineData.fcr) {
-      const reduction = additive === 'jefo-pro' ? 0.97 : 0.95;
+      // Automatic reduction logic for UI suggestion
+      const reduction = additive === 'jefo-combo' ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
       targetFcr = parseFloat((baselineData.fcr * reduction).toFixed(2));
       setScenarioFcr(targetFcr);
     } else if (additive === 'none') {
@@ -174,27 +175,47 @@ export default function Home() {
                   <ArrowRight className="w-4 h-4" /> Mitigation Scenario
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Adjust FCR for the mitigated cycle to see impact on total emissions.
+                  Select a nutritional strategy and adjust FCR to see its mitigation impact.
                 </p>
-                <div className="grid grid-cols-1 gap-3 mb-6">
+                <div className="grid grid-cols-1 gap-2 mb-6">
                   <Button 
                     variant={selectedAdditive === 'jefo-pro' ? 'default' : 'outline'}
                     onClick={() => handleApplyMitigation('jefo-pro')}
-                    className="justify-start h-auto py-3 px-4"
+                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'jefo-pro' ? 'bg-[#FBBC01] hover:bg-[#FBBC01]/90' : ''}`}
                   >
                     <div className="text-left">
-                      <div className="font-bold">Jefo Pro Solution</div>
-                      <div className="text-[10px] opacity-70">Enzymatic metabolic catalyst</div>
+                      <div className="font-bold text-sm">Jefo Pro Solution</div>
+                      <div className="text-[10px] opacity-70">Metabolic catalyst</div>
                     </div>
                   </Button>
                   <Button 
                     variant={selectedAdditive === 'poa-eo' ? 'default' : 'outline'}
                     onClick={() => handleApplyMitigation('poa-eo')}
-                    className="justify-start h-auto py-3 px-4"
+                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'poa-eo' ? 'bg-[#D38F89] hover:bg-[#D38F89]/90' : ''}`}
                   >
                     <div className="text-left">
-                      <div className="font-bold">P(OA+EO)</div>
+                      <div className="font-bold text-sm">P(OA+EO)</div>
                       <div className="text-[10px] opacity-70">Organic acid / EO synergy</div>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant={selectedAdditive === 'xylanase' ? 'default' : 'outline'}
+                    onClick={() => handleApplyMitigation('xylanase')}
+                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'xylanase' ? 'bg-[#4A90E2] hover:bg-[#4A90E2]/90' : ''}`}
+                  >
+                    <div className="text-left">
+                      <div className="font-bold text-sm">Xylanase</div>
+                      <div className="text-[10px] opacity-70">Energy efficiency catalyst</div>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant={selectedAdditive === 'jefo-combo' ? 'default' : 'outline'}
+                    onClick={() => handleApplyMitigation('jefo-combo')}
+                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'jefo-combo' ? 'bg-[#F5A623] hover:bg-[#F5A623]/90' : ''}`}
+                  >
+                    <div className="text-left">
+                      <div className="font-bold text-sm">Jefo Xylanase + Protease</div>
+                      <div className="text-[10px] opacity-70">Synergistic enzyme complex</div>
                     </div>
                   </Button>
                 </div>
