@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -48,7 +49,6 @@ export default function Home() {
     
     let targetFcr = scenarioFcr;
     if (additive !== 'none' && targetFcr === baselineData.fcr) {
-      // Automatic reduction logic for UI suggestion
       const reduction = (additive === 'jefo-combo' || additive === 'xylanase') ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
       targetFcr = parseFloat((baselineData.fcr * reduction).toFixed(2));
       setScenarioFcr(targetFcr);
@@ -125,24 +125,32 @@ export default function Home() {
               <DialogTrigger asChild>
                 <button className="hover:text-white transition-colors flex items-center gap-1"><Info className="w-4 h-4" /> Science</button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Environmental Intensity Methodology</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 text-sm leading-relaxed">
+                <div className="space-y-6 text-sm leading-relaxed pr-2">
                   <section>
-                    <h4 className="font-bold text-primary mb-1">Nitrogen Excretion (N-excreted):</h4>
-                    <p>Calculated per phase by subtracting nitrogen retention from nitrogen intake.</p>
-                    <code className="block bg-muted p-2 mt-2 rounded">N Intake = (Feed Intake × CP% / 100) / 6.25</code>
-                    <p className="mt-2 text-[10px] text-muted-foreground italic">Retention: 29g N per kg of weight produced per phase.</p>
+                    <h4 className="font-bold text-primary mb-2">Nitrogen & Phosphorus Excretion:</h4>
+                    <p className="mb-2">Calculated per phase by subtracting retention from intake. Total cycle excretion is the sum of phase-specific balances.</p>
+                    <div className="bg-muted p-3 rounded space-y-2">
+                      <p><strong>N Intake</strong> = (Feed Intake × CP% / 100) / 6.25</p>
+                      <p><strong>N Retention</strong> = (Weight Gain × 29g N/kg) × Count</p>
+                      <p className="border-t pt-2 mt-2"><strong>P Intake</strong> = (Feed Intake × P% / 100)</p>
+                      <p><strong>P Retention</strong> = (Weight Gain × 0.6 / 100) × Count</p>
+                    </div>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-1">Phosphorus Excretion (P-excreted):</h4>
-                    <p>Calculated per phase as the difference between Phosphorus intake and phosphorus retention.</p>
-                    <code className="block bg-muted p-2 mt-2 rounded">P Retention = (Weight Gain × 0.6 / 100) × Count</code>
+                    <h4 className="font-bold text-primary mb-2">Nitrous Oxide (N2O) Emissions:</h4>
+                    <p className="mb-2">Calculated based on total nitrogen excreted and molecular conversion factors.</p>
+                    <div className="bg-muted p-3 rounded space-y-2">
+                      <p><strong>Direct N2O</strong> = N Excreted × EF (System) × (44/28)</p>
+                      <p className="text-[10px] text-muted-foreground italic pl-4">*EF system: 0.02 (Solid), 0.005 (Slurry/Lagoon), 0.01 (Dry Lot)</p>
+                      <p><strong>Indirect N2O</strong> = N Excreted × 0.01 × (44/28)</p>
+                    </div>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-1">Phasing Partitioning:</h4>
+                    <h4 className="font-bold text-primary mb-1">Phase Partitioning (Intake & Gain):</h4>
                     <ul className="list-disc pl-5">
                       <li><strong>Broilers:</strong> 14% Starter, 45% Grower, 41% Finisher.</li>
                       <li><strong>Nursery Pigs:</strong> 15% Phase I, 35% Phase II, 50% Phase III.</li>
