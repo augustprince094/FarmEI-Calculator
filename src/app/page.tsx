@@ -130,39 +130,44 @@ export default function Home() {
                 </DialogHeader>
                 <div className="space-y-6 text-sm leading-relaxed pr-2">
                   <section>
-                    <h4 className="font-bold text-primary mb-2">Nitrogen & Phosphorus Excretion:</h4>
-                    <p className="mb-2">Calculated per phase (Starter, Grower, Finisher) as the difference between intake and retention.</p>
+                    <h4 className="font-bold text-primary mb-2">Nutrient Excretion (Mass Balance):</h4>
+                    <p className="mb-2">Calculated per phase as the difference between dietary intake and biological retention.</p>
                     <div className="bg-muted p-3 rounded space-y-2">
                       <p><strong>N Intake</strong> = {"Sum((Feed_i * CP_i / 100) / 6.25)"}</p>
                       <p><strong>N Retention</strong> = {"Sum((Weight_Gain_i * 29g N/kg) * Count)"}</p>
                       <p className="border-t pt-2 mt-2"><strong>P Intake</strong> = {"Sum(Feed_i * P_i / 100)"}</p>
-                      <p><strong>P Retention</strong> = {"Sum((Weight_Gain_i * 0.6 / 100) * Count)"}</p>
+                      <p><strong>P Retention</strong> = {"Sum((Weight_Gain_i * 0.006) * Count)"}</p>
                     </div>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-2">Nitrous Oxide (N2O) Emissions (IPCC 2019):</h4>
-                    <p className="mb-2">Direct and indirect calculations based on total nitrogen excreted.</p>
+                    <h4 className="font-bold text-primary mb-2">Nitrous Oxide (IPCC 2019):</h4>
                     <div className="bg-muted p-3 rounded space-y-4">
                       <div>
                         <p className="font-bold text-xs uppercase text-primary">Poultry (Broilers)</p>
-                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times 1.0\\ (\\text{AWMS}) \\times 0.001\\ (EF) \\times (44/28)$"}</p>
-                        <p><strong>Indirect N2O</strong> = {"$N_{excreted} \\times 1.0\\ (\\text{AWMS}) \\times 0.2\\ (Frac_{gas}) \\times 0.01\\ (EF_4) \\times (44/28)$"}</p>
-                        <p className="text-[10px] text-muted-foreground italic">*Source: IPCC 2019 Poultry manure with litter.</p>
+                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times 1.0 (AWMS) \\times 0.001 (EF) \\times (44/28)$"}</p>
+                        <p><strong>Indirect N2O</strong> = {"$N_{excreted} \\times 1.0 (AWMS) \\times 0.2 (Frac_{gas}) \\times 0.01 (EF_4) \\times (44/28)$"}</p>
                       </div>
                       <div>
                         <p className="font-bold text-xs uppercase text-secondary">Swine</p>
-                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times EF_{\\text{system}} \\times (44/28)$"}</p>
-                        <p><strong>Indirect N2O</strong> = {"$N_{excreted} \\times Frac_{gas} \\times 0.01 \\times (44/28)$"}</p>
-                        <p className="text-[10px] text-muted-foreground italic">*EF System: 0.02 (Solid), 0.005 (Slurry). Frac Gas: 0.45 (Solid), 0.25 (Slurry).</p>
+                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times EF_{system} \\times (44/28)$"}</p>
+                        <p className="text-[10px] text-muted-foreground italic">*EF: 0.02 (Solid), 0.005 (Slurry/Lagoon), 0.01 (Dry Lot)</p>
                       </div>
                     </div>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-1">Phase Partitioning (Intake & Gain):</h4>
-                    <ul className="list-disc pl-5">
-                      <li><strong>Broilers:</strong> 14% Starter, 45% Grower, 41% Finisher.</li>
-                      <li><strong>Nursery Pigs:</strong> 15% Phase I, 35% Phase II, 50% Phase III.</li>
-                    </ul>
+                    <h4 className="font-bold text-primary mb-2">Manure Methane (VS Balance):</h4>
+                    <p className="mb-2">Calculated using Volatile Solids (VS) approach derived from feed intake.</p>
+                    <div className="bg-muted p-3 rounded space-y-2">
+                      <p><strong>Manure CH4</strong> = {"$VS \\times B_0 \\times MCF \\times Density$"}</p>
+                      <p><strong>VS</strong> = {"$Feed_{intake} \\times (1 - DMD) \\times (1 - Ash)$"}</p>
+                      <div className="text-[10px] text-muted-foreground italic grid grid-cols-2 gap-1 mt-2">
+                        <span>DMD: 85%</span>
+                        <span>Ash: 10%</span>
+                        <span>$B_0$: 0.36 $m^3/kg$</span>
+                        <span>MCF: 1.5%</span>
+                        <span>Density: 0.0662</span>
+                      </div>
+                    </div>
                   </section>
                 </div>
               </DialogContent>
@@ -397,7 +402,7 @@ export default function Home() {
                         </Table>
                       </div>
                       <div className="mt-4 p-4 bg-muted/20 rounded-lg flex items-start gap-2">
-                        <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <span className="text-primary mt-0.5"><Info className="w-4 h-4" /></span>
                         <p className="text-[10px] text-muted-foreground leading-relaxed">
                           Mitigation values include both physical feed efficiency (FCR) improvements and modeled metabolic efficiencies (digestibility enhancements and gas suppression) specific to the selected nutritional additive.
                         </p>
