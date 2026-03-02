@@ -5,13 +5,15 @@ import { FarmDataInput } from '@/components/calculator/FarmDataInput';
 import { EmissionsResults } from '@/components/calculator/EmissionsResults';
 import { MitigationAI } from '@/components/calculator/MitigationAI';
 import { calculateEmissions, FarmData, ComparativeResults, EmissionResults, AnimalType } from '@/lib/calculations';
-import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers, Calculator } from 'lucide-react';
+import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers, Calculator, TrendingDown, TrendingUp } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
 const animalTypeLabels: Record<AnimalType, string> = {
   'broilers': 'Broilers',
@@ -89,6 +91,22 @@ export default function Home() {
 
   const isPhased = baselineData?.animalType === 'broilers' || baselineData?.animalType === 'swine-nursery';
 
+  const calculateDiff = (base: number, scen: number) => {
+    if (base === 0) return 0;
+    return ((scen - base) / base) * 100;
+  };
+
+  const formatDiff = (diff: number) => {
+    if (Math.abs(diff) < 0.1) return <span className="text-muted-foreground">0%</span>;
+    const isReduction = diff < 0;
+    return (
+      <span className={cn("flex items-center gap-1 font-bold", isReduction ? "text-green-600" : "text-red-600")}>
+        {isReduction ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+        {Math.abs(diff).toFixed(1)}%
+      </span>
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary py-8 border-b border-primary/20">
@@ -114,19 +132,19 @@ export default function Home() {
                 <div className="space-y-4 text-sm leading-relaxed">
                   <section>
                     <h4 className="font-bold text-primary mb-1">Nitrogen Excretion (N-excreted):</h4>
-                    <p>Intake is calculated per phase using dietary Crude Protein and partitioned intake volumes. Retention is based on a constant 29g N per kg of weight produced per phase.</p>
+                    <p>Calculated per phase by subtracting nitrogen retention from nitrogen intake.</p>
                     <code className="block bg-muted p-2 mt-2 rounded">N Intake = (Feed Intake × CP% / 100) / 6.25</code>
-                    <p className="mt-2 text-[10px] text-muted-foreground italic">Total Excretion = Sum of (Intake - Retention) per phase.</p>
+                    <p className="mt-2 text-[10px] text-muted-foreground italic">Retention: 29g N per kg of weight produced per phase.</p>
                   </section>
                   <section>
                     <h4 className="font-bold text-primary mb-1">Phosphorus Excretion (P-excreted):</h4>
-                    <p>Calculated as the difference between Phosphorus intake (dietary P%) and retention (modeled at 0.6% of body weight produced, or 6g P/kg).</p>
+                    <p>Calculated per phase as the difference between Phosphorus intake and phosphorus retention.</p>
                     <code className="block bg-muted p-2 mt-2 rounded">P Retention = (Weight Gain × 0.6 / 100) × Count</code>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-1">Phasing Partitioning (Feed & Gain):</h4>
+                    <h4 className="font-bold text-primary mb-1">Phasing Partitioning:</h4>
                     <ul className="list-disc pl-5">
-                      <li><strong>Broilers:</strong> 14% Phase I, 45% Phase II, 41% Phase III.</li>
+                      <li><strong>Broilers:</strong> 14% Starter, 45% Grower, 41% Finisher.</li>
                       <li><strong>Nursery Pigs:</strong> 15% Phase I, 35% Phase II, 50% Phase III.</li>
                     </ul>
                   </section>
@@ -300,26 +318,73 @@ export default function Home() {
                   
                   <TabsContent value="details" className="mt-0">
                     <div className="bg-white p-8 rounded-2xl border shadow-sm">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold">Cycle Technical Breakdown</h3>
+                      <div className="flex items-center justify-between mb-8">
+                        <div>
+                          <h3 className="text-xl font-bold">Cycle Technical Comparison</h3>
+                          <p className="text-xs text-muted-foreground">Detailed mass balance and gas emission metrics.</p>
+                        </div>
                         <Badge variant="outline" className="text-xs font-normal">Calculated via Mass Balance</Badge>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                          { label: 'Nitrogen Excreted', val: (comparisonResults?.scenario || baselineResults).nitrogenExcreted, unit: 'kg N', precision: 1 },
-                          { label: 'Phosphorus Excreted', val: (comparisonResults?.scenario || baselineResults).phosphorusExcreted, unit: 'kg P', precision: 1 },
-                          { label: 'Enteric Methane', val: (comparisonResults?.scenario || baselineResults).entericMethane, unit: 'kg CH4', precision: 2 },
-                          { label: 'Manure Methane', val: (comparisonResults?.scenario || baselineResults).manureMethane, unit: 'kg CH4', precision: 2 },
-                          { label: 'Direct N2O', val: (comparisonResults?.scenario || baselineResults).directN2O, unit: 'kg N2O', precision: 2 },
-                          { label: 'Indirect N2O', val: (comparisonResults?.scenario || baselineResults).indirectN2O, unit: 'kg N2O', precision: 2 },
-                          { label: 'Phosphorus Runoff', val: (comparisonResults?.scenario || baselineResults).phosphorusRunoff, unit: 'kg P', precision: 2 },
-                          { label: 'Cycle Feed Mass', val: (comparisonResults?.scenario?.fcr || baselineData?.fcr || 0) * (baselineData?.avgWeight || 0) * (baselineData?.count || 0), unit: 'kg Feed', precision: 0 },
-                        ].map((item, i) => (
-                          <div key={i} className="p-4 bg-muted/30 rounded-lg flex justify-between items-center border border-transparent hover:border-primary/20 transition-colors">
-                            <span className="text-sm font-medium">{item.label}</span>
-                            <span className="font-bold">{item.val.toFixed(item.precision)} <span className="text-[10px] text-muted-foreground">{item.unit}</span></span>
-                          </div>
-                        ))}
+                      
+                      <div className="overflow-hidden border rounded-xl">
+                        <Table>
+                          <TableHeader className="bg-muted/50">
+                            <TableRow>
+                              <TableHead className="w-[240px]">Environmental Metric</TableHead>
+                              <TableHead className="text-right">Baseline</TableHead>
+                              <TableHead className="text-right">Mitigation</TableHead>
+                              <TableHead className="text-right">% Diff</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {[
+                              { label: 'Nitrogen Excreted', unit: 'kg N', key: 'nitrogenExcreted', precision: 1 },
+                              { label: 'Phosphorus Excreted', unit: 'kg P', key: 'phosphorusExcreted', precision: 1 },
+                              { label: 'Enteric Methane', unit: 'kg CH4', key: 'entericMethane', precision: 2 },
+                              { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 2 },
+                              { label: 'Direct N2O', unit: 'kg N2O', key: 'directN2O', precision: 2 },
+                              { label: 'Indirect N2O', unit: 'kg N2O', key: 'indirectN2O', precision: 2 },
+                              { label: 'Phosphorus Runoff', unit: 'kg P', key: 'phosphorusRunoff', precision: 2 },
+                              { label: 'Total Carbon Equivalent', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
+                            ].map((item) => {
+                              const baseVal = baselineResults[item.key as keyof EmissionResults];
+                              const scenVal = (comparisonResults?.scenario || baselineResults)[item.key as keyof EmissionResults];
+                              const diff = calculateDiff(baseVal, scenVal);
+                              
+                              return (
+                                <TableRow key={item.key} className="hover:bg-muted/30 transition-colors">
+                                  <TableCell className="font-medium">
+                                    <div className="flex flex-col">
+                                      <span>{item.label}</span>
+                                      <span className="text-[10px] text-muted-foreground uppercase">{item.unit}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-right font-mono">{baseVal.toFixed(item.precision)}</TableCell>
+                                  <TableCell className="text-right font-mono font-bold text-primary">{scenVal.toFixed(item.precision)}</TableCell>
+                                  <TableCell className="text-right">{formatDiff(diff)}</TableCell>
+                                </TableRow>
+                              );
+                            })}
+                            <TableRow className="bg-primary/5 hover:bg-primary/5">
+                              <TableCell className="font-bold text-primary">Cycle Feed Consumption</TableCell>
+                              <TableCell className="text-right font-mono">
+                                {(baselineData!.fcr * baselineData!.avgWeight * baselineData!.count).toLocaleString()} <span className="text-[10px]">kg</span>
+                              </TableCell>
+                              <TableCell className="text-right font-mono font-bold text-primary">
+                                {(scenarioFcr * baselineData!.avgWeight * baselineData!.count).toLocaleString()} <span className="text-[10px]">kg</span>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {formatDiff(calculateDiff(baselineData!.fcr, scenarioFcr))}
+                              </TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+                      <div className="mt-4 p-4 bg-muted/20 rounded-lg flex items-start gap-2">
+                        <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">
+                          Mitigation values include both physical feed efficiency (FCR) improvements and modeled metabolic efficiencies (digestibility enhancements and gas suppression) specific to the selected nutritional additive.
+                        </p>
                       </div>
                     </div>
                   </TabsContent>
