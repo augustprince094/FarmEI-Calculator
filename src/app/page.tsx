@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const animalTypeLabels: Record<AnimalType, string> = {
   'broilers': 'Broilers',
@@ -46,7 +48,7 @@ export default function Home() {
     let targetFcr = scenarioFcr;
     if (additive !== 'none' && targetFcr === baselineData.fcr) {
       // Automatic reduction logic for UI suggestion
-      const reduction = additive === 'jefo-combo' ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
+      const reduction = (additive === 'jefo-combo' || additive === 'xylanase') ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
       targetFcr = parseFloat((baselineData.fcr * reduction).toFixed(2));
       setScenarioFcr(targetFcr);
     } else if (additive === 'none') {
@@ -102,7 +104,35 @@ export default function Home() {
             </div>
           </div>
           <nav className="hidden md:flex gap-6 text-primary-foreground/90 font-medium">
-            <a href="#" className="hover:text-white transition-colors flex items-center gap-1"><Info className="w-4 h-4" /> Science</a>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="hover:text-white transition-colors flex items-center gap-1"><Info className="w-4 h-4" /> Science</button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Environmental Intensity Methodology</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 text-sm leading-relaxed">
+                  <section>
+                    <h4 className="font-bold text-primary mb-1">Nitrogen Excretion ($N_{"exc"}$):</h4>
+                    <p>Intake is calculated per phase using dietary Crude Protein and partitioned intake volumes. Retention is based on a constant 29g N per kg of weight produced per phase.</p>
+                    <code className="block bg-muted p-2 mt-2 rounded">N Intake = (Feed Intake × CP% / 100) / 6.25</code>
+                  </section>
+                  <section>
+                    <h4 className="font-bold text-primary mb-1">Phosphorus Excretion ($P_{"exc"}$):</h4>
+                    <p>Calculated as the difference between Phosphorus intake (dietary P%) and retention (modeled at 0.6% of body weight produced).</p>
+                    <code className="block bg-muted p-2 mt-2 rounded">P Retention = (Weight Gain × 0.6 / 100) × Count</code>
+                  </section>
+                  <section>
+                    <h4 className="font-bold text-primary mb-1">Phasing Partitioning (Feed & Gain):</h4>
+                    <ul className="list-disc pl-5">
+                      <li><strong>Broilers:</strong> 14% Starter, 45% Grower, 41% Finisher.</li>
+                      <li><strong>Nursery Pigs:</strong> 15% Phase I, 35% Phase II, 50% Phase III.</li>
+                    </ul>
+                  </section>
+                </div>
+              </DialogContent>
+            </Dialog>
             <a href="#" className="hover:text-white transition-colors flex items-center gap-1"><BookOpen className="w-4 h-4" /> Additives</a>
             <a href="#" className="hover:text-white transition-colors flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Methodology</a>
           </nav>
@@ -115,7 +145,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-primary mb-3">Environmental Footprint Baseline</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Establish your baseline by defining efficiency metrics. Standard cycles are analyzed per production batch.
+                Establish your baseline by defining efficiency metrics. Standard cycles are analyzed per production batch using phase-specific mass balance.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

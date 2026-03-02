@@ -39,10 +39,16 @@ export interface ComparativeResults {
 /**
  * Calculates farm emissions per production cycle based on phase-specific mass balance.
  * 
- * PHASING LOGIC (14/45/41 Distribution):
- * - Broilers & Nursery Pigs use 3 phases for both Feed Intake and Weight Gain.
- * - Nitrogen retention constant: 29g N / kg weight gain.
- * - Phosphorus retention constant: 6g P / kg weight gain (0.6% tissue/bone content).
+ * EQUATIONS:
+ * Nitrogen Intake = (Feed Intake * CP% / 100) / 6.25
+ * Nitrogen Retention = (Weight Gain * 29g N / 1000) * Count
+ * 
+ * Phosphorus Intake = (Feed Intake * P% / 100)
+ * Phosphorus Retention = (Weight Gain * 0.6 / 100) * Count
+ * 
+ * Partitioning:
+ * - Broilers: 14/45/41 for Intake & Gain
+ * - Nursery Pigs: 15/35/50 for Intake & Gain
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -56,25 +62,26 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const totalFeedPerCycle = count * fcr * avgWeight;
   const totalGain = avgWeight;
 
+  // Additive metabolic efficiency factors
   let metabolicNMitigation = 1.0;
   let metabolicPMitigation = 1.0;
   let ch4MitigationFactor = 1.0;
 
   if (useAdditive && additive !== 'none') {
     if (additive === 'jefo-pro') {
-      metabolicNMitigation = 0.95; // 5% improvement in N digestibility
+      metabolicNMitigation = 0.95; 
       metabolicPMitigation = 0.98;
       ch4MitigationFactor = 0.95; 
     } else if (additive === 'poa-eo') {
-      metabolicNMitigation = 0.92; // 8% improvement
+      metabolicNMitigation = 0.92;
       metabolicPMitigation = 0.95;
-      ch4MitigationFactor = 0.88; // 12% CH4 reduction
+      ch4MitigationFactor = 0.88; 
     } else if (additive === 'xylanase') {
-      metabolicNMitigation = 0.98; // 2% improvement
+      metabolicNMitigation = 0.98;
       metabolicPMitigation = 0.99;
       ch4MitigationFactor = 0.98;
     } else if (additive === 'jefo-combo') {
-      metabolicNMitigation = 0.93; // 7% synergistic improvement
+      metabolicNMitigation = 0.93;
       metabolicPMitigation = 0.96;
       ch4MitigationFactor = 0.93;
     }
@@ -90,10 +97,12 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
                    phase1P !== undefined && phase2P !== undefined && phase3P !== undefined;
 
   if (isPhased) {
-    const phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 }; // 14/45/41 Industry Standard
+    // Phase Partitioning
+    const phaseDist = animalType === 'broilers' 
+      ? { p1: 0.14, p2: 0.45, p3: 0.41 } 
+      : { p1: 0.15, p2: 0.35, p3: 0.50 };
 
-    const nRetentionFactor = 29; // g/kg (Standard N retention)
-    const pRetentionFactor = 6; // g/kg (0.6% assumption for tissue/bones)
+    const nRetentionFactor = 29; // g N / kg gain
 
     // Phase 1
     const p1Feed = totalFeedPerCycle * phaseDist.p1;
@@ -101,7 +110,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenIntake += (p1Feed * phase1CP! / 100) / 6.25;
     totalNitrogenRetention += (nRetentionFactor * p1Gain / 1000) * count;
     totalPhosphorusIntake += p1Feed * (phase1P! / 100);
-    totalPhosphorusRetention += (pRetentionFactor * p1Gain / 1000) * count;
+    totalPhosphorusRetention += (p1Gain * 0.6 / 100) * count;
 
     // Phase 2
     const p2Feed = totalFeedPerCycle * phaseDist.p2;
@@ -109,7 +118,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenIntake += (p2Feed * phase2CP! / 100) / 6.25;
     totalNitrogenRetention += (nRetentionFactor * p2Gain / 1000) * count;
     totalPhosphorusIntake += p2Feed * (phase2P! / 100);
-    totalPhosphorusRetention += (pRetentionFactor * p2Gain / 1000) * count;
+    totalPhosphorusRetention += (p2Gain * 0.6 / 100) * count;
 
     // Phase 3
     const p3Feed = totalFeedPerCycle * phaseDist.p3;
@@ -117,23 +126,22 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenIntake += (p3Feed * phase3CP! / 100) / 6.25;
     totalNitrogenRetention += (nRetentionFactor * p3Gain / 1000) * count;
     totalPhosphorusIntake += p3Feed * (phase3P! / 100);
-    totalPhosphorusRetention += (pRetentionFactor * p3Gain / 1000) * count;
+    totalPhosphorusRetention += (p3Gain * 0.6 / 100) * count;
 
   } else {
+    // Single Phase Analysis
     totalNitrogenIntake = (totalFeedPerCycle * (feedCrudeProtein / 100)) / 6.25;
     totalNitrogenRetention = (29 * avgWeight / 1000) * count;
     
     totalPhosphorusIntake = totalFeedPerCycle * (feedPhosphorus / 100);
-    const genericPRetentionFactor = 6; // g/kg
-    totalPhosphorusRetention = (genericPRetentionFactor * avgWeight / 1000) * count;
+    totalPhosphorusRetention = (avgWeight * 0.6 / 100) * count;
   }
 
-  const baseNitrogenExcreted = Math.max(0, totalNitrogenIntake - totalNitrogenRetention);
-  const totalNitrogenExcreted = baseNitrogenExcreted * metabolicNMitigation;
+  // Excretion = Intake - Retention (adjusted by metabolic additive if applicable)
+  const totalNitrogenExcreted = Math.max(0, totalNitrogenIntake - totalNitrogenRetention) * metabolicNMitigation;
+  const totalPhosphorusExcreted = Math.max(0, totalPhosphorusIntake - totalPhosphorusRetention) * metabolicPMitigation;
 
-  const basePhosphorusExcreted = Math.max(0, totalPhosphorusIntake - totalPhosphorusRetention);
-  const totalPhosphorusExcreted = basePhosphorusExcreted * metabolicPMitigation;
-
+  // Gas Emissions
   const cycleDays = {
     'broilers': 42,
     'swine-sow': 365,
