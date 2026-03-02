@@ -40,11 +40,8 @@ export interface ComparativeResults {
  * Calculates farm emissions per production cycle based on phase-specific mass balance.
  * 
  * EQUATIONS:
- * Nitrogen Intake = (Feed Intake * CP% / 100) / 6.25
- * Nitrogen Retention = (Weight Gain * 29g N / 1000) * Count
- * 
- * Phosphorus Intake = (Feed Intake * P% / 100)
- * Phosphorus Retention = (Weight Gain * 0.6 / 100) * Count
+ * Nitrogen Excretion (Phase) = (Nitrogen Intake - Nitrogen Retention)
+ * Phosphorus Excretion (Phase) = (Phosphorus Intake - Phosphorus Retention)
  * 
  * Partitioning:
  * - Broilers: 14/45/41 for Intake & Gain
@@ -87,59 +84,64 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     }
   }
 
-  let totalNitrogenIntake = 0;
-  let totalNitrogenRetention = 0;
-  let totalPhosphorusIntake = 0;
-  let totalPhosphorusRetention = 0;
+  let totalNitrogenExcreted = 0;
+  let totalPhosphorusExcreted = 0;
 
   const isPhased = (animalType === 'broilers' || animalType === 'swine-nursery') && 
                    phase1CP !== undefined && phase2CP !== undefined && phase3CP !== undefined &&
                    phase1P !== undefined && phase2P !== undefined && phase3P !== undefined;
 
   if (isPhased) {
-    // Phase Partitioning
     const phaseDist = animalType === 'broilers' 
       ? { p1: 0.14, p2: 0.45, p3: 0.41 } 
       : { p1: 0.15, p2: 0.35, p3: 0.50 };
 
     const nRetentionFactor = 29; // g N / kg gain
+    const pRetentionFactor = 6;  // g P / kg gain (0.6%)
 
     // Phase 1
     const p1Feed = totalFeedPerCycle * phaseDist.p1;
     const p1Gain = totalGain * phaseDist.p1;
-    totalNitrogenIntake += (p1Feed * phase1CP! / 100) / 6.25;
-    totalNitrogenRetention += (nRetentionFactor * p1Gain / 1000) * count;
-    totalPhosphorusIntake += p1Feed * (phase1P! / 100);
-    totalPhosphorusRetention += (p1Gain * 0.6 / 100) * count;
+    const p1NIntake = (p1Feed * phase1CP! / 100) / 6.25;
+    const p1NRetention = (nRetentionFactor * p1Gain / 1000) * count;
+    const p1PIntake = p1Feed * (phase1P! / 100);
+    const p1PRetention = (pRetentionFactor * p1Gain / 1000) * count;
+    totalNitrogenExcreted += Math.max(0, p1NIntake - p1NRetention);
+    totalPhosphorusExcreted += Math.max(0, p1PIntake - p1PRetention);
 
     // Phase 2
     const p2Feed = totalFeedPerCycle * phaseDist.p2;
     const p2Gain = totalGain * phaseDist.p2;
-    totalNitrogenIntake += (p2Feed * phase2CP! / 100) / 6.25;
-    totalNitrogenRetention += (nRetentionFactor * p2Gain / 1000) * count;
-    totalPhosphorusIntake += p2Feed * (phase2P! / 100);
-    totalPhosphorusRetention += (p2Gain * 0.6 / 100) * count;
+    const p2NIntake = (p2Feed * phase2CP! / 100) / 6.25;
+    const p2NRetention = (nRetentionFactor * p2Gain / 1000) * count;
+    const p2PIntake = p2Feed * (phase2P! / 100);
+    const p2PRetention = (pRetentionFactor * p2Gain / 1000) * count;
+    totalNitrogenExcreted += Math.max(0, p2NIntake - p2NRetention);
+    totalPhosphorusExcreted += Math.max(0, p2PIntake - p2PRetention);
 
     // Phase 3
     const p3Feed = totalFeedPerCycle * phaseDist.p3;
     const p3Gain = totalGain * phaseDist.p3;
-    totalNitrogenIntake += (p3Feed * phase3CP! / 100) / 6.25;
-    totalNitrogenRetention += (nRetentionFactor * p3Gain / 1000) * count;
-    totalPhosphorusIntake += p3Feed * (phase3P! / 100);
-    totalPhosphorusRetention += (p3Gain * 0.6 / 100) * count;
+    const p3NIntake = (p3Feed * phase3CP! / 100) / 6.25;
+    const p3NRetention = (nRetentionFactor * p3Gain / 1000) * count;
+    const p3PIntake = p3Feed * (phase3P! / 100);
+    const p3PRetention = (pRetentionFactor * p3Gain / 1000) * count;
+    totalNitrogenExcreted += Math.max(0, p3NIntake - p3NRetention);
+    totalPhosphorusExcreted += Math.max(0, p3PIntake - p3PRetention);
 
   } else {
     // Single Phase Analysis
-    totalNitrogenIntake = (totalFeedPerCycle * (feedCrudeProtein / 100)) / 6.25;
-    totalNitrogenRetention = (29 * avgWeight / 1000) * count;
-    
-    totalPhosphorusIntake = totalFeedPerCycle * (feedPhosphorus / 100);
-    totalPhosphorusRetention = (avgWeight * 0.6 / 100) * count;
+    const nIntake = (totalFeedPerCycle * (feedCrudeProtein / 100)) / 6.25;
+    const nRetention = (29 * avgWeight / 1000) * count;
+    const pIntake = totalFeedPerCycle * (feedPhosphorus / 100);
+    const pRetention = (6 * avgWeight / 1000) * count;
+    totalNitrogenExcreted = Math.max(0, nIntake - nRetention);
+    totalPhosphorusExcreted = Math.max(0, pIntake - pRetention);
   }
 
-  // Excretion = Intake - Retention (adjusted by metabolic additive if applicable)
-  const totalNitrogenExcreted = Math.max(0, totalNitrogenIntake - totalNitrogenRetention) * metabolicNMitigation;
-  const totalPhosphorusExcreted = Math.max(0, totalPhosphorusIntake - totalPhosphorusRetention) * metabolicPMitigation;
+  // Apply metabolic additive efficiency
+  totalNitrogenExcreted *= metabolicNMitigation;
+  totalPhosphorusExcreted *= metabolicPMitigation;
 
   // Gas Emissions
   const cycleDays = {

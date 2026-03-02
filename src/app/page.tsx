@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -114,19 +113,20 @@ export default function Home() {
                 </DialogHeader>
                 <div className="space-y-4 text-sm leading-relaxed">
                   <section>
-                    <h4 className="font-bold text-primary mb-1">Nitrogen Excretion ($N_{"exc"}$):</h4>
+                    <h4 className="font-bold text-primary mb-1">Nitrogen Excretion (N-excreted):</h4>
                     <p>Intake is calculated per phase using dietary Crude Protein and partitioned intake volumes. Retention is based on a constant 29g N per kg of weight produced per phase.</p>
                     <code className="block bg-muted p-2 mt-2 rounded">N Intake = (Feed Intake × CP% / 100) / 6.25</code>
+                    <p className="mt-2 text-[10px] text-muted-foreground italic">Total Excretion = Sum of (Intake - Retention) per phase.</p>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-1">Phosphorus Excretion ($P_{"exc"}$):</h4>
-                    <p>Calculated as the difference between Phosphorus intake (dietary P%) and retention (modeled at 0.6% of body weight produced).</p>
+                    <h4 className="font-bold text-primary mb-1">Phosphorus Excretion (P-excreted):</h4>
+                    <p>Calculated as the difference between Phosphorus intake (dietary P%) and retention (modeled at 0.6% of body weight produced, or 6g P/kg).</p>
                     <code className="block bg-muted p-2 mt-2 rounded">P Retention = (Weight Gain × 0.6 / 100) × Count</code>
                   </section>
                   <section>
                     <h4 className="font-bold text-primary mb-1">Phasing Partitioning (Feed & Gain):</h4>
                     <ul className="list-disc pl-5">
-                      <li><strong>Broilers:</strong> 14% Starter, 45% Grower, 41% Finisher.</li>
+                      <li><strong>Broilers:</strong> 14% Phase I, 45% Phase II, 41% Phase III.</li>
                       <li><strong>Nursery Pigs:</strong> 15% Phase I, 35% Phase II, 50% Phase III.</li>
                     </ul>
                   </section>
