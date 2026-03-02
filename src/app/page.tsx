@@ -132,7 +132,7 @@ export default function Home() {
                 <div className="space-y-6 text-sm leading-relaxed pr-2">
                   <section>
                     <h4 className="font-bold text-primary mb-2">Nitrogen & Phosphorus Excretion:</h4>
-                    <p className="mb-2">Calculated per phase by subtracting retention from intake. Total cycle excretion is the sum of phase-specific balances.</p>
+                    <p className="mb-2">Calculated per phase (Starter, Grower, Finisher) as the difference between intake and retention.</p>
                     <div className="bg-muted p-3 rounded space-y-2">
                       <p><strong>N Intake</strong> = (Feed Intake × CP% / 100) / 6.25</p>
                       <p><strong>N Retention</strong> = (Weight Gain × 29g N/kg) × Count</p>
@@ -141,12 +141,20 @@ export default function Home() {
                     </div>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-2">Nitrous Oxide (N2O) Emissions:</h4>
-                    <p className="mb-2">Calculated based on total nitrogen excreted and molecular conversion factors.</p>
-                    <div className="bg-muted p-3 rounded space-y-2">
-                      <p><strong>Direct N2O</strong> = N Excreted × EF (System) × (44/28)</p>
-                      <p className="text-[10px] text-muted-foreground italic pl-4">*EF system: 0.02 (Solid), 0.005 (Slurry/Lagoon), 0.01 (Dry Lot)</p>
-                      <p><strong>Indirect N2O</strong> = N Excreted × 0.01 × (44/28)</p>
+                    <h4 className="font-bold text-primary mb-2">Nitrous Oxide (N2O) Emissions (IPCC 2019):</h4>
+                    <p className="mb-2">Direct and indirect calculations based on total nitrogen excreted.</p>
+                    <div className="bg-muted p-3 rounded space-y-4">
+                      <div>
+                        <p className="font-bold text-xs uppercase text-primary">Poultry (Broilers)</p>
+                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times 1.0\\ (\\text{AWMS}) \\times 0.001\\ (EF) \\times (44/28)$"}</p>
+                        <p className="text-[10px] text-muted-foreground italic">*Source: IPCC 2019 Poultry manure with litter (AWMS 100%).</p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-xs uppercase text-secondary">Swine</p>
+                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times EF_{\\text{system}} \\times (44/28)$"}</p>
+                        <p className="text-[10px] text-muted-foreground italic">*EF: 0.02 (Solid), 0.005 (Slurry/Lagoon), 0.01 (Dry Lot)</p>
+                      </div>
+                      <p className="border-t pt-2 mt-2"><strong>Indirect N2O</strong> = {"$N_{excreted} \\times 0.01 \\times (44/28)$"}</p>
                     </div>
                   </section>
                   <section>
