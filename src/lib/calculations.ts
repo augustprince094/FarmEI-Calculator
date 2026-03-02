@@ -170,13 +170,16 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.05;
 
-  // Direct N2O logic update based on user request (IPCC 2019 for Poultry)
+  // Direct and Indirect N2O logic update based on user request (IPCC 2019)
   let directN2oFactor = 0.01;
+  let fracGas = 0.1; // Default
+  let ef4 = 0.01;
   let awmsFactor = 1.0;
 
   if (animalType === 'broilers') {
     directN2oFactor = 0.001; // IPCC 2019 EF for poultry manure with litter
     awmsFactor = 1.0;        // 100% AWMS for poultry litter
+    fracGas = 0.2;           // IPCC 2019 Frac_gas for poultry manure with litter
   } else {
     directN2oFactor = {
       'lagoon': 0.005,
@@ -184,11 +187,17 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       'slurry': 0.005,
       'dry-lot': 0.01
     }[manureManagement] || 0.01;
-    awmsFactor = 1.0; // Default AWMS
+    fracGas = {
+      'lagoon': 0.4,
+      'solid': 0.45,
+      'slurry': 0.25,
+      'dry-lot': 0.3
+    }[manureManagement] || 0.2;
+    awmsFactor = 1.0;
   }
   
   const directN2O = totalNitrogenExcreted * awmsFactor * directN2oFactor * (44 / 28);
-  const indirectN2O = totalNitrogenExcreted * 0.01 * (44 / 28);
+  const indirectN2O = totalNitrogenExcreted * awmsFactor * fracGas * ef4 * (44 / 28);
 
   const totalCarbonEquivalent = 
     (totalEntericMethane + manureMethane) * 28 + 

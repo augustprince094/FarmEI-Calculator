@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -134,10 +133,10 @@ export default function Home() {
                     <h4 className="font-bold text-primary mb-2">Nitrogen & Phosphorus Excretion:</h4>
                     <p className="mb-2">Calculated per phase (Starter, Grower, Finisher) as the difference between intake and retention.</p>
                     <div className="bg-muted p-3 rounded space-y-2">
-                      <p><strong>N Intake</strong> = (Feed Intake × CP% / 100) / 6.25</p>
-                      <p><strong>N Retention</strong> = (Weight Gain × 29g N/kg) × Count</p>
-                      <p className="border-t pt-2 mt-2"><strong>P Intake</strong> = (Feed Intake × P% / 100)</p>
-                      <p><strong>P Retention</strong> = (Weight Gain × 0.6 / 100) × Count</p>
+                      <p><strong>N Intake</strong> = {"Sum((Feed_i * CP_i / 100) / 6.25)"}</p>
+                      <p><strong>N Retention</strong> = {"Sum((Weight_Gain_i * 29g N/kg) * Count)"}</p>
+                      <p className="border-t pt-2 mt-2"><strong>P Intake</strong> = {"Sum(Feed_i * P_i / 100)"}</p>
+                      <p><strong>P Retention</strong> = {"Sum((Weight_Gain_i * 0.6 / 100) * Count)"}</p>
                     </div>
                   </section>
                   <section>
@@ -147,14 +146,15 @@ export default function Home() {
                       <div>
                         <p className="font-bold text-xs uppercase text-primary">Poultry (Broilers)</p>
                         <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times 1.0\\ (\\text{AWMS}) \\times 0.001\\ (EF) \\times (44/28)$"}</p>
-                        <p className="text-[10px] text-muted-foreground italic">*Source: IPCC 2019 Poultry manure with litter (AWMS 100%).</p>
+                        <p><strong>Indirect N2O</strong> = {"$N_{excreted} \\times 1.0\\ (\\text{AWMS}) \\times 0.2\\ (Frac_{gas}) \\times 0.01\\ (EF_4) \\times (44/28)$"}</p>
+                        <p className="text-[10px] text-muted-foreground italic">*Source: IPCC 2019 Poultry manure with litter.</p>
                       </div>
                       <div>
                         <p className="font-bold text-xs uppercase text-secondary">Swine</p>
                         <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times EF_{\\text{system}} \\times (44/28)$"}</p>
-                        <p className="text-[10px] text-muted-foreground italic">*EF: 0.02 (Solid), 0.005 (Slurry/Lagoon), 0.01 (Dry Lot)</p>
+                        <p><strong>Indirect N2O</strong> = {"$N_{excreted} \\times Frac_{gas} \\times 0.01 \\times (44/28)$"}</p>
+                        <p className="text-[10px] text-muted-foreground italic">*EF System: 0.02 (Solid), 0.005 (Slurry). Frac Gas: 0.45 (Solid), 0.25 (Slurry).</p>
                       </div>
-                      <p className="border-t pt-2 mt-2"><strong>Indirect N2O</strong> = {"$N_{excreted} \\times 0.01 \\times (44/28)$"}</p>
                     </div>
                   </section>
                   <section>
