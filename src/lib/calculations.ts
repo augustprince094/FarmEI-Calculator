@@ -173,7 +173,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const totalVolatileSolids = totalFeedPerCycle * (1 - dmd) * (1 - ash);
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
 
-  const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.05;
+  // Phosphorus run-off estimated at 2.9% of the phosphorus excreted
+  const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.029;
 
   // Direct and Indirect N2O logic update (IPCC 2019)
   let directN2oFactor = 0.01;

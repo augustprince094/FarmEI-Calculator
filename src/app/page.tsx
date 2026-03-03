@@ -173,6 +173,13 @@ export default function Home() {
                       </div>
                     </div>
                   </section>
+                  <section>
+                    <h4 className="font-bold text-primary mb-2">Phosphorus Runoff:</h4>
+                    <div className="bg-muted p-3 rounded">
+                      <p><strong>Phosphorus Runoff</strong> = {"Phosphorus_excreted \\times 0.029"}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Estimated at 2.9% of total phosphorus excreted.</p>
+                    </div>
+                  </section>
                 </div>
               </DialogContent>
             </Dialog>
