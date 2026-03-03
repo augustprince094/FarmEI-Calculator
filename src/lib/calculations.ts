@@ -151,16 +151,19 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     'swine-grow-finish': 115
   }[animalType] || 42;
 
-  let entericMultiplier = 0.03;
-  if (animalType === 'swine-sow') entericMultiplier = 0.05;
-  if (animalType === 'swine-nursery') entericMultiplier = 0.015;
+  let totalEntericMethane = 0;
+  if (animalType === 'broilers') {
+    // 1.6 g per bird per cycle as kg
+    totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
+  } else {
+    let entericMultiplier = 0.03;
+    if (animalType === 'swine-sow') entericMultiplier = 0.05;
+    if (animalType === 'swine-nursery') entericMultiplier = 0.015;
+    const entericEmissionFactor = (avgWeight * entericMultiplier / 365);
+    totalEntericMethane = entericEmissionFactor * count * cycleDays * ch4MitigationFactor;
+  }
 
-  const entericEmissionFactor = animalType === 'broilers' ? 0 : (avgWeight * entericMultiplier / 365);
-  const totalEntericMethane = entericEmissionFactor * count * cycleDays * ch4MitigationFactor;
-
-  // REFINED MANURE METHANE (User Request)
-  // Manure methane = Volatile solids * Maximum methane * MCF * density
-  // VS = feed intake * (1 - DMD) * (1 - A)
+  // REFINED MANURE METHANE (VS Balance)
   const dmd = 0.85; // 85%
   const ash = 0.10; // 10%
   const b0 = 0.36;  // Maximum methane potential

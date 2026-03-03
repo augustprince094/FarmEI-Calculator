@@ -150,22 +150,26 @@ export default function Home() {
                       <div>
                         <p className="font-bold text-xs uppercase text-secondary">Swine</p>
                         <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times EF_{system} \\times (44/28)$"}</p>
-                        <p className="text-[10px] text-muted-foreground italic">*EF: 0.02 (Solid), 0.005 (Slurry/Lagoon), 0.01 (Dry Lot)</p>
                       </div>
                     </div>
                   </section>
                   <section>
-                    <h4 className="font-bold text-primary mb-2">Manure Methane (VS Balance):</h4>
-                    <p className="mb-2">Calculated using Volatile Solids (VS) approach derived from feed intake.</p>
-                    <div className="bg-muted p-3 rounded space-y-2">
-                      <p><strong>Manure CH4</strong> = {"$VS \\times B_0 \\times MCF \\times Density$"}</p>
-                      <p><strong>VS</strong> = {"$Feed_{intake} \\times (1 - DMD) \\times (1 - Ash)$"}</p>
-                      <div className="text-[10px] text-muted-foreground italic grid grid-cols-2 gap-1 mt-2">
-                        <span>DMD: 85%</span>
-                        <span>Ash: 10%</span>
-                        <span>$B_0$: 0.36 $m^3/kg$</span>
-                        <span>MCF: 1.5%</span>
-                        <span>Density: 0.0662</span>
+                    <h4 className="font-bold text-primary mb-2">Methane (CH4):</h4>
+                    <div className="bg-muted p-3 rounded space-y-4">
+                      <div>
+                        <p className="font-bold text-xs uppercase text-primary">Enteric Methane (Poultry)</p>
+                        <p><strong>Enteric CH4</strong> = {"1.6g / bird / cycle"}</p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-xs uppercase text-secondary">Manure Methane (VS Balance)</p>
+                        <p><strong>Manure CH4</strong> = {"$VS \\times B_0 \\times MCF \\times Density$"}</p>
+                        <div className="text-[10px] text-muted-foreground italic grid grid-cols-2 gap-1 mt-2">
+                          <span>{"$VS = Feed_{in} \\times (1 - DMD) \\times (1 - Ash)$"}</span>
+                          <span>DMD: 85%, Ash: 10%</span>
+                          <span>{"$B_0$: 0.36 $m^3/kg$"}</span>
+                          <span>MCF: 1.5%</span>
+                          <span>Density: 0.0662</span>
+                        </div>
                       </div>
                     </div>
                   </section>
@@ -361,10 +365,10 @@ export default function Home() {
                             {[
                               { label: 'Nitrogen Excreted', unit: 'kg N', key: 'nitrogenExcreted', precision: 1 },
                               { label: 'Phosphorus Excreted', unit: 'kg P', key: 'phosphorusExcreted', precision: 1 },
-                              { label: 'Enteric Methane', unit: 'kg CH4', key: 'entericMethane', precision: 2 },
-                              { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 2 },
-                              { label: 'Direct N2O', unit: 'kg N2O', key: 'directN2O', precision: 2 },
-                              { label: 'Indirect N2O', unit: 'kg N2O', key: 'indirectN2O', precision: 2 },
+                              { label: 'Enteric Methane', unit: 'kg CH4', key: 'entericMethane', precision: 3 },
+                              { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 3 },
+                              { label: 'Direct N2O', unit: 'kg N2O', key: 'directN2O', precision: 3 },
+                              { label: 'Indirect N2O', unit: 'kg N2O', key: 'indirectN2O', precision: 3 },
                               { label: 'Phosphorus Runoff', unit: 'kg P', key: 'phosphorusRunoff', precision: 2 },
                               { label: 'Total Carbon Equivalent', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
                             ].map((item) => {
