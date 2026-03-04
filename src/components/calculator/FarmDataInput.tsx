@@ -119,7 +119,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                 value={formData.animalType} 
                 onValueChange={(val: AnimalType) => handleAnimalTypeChange(val)}
               >
-                <SelectTrigger className="h-9 border-white/40 bg-white/40 backdrop-blur-md focus:ring-primary rounded-xl text-xs font-medium">
+                <SelectTrigger className="h-9 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-xs font-bold">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent className="glass">
@@ -134,7 +134,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             <div className="space-y-1">
               <Label className="font-bold text-[9px] uppercase tracking-wider text-primary">Head Count</Label>
               <Input 
-                className="h-9 border-white/40 bg-white/40 text-xs font-bold rounded-xl"
+                className="h-9 border-white/60 bg-white/70 text-xs font-bold rounded-xl"
                 type="number" 
                 value={formData.count} 
                 onChange={(e) => updateField('count', e.target.value)} 
@@ -145,7 +145,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             <div className="space-y-1">
               <Label className="font-bold text-[9px] uppercase tracking-wider text-secondary">Exit Weight (kg)</Label>
               <Input 
-                className="h-9 border-secondary/20 bg-white/40 text-xs font-bold rounded-xl"
+                className="h-9 border-secondary/30 bg-white/70 text-xs font-bold rounded-xl"
                 type="number" 
                 step="0.1"
                 value={formData.avgWeight} 
@@ -156,7 +156,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             <div className="space-y-1">
               <Label className="font-bold text-[9px] uppercase tracking-wider text-secondary">Baseline FCR</Label>
               <Input 
-                className="h-9 border-secondary/20 bg-white/40 text-xs font-bold rounded-xl"
+                className="h-9 border-secondary/30 bg-white/70 text-xs font-bold rounded-xl"
                 type="number" 
                 step="0.01"
                 value={formData.fcr} 
@@ -166,7 +166,7 @@ export function FarmDataInput({ onCalculate }: Props) {
 
             {isPhased ? (
               <div className="md:col-span-2 space-y-3 pt-1 animate-in slide-in-from-top-4 duration-500">
-                <div className="p-3 bg-white/30 rounded-xl border border-white/50 backdrop-blur-md">
+                <div className="p-3 bg-white/40 rounded-xl border border-primary/10 shadow-sm backdrop-blur-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Settings2 className="w-3 h-3 text-primary" />
                     <h4 className="text-[9px] font-black text-primary uppercase tracking-widest">Dietary Strategy (%)</h4>
@@ -181,13 +181,13 @@ export function FarmDataInput({ onCalculate }: Props) {
                       { id: 'phase3P', label: 'P3 P', value: formData.phase3P },
                     ].map((item) => (
                       <div key={item.id} className="space-y-1">
-                        <Label className="text-[8px] font-bold text-primary/70 uppercase tracking-tight">{item.label}</Label>
+                        <Label className="text-[9px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
                         <Input 
                           type="number" 
                           step={item.id.includes('CP') ? "0.1" : "0.01"}
                           value={item.value} 
                           onChange={(e) => updateField(item.id as any, e.target.value)} 
-                          className="h-7 border-white/50 bg-white/50 rounded-lg font-bold text-[10px] px-2"
+                          className="h-8 border-primary/20 bg-white/90 rounded-lg font-bold text-[11px] px-2 text-primary focus:ring-primary shadow-sm"
                         />
                       </div>
                     ))}
@@ -199,7 +199,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                 <div className="space-y-1">
                   <Label className="font-bold text-[9px] uppercase tracking-wider text-primary">Crude Protein (%)</Label>
                   <Input 
-                    className="h-9 border-white/40 bg-white/40 text-xs font-bold rounded-xl"
+                    className="h-9 border-white/60 bg-white/70 text-xs font-bold rounded-xl"
                     type="number" 
                     step="0.1"
                     value={formData.feedCrudeProtein} 
@@ -209,7 +209,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                 <div className="space-y-1">
                   <Label className="font-bold text-[9px] uppercase tracking-wider text-primary">Phosphorus (%)</Label>
                   <Input 
-                    className="h-9 border-white/40 bg-white/40 text-xs font-bold rounded-xl"
+                    className="h-9 border-white/60 bg-white/70 text-xs font-bold rounded-xl"
                     type="number" 
                     step="0.01"
                     value={formData.feedPhosphorus} 
