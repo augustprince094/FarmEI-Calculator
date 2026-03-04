@@ -49,47 +49,47 @@ export function MitigationAI({ data, results }: Props) {
 
   return (
     <Card className="glass border-primary/20 bg-primary/5 shadow-inner rounded-2xl overflow-hidden group">
-      <CardHeader className="p-3.5 pb-2">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-primary/10 rounded-lg backdrop-blur-md group-hover:scale-110 transition-transform">
-            <BrainCircuit className="w-4 h-4 text-primary" />
+      <CardHeader className="p-4 pb-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg backdrop-blur-md group-hover:scale-110 transition-transform">
+            <BrainCircuit className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-[11px] font-black text-primary uppercase tracking-wider">Mitigation AI</CardTitle>
-            <CardDescription className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+            <CardTitle className="text-xs font-black text-primary uppercase tracking-wider">Mitigation AI</CardTitle>
+            <CardDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
               Strategy Insights
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-1 pb-3 px-3.5">
+      <CardContent className="pt-2 pb-4 px-4">
         {!aiResponse ? (
-          <div className="flex flex-col items-center justify-center py-4 space-y-3 text-center">
-            <Sparkles className="w-8 h-8 text-primary opacity-20 animate-pulse" />
-            <p className="text-[9px] text-muted-foreground font-medium leading-relaxed">
+          <div className="flex flex-col items-center justify-center py-5 space-y-4 text-center">
+            <Sparkles className="w-10 h-10 text-primary opacity-20 animate-pulse" />
+            <p className="text-xs text-muted-foreground font-medium leading-relaxed">
               Generate advanced strategies to optimize FCR and reduce intensities.
             </p>
-            <Button onClick={runAnalysis} disabled={isAnalyzing} className="bg-primary text-white h-8 px-4 text-[10px] w-full rounded-xl shadow-md font-bold uppercase tracking-widest">
-              {isAnalyzing ? <RefreshCw className="w-2.5 h-2.5 mr-1.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5 mr-1.5" />}
+            <Button onClick={runAnalysis} disabled={isAnalyzing} className="bg-primary text-white h-10 px-6 text-xs w-full rounded-xl shadow-md font-bold uppercase tracking-widest">
+              {isAnalyzing ? <RefreshCw className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />}
               {isAnalyzing ? 'Analyzing...' : 'AI Strategy'}
             </Button>
           </div>
         ) : (
-          <div className="space-y-3 animate-in fade-in zoom-in-95 duration-500 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
-            <div className="bg-white/60 backdrop-blur-xl p-3 rounded-xl border border-white/50 shadow-sm">
-              <h4 className="text-[8px] font-black text-primary uppercase mb-1.5 flex items-center gap-1.5 tracking-widest">
-                <TargetIcon className="w-3 h-3" /> Focus
+          <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="bg-white/60 backdrop-blur-xl p-4 rounded-xl border border-white/50 shadow-sm">
+              <h4 className="text-[10px] font-black text-primary uppercase mb-2 flex items-center gap-2 tracking-widest">
+                <TargetIcon className="w-4 h-4" /> Focus
               </h4>
-              <div className="text-[10px] leading-relaxed whitespace-pre-wrap font-medium text-slate-700">
+              <div className="text-xs leading-relaxed whitespace-pre-wrap font-medium text-slate-700">
                 {aiResponse.suggestedPractices}
               </div>
             </div>
 
-            <div className="p-3 bg-primary/10 rounded-xl border border-primary/10 backdrop-blur-md">
-              <h4 className="text-[8px] font-black text-primary uppercase mb-1.5 flex items-center gap-1.5 tracking-widest">
-                <InfoIcon className="w-3 h-3" /> Logic
+            <div className="p-4 bg-primary/10 rounded-xl border border-primary/10 backdrop-blur-md">
+              <h4 className="text-[10px] font-black text-primary uppercase mb-2 flex items-center gap-2 tracking-widest">
+                <InfoIcon className="w-4 h-4" /> Logic
               </h4>
-              <p className="text-[9px] italic leading-relaxed text-muted-foreground font-medium">
+              <p className="text-xs italic leading-relaxed text-muted-foreground font-medium">
                 {aiResponse.justification}
               </p>
             </div>
@@ -97,9 +97,9 @@ export function MitigationAI({ data, results }: Props) {
         )}
       </CardContent>
       {aiResponse && (
-        <CardFooter className="py-2 bg-white/30 backdrop-blur-md border-t border-white/10">
-          <Button variant="ghost" className="text-[8px] font-black text-primary w-full h-7 rounded-lg hover:bg-primary/10 uppercase tracking-widest" onClick={runAnalysis}>
-            <RefreshCw className="w-2 h-2 mr-1.5" /> Refresh
+        <CardFooter className="py-3 bg-white/30 backdrop-blur-md border-t border-white/10">
+          <Button variant="ghost" className="text-[10px] font-black text-primary w-full h-8 rounded-lg hover:bg-primary/10 uppercase tracking-widest" onClick={runAnalysis}>
+            <RefreshCw className="w-3 h-3 mr-2" /> Refresh
           </Button>
         </CardFooter>
       )}

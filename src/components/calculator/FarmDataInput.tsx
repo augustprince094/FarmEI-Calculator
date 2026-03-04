@@ -97,44 +97,44 @@ export function FarmDataInput({ onCalculate }: Props) {
 
   return (
     <Card className="glass border-white/40 overflow-hidden rounded-2xl">
-      <CardHeader className="bg-primary/90 backdrop-blur-md text-white p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-white/20 rounded-lg border border-white/30 backdrop-blur-lg">
-            <Database className="w-5 h-5" />
+      <CardHeader className="bg-primary/90 backdrop-blur-md text-white p-5">
+        <div className="flex items-center gap-4">
+          <div className="p-2 bg-white/20 rounded-lg border border-white/30 backdrop-blur-lg">
+            <Database className="w-6 h-6" />
           </div>
           <div>
-            <CardTitle className="text-base font-bold tracking-tight uppercase">Configuration</CardTitle>
-            <CardDescription className="text-white/80 text-[10px] font-medium uppercase tracking-wider">Define Cycle Parameters</CardDescription>
+            <CardTitle className="text-lg font-bold tracking-tight uppercase">Configuration</CardTitle>
+            <CardDescription className="text-white/80 text-[11px] font-medium uppercase tracking-wider">Define Cycle Parameters</CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label className="flex items-center gap-1.5 text-primary font-bold text-[9px] uppercase tracking-wider">
-                <Bird className="w-2.5 h-2.5" /> Category
+      <CardContent className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                <Bird className="w-3.5 h-3.5" /> Category
               </Label>
               <Select 
                 value={formData.animalType} 
                 onValueChange={(val: AnimalType) => handleAnimalTypeChange(val)}
               >
-                <SelectTrigger className="h-9 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-xs font-bold">
+                <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent className="glass">
-                  <SelectItem value="broilers">Poultry: Broilers</SelectItem>
-                  <SelectItem value="swine-sow">Swine: Sow & Litter</SelectItem>
-                  <SelectItem value="swine-nursery">Swine: Nursery Pigs</SelectItem>
-                  <SelectItem value="swine-grow-finish">Swine: Grow-to-Finish</SelectItem>
+                  <SelectItem value="broilers" className="text-sm">Poultry: Broilers</SelectItem>
+                  <SelectItem value="swine-sow" className="text-sm">Swine: Sow & Litter</SelectItem>
+                  <SelectItem value="swine-nursery" className="text-sm">Swine: Nursery Pigs</SelectItem>
+                  <SelectItem value="swine-grow-finish" className="text-sm">Swine: Grow-to-Finish</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-1">
-              <Label className="font-bold text-[9px] uppercase tracking-wider text-primary">Head Count</Label>
+            <div className="space-y-2">
+              <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Head Count</Label>
               <Input 
-                className="h-9 border-white/60 bg-white/70 text-xs font-bold rounded-xl"
+                className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
                 type="number" 
                 value={formData.count} 
                 onChange={(e) => updateField('count', e.target.value)} 
@@ -142,10 +142,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-1">
-              <Label className="font-bold text-[9px] uppercase tracking-wider text-secondary">Exit Weight (kg)</Label>
+            <div className="space-y-2">
+              <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Exit Weight (kg)</Label>
               <Input 
-                className="h-9 border-secondary/30 bg-white/70 text-xs font-bold rounded-xl"
+                className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
                 type="number" 
                 step="0.1"
                 value={formData.avgWeight} 
@@ -153,10 +153,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-1">
-              <Label className="font-bold text-[9px] uppercase tracking-wider text-secondary">Baseline FCR</Label>
+            <div className="space-y-2">
+              <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Baseline FCR</Label>
               <Input 
-                className="h-9 border-secondary/30 bg-white/70 text-xs font-bold rounded-xl"
+                className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
                 type="number" 
                 step="0.01"
                 value={formData.fcr} 
@@ -165,13 +165,13 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             {isPhased ? (
-              <div className="md:col-span-2 space-y-3 pt-1 animate-in slide-in-from-top-4 duration-500">
-                <div className="p-3 bg-white/40 rounded-xl border border-primary/10 shadow-sm backdrop-blur-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Settings2 className="w-3 h-3 text-primary" />
-                    <h4 className="text-[9px] font-black text-primary uppercase tracking-widest">Dietary Strategy (%)</h4>
+              <div className="md:col-span-2 space-y-4 pt-2 animate-in slide-in-from-top-4 duration-500">
+                <div className="p-4 bg-white/40 rounded-xl border border-primary/10 shadow-sm backdrop-blur-lg">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <Settings2 className="w-4 h-4 text-primary" />
+                    <h4 className="text-[11px] font-black text-primary uppercase tracking-widest">Dietary Strategy (%)</h4>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-4">
                     {[
                       { id: 'phase1CP', label: 'P1 CP', value: formData.phase1CP },
                       { id: 'phase2CP', label: 'P2 CP', value: formData.phase2CP },
@@ -180,14 +180,14 @@ export function FarmDataInput({ onCalculate }: Props) {
                       { id: 'phase2P', label: 'P2 P', value: formData.phase2P },
                       { id: 'phase3P', label: 'P3 P', value: formData.phase3P },
                     ].map((item) => (
-                      <div key={item.id} className="space-y-1">
-                        <Label className="text-[9px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
+                      <div key={item.id} className="space-y-1.5">
+                        <Label className="text-[10px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
                         <Input 
                           type="number" 
                           step={item.id.includes('CP') ? "0.1" : "0.01"}
                           value={item.value} 
                           onChange={(e) => updateField(item.id as any, e.target.value)} 
-                          className="h-8 border-primary/20 bg-white/90 rounded-lg font-bold text-[11px] px-2 text-primary focus:ring-primary shadow-sm"
+                          className="h-9 border-primary/20 bg-white/90 rounded-lg font-bold text-xs px-2.5 text-primary focus:ring-primary shadow-sm"
                         />
                       </div>
                     ))}
@@ -195,21 +195,21 @@ export function FarmDataInput({ onCalculate }: Props) {
                 </div>
               </div>
             ) : (
-              <div className="md:col-span-2 grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="font-bold text-[9px] uppercase tracking-wider text-primary">Crude Protein (%)</Label>
+              <div className="md:col-span-2 grid grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Crude Protein (%)</Label>
                   <Input 
-                    className="h-9 border-white/60 bg-white/70 text-xs font-bold rounded-xl"
+                    className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
                     type="number" 
                     step="0.1"
                     value={formData.feedCrudeProtein} 
                     onChange={(e) => updateField('feedCrudeProtein', e.target.value)} 
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label className="font-bold text-[9px] uppercase tracking-wider text-primary">Phosphorus (%)</Label>
+                <div className="space-y-2">
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Phosphorus (%)</Label>
                   <Input 
-                    className="h-9 border-white/60 bg-white/70 text-xs font-bold rounded-xl"
+                    className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
                     type="number" 
                     step="0.01"
                     value={formData.feedPhosphorus} 
@@ -220,7 +220,7 @@ export function FarmDataInput({ onCalculate }: Props) {
             )}
           </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-black h-10 text-sm rounded-xl shadow-md transition-all uppercase tracking-widest">
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-black h-12 text-base rounded-xl shadow-md transition-all uppercase tracking-widest mt-4">
             Establish Baseline
           </Button>
         </form>
