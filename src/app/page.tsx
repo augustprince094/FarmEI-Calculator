@@ -203,30 +203,30 @@ export default function Home() {
                 </div>
                 <div className="space-y-4 text-sm font-bold">
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[10px] tracking-widest">Category</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest">Category</span>
                     <span className="text-primary">{baselineData ? animalTypeLabels[baselineData.animalType] : ''}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[10px] tracking-widest">Baseline FCR</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest">Baseline FCR</span>
                     <span className="text-secondary">{baselineData?.fcr}</span>
                   </div>
                   
                   {isPhased && baselineData && (
                     <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-3">
-                      <div className="text-[10px] font-black uppercase text-primary/60 border-b border-primary/10 pb-2 tracking-widest">Dietary Strategy</div>
+                      <div className="text-[11px] font-black uppercase text-primary/60 border-b border-primary/10 pb-2 tracking-widest">Dietary Strategy</div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                         <span className="text-muted-foreground">CP % (P1-3)</span>
-                        <span className="text-right text-primary">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}</span>
+                        <span className="text-right text-primary font-bold">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}</span>
                         
                         <span className="text-muted-foreground">P % (P1-3)</span>
-                        <span className="text-right text-primary">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
+                        <span className="text-right text-primary font-bold">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
                       </div>
                     </div>
                   )}
                   
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[10px] tracking-widest">Exit Weight</span>
-                    <span className="text-primary">{baselineData?.avgWeight} kg</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest">Exit Weight</span>
+                    <span className="text-primary font-bold">{baselineData?.avgWeight} kg</span>
                   </div>
                 </div>
               </div>
@@ -239,7 +239,7 @@ export default function Home() {
                   {[
                     { id: 'jefo-pro', label: 'Jefo Pro', color: '#FBBC01' },
                     { id: 'poa-eo', label: 'P(OA+EO)', color: '#D38F89' },
-                    { id: 'xylanase', label: 'Xylanase', color: '#4A90E2' },
+                    { id: 'xylanase', label: 'Xylanase', color: '#F26648' },
                     { id: 'jefo-combo', label: 'Xyl + Pro', color: '#F5A623' },
                   ].map((item) => (
                     <Button 
@@ -309,7 +309,7 @@ export default function Home() {
                           <h3 className="text-2xl font-black text-primary uppercase tracking-widest">Technical Audit</h3>
                           <p className="text-sm font-medium text-muted-foreground mt-1">Detailed mass balance & emission factor audit.</p>
                         </div>
-                        <Badge variant="outline" className="text-[10px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Validated Engine</Badge>
+                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Validated Engine</Badge>
                       </div>
                       
                       <div className="overflow-hidden border border-white/30 rounded-2xl bg-white/10 backdrop-blur-lg">
@@ -342,7 +342,7 @@ export default function Home() {
                                   <TableCell className="py-3 px-6">
                                     <div className="flex flex-col">
                                       <span className="font-black text-primary text-base">{item.label}</span>
-                                      <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">{item.unit}</span>
+                                      <span className="text-[11px] text-muted-foreground uppercase tracking-widest font-black">{item.unit}</span>
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right font-bold text-slate-600 text-base border-x border-white/10 px-8">{baseVal.toFixed(item.precision)}</TableCell>

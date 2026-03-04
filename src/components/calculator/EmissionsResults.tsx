@@ -47,10 +47,10 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
   const baselineColor = '#94a3b8'; // slate-400
   const getScenarioColor = (type: string) => {
     switch (type) {
-      case 'poa-eo': return '#f87171'; // red-400
-      case 'xylanase': return '#60a5fa'; // blue-400
-      case 'jefo-combo': return '#fbbf24'; // amber-400
-      default: return '#fbbf24'; // amber-400
+      case 'poa-eo': return '#f87171';
+      case 'xylanase': return '#F26648';
+      case 'jefo-combo': return '#fbbf24';
+      default: return '#fbbf24';
     }
   };
   const scenarioColor = getScenarioColor(additiveType);
@@ -77,7 +77,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         <div className="glass p-3 rounded-xl border-white/40 shadow-2xl backdrop-blur-xl">
           <p className="font-bold text-xs mb-1 text-primary uppercase tracking-wider">{label}</p>
           <p className="text-base font-black text-primary">
-            {payload[0].value.toLocaleString()} <span className="text-[10px] font-medium text-muted-foreground uppercase">{payload[0].payload.unit || ''}</span>
+            {payload[0].value.toLocaleString()} <span className="text-[11px] font-medium text-muted-foreground uppercase">{payload[0].payload.unit || ''}</span>
           </p>
         </div>
       );
@@ -108,7 +108,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
               <div className="glass px-5 py-3 rounded-xl border-secondary/20 flex flex-col items-end">
                  <div className="flex items-center gap-2">
                    <Calculator className="w-4 h-4 text-secondary" />
-                   <p className="text-[10px] font-black text-secondary uppercase tracking-tight">Efficiency</p>
+                   <p className="text-[11px] font-black text-secondary uppercase tracking-tight">Efficiency</p>
                  </div>
                  <p className="text-xl font-black text-secondary leading-tight">-{fcrImprovement}% FCR</p>
               </div>
@@ -117,7 +117,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
               <div className="glass px-5 py-3 rounded-xl border-green-200/50 flex flex-col items-end bg-green-50/20">
                 <div className="flex items-center gap-2">
                   <TrendingDown className="w-5 h-5 text-green-700" />
-                  <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Impact</p>
+                  <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Impact</p>
                 </div>
                 <p className="text-xl font-black text-green-700 leading-tight">-{reductionPercentage}% CO2e</p>
               </div>
@@ -161,7 +161,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             <CardContent className="p-5">
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{item.label}</p>
+                  <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">{item.label}</p>
                   <h3 className={cn("text-3xl font-black", item.color)}>
                     {item.unit === 'kg CO2e' ? formatCarbon(item.val) : formatValue(item.val)} 
                     <span className="text-xs font-bold ml-2 opacity-60">{item.unit}</span>
@@ -190,7 +190,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         ].map((chart, idx) => (
           <Card key={idx} className="glass rounded-2xl border-white/30 p-5 transition-all duration-300 hover:shadow-xl">
             <CardHeader className="p-0 pb-5">
-              <CardTitle className="text-xs font-black flex items-center gap-2.5 uppercase tracking-widest text-primary/80">
+              <CardTitle className="text-[13px] font-black flex items-center gap-2.5 uppercase tracking-widest text-primary/80">
                 <chart.icon className={cn("w-5 h-5", chart.color)} /> {chart.label}
               </CardTitle>
             </CardHeader>
@@ -223,7 +223,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-4">
-        <div className="flex items-center gap-2.5 text-xs text-muted-foreground italic font-medium">
+        <div className="flex items-center gap-2.5 text-sm text-muted-foreground italic font-medium">
           <Leaf className="w-4 h-4 opacity-50" />
           Note: Values derived from batch-specific mass balance and IPCC 2019 guidelines.
         </div>
