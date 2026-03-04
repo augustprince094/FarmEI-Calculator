@@ -108,23 +108,23 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-primary py-8 border-b border-primary/20">
+      <header className="bg-primary/90 backdrop-blur-md sticky top-0 z-50 py-4 border-b border-white/10">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-background rounded-xl">
-              <Leaf className="w-8 h-8 text-primary" />
+            <div className="p-2 bg-white/20 backdrop-blur-lg rounded-xl border border-white/30">
+              <Leaf className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-primary-foreground tracking-tight">FarmEI Estimator</h1>
-              <p className="text-primary-foreground/80 text-sm">Comparative Environmental Assessment</p>
+              <h1 className="text-xl font-bold text-white tracking-tight">FarmEI Estimator</h1>
+              <p className="text-white/70 text-[10px] uppercase tracking-wider font-bold">Comparative Assessment</p>
             </div>
           </div>
-          <nav className="hidden md:flex gap-6 text-primary-foreground/90 font-medium">
+          <nav className="hidden md:flex gap-6 text-white/90 font-medium text-sm">
             <Dialog>
               <DialogTrigger asChild>
                 <button className="hover:text-white transition-colors flex items-center gap-1"><Info className="w-4 h-4" /> Science</button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto glass">
                 <DialogHeader>
                   <DialogTitle>Environmental Intensity Methodology</DialogTitle>
                 </DialogHeader>
@@ -132,30 +132,30 @@ export default function Home() {
                   <section>
                     <h4 className="font-bold text-primary mb-2">Nutrient Excretion (Mass Balance):</h4>
                     <p className="mb-2">Calculated per phase as the difference between dietary intake and biological retention.</p>
-                    <div className="bg-muted p-3 rounded space-y-2">
+                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-2">
                       <p><strong>N Intake</strong> = {"Sum((Feed_i * CP_i / 100) / 6.25)"}</p>
                       <p><strong>N Retention</strong> = {"Sum((Weight_Gain_i * 29g N/kg) * Count)"}</p>
-                      <p className="border-t pt-2 mt-2"><strong>P Intake</strong> = {"Sum(Feed_i * P_i / 100)"}</p>
+                      <p className="border-t border-white/30 pt-2 mt-2"><strong>P Intake</strong> = {"Sum(Feed_i * P_i / 100)"}</p>
                       <p><strong>P Retention</strong> = {"Sum((Weight_Gain_i * 0.006) * Count)"}</p>
                     </div>
                   </section>
                   <section>
                     <h4 className="font-bold text-primary mb-2">Nitrous Oxide (IPCC 2019):</h4>
-                    <div className="bg-muted p-3 rounded space-y-4">
+                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4">
                       <div>
                         <p className="font-bold text-xs uppercase text-primary">Poultry (Broilers)</p>
-                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times 1.0 (AWMS) \\times 0.001 (EF) \\times (44/28)$"}</p>
-                        <p><strong>Indirect N2O</strong> = {"$N_{excreted} \\times 1.0 (AWMS) \\times 0.2 (Frac_{gas}) \\times 0.01 (EF_4) \\times (44/28)$"}</p>
+                        <p><strong>Direct N2O</strong> = {"$N_{exc} \\times 1.0 (AWMS) \\times 0.001 (EF) \\times (44/28)$"}</p>
+                        <p><strong>Indirect N2O</strong> = {"$N_{exc} \\times 1.0 (AWMS) \\times 0.2 (Frac_{gas}) \\times 0.01 (EF_4) \\times (44/28)$"}</p>
                       </div>
                       <div>
                         <p className="font-bold text-xs uppercase text-secondary">Swine</p>
-                        <p><strong>Direct N2O</strong> = {"$N_{excreted} \\times EF_{system} \\times (44/28)$"}</p>
+                        <p><strong>Direct N2O</strong> = {"$N_{exc} \\times EF_{system} \\times (44/28)$"}</p>
                       </div>
                     </div>
                   </section>
                   <section>
                     <h4 className="font-bold text-primary mb-2">Methane (CH4):</h4>
-                    <div className="bg-muted p-3 rounded space-y-4">
+                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4">
                       <div>
                         <p className="font-bold text-xs uppercase text-primary">Enteric Methane (Poultry)</p>
                         <p><strong>Enteric CH4</strong> = {"1.6g / bird / cycle"}</p>
@@ -173,13 +173,6 @@ export default function Home() {
                       </div>
                     </div>
                   </section>
-                  <section>
-                    <h4 className="font-bold text-primary mb-2">Phosphorus Runoff:</h4>
-                    <div className="bg-muted p-3 rounded">
-                      <p><strong>Phosphorus Runoff</strong> = {"Phosphorus_excreted \\times 0.029"}</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Estimated at 2.9% of total phosphorus excreted.</p>
-                    </div>
-                  </section>
                 </div>
               </DialogContent>
             </Dialog>
@@ -193,13 +186,13 @@ export default function Home() {
         {step === 'input' ? (
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-primary mb-3">Environmental Footprint Baseline</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Establish your baseline by defining efficiency metrics. Standard cycles are analyzed per production batch using phase-specific mass balance.
+              <h2 className="text-4xl font-bold text-primary mb-4">Environmental Footprint Baseline</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                Establish your production baseline by defining core efficiency metrics. Results are analyzed per production batch using phase-specific mass balance.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-8 lg:col-start-3">
+              <div className="lg:col-span-10 lg:col-start-2">
                 <FarmDataInput onCalculate={handleEstablishBaseline} />
               </div>
             </div>
@@ -207,29 +200,29 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white p-6 rounded-2xl border border-primary/10 shadow-sm">
-                <div className="flex justify-between items-center mb-4">
+              <div className="glass p-6 rounded-2xl border-white/30">
+                <div className="flex justify-between items-center mb-6">
                   <h3 className="font-bold text-primary flex items-center gap-2">
-                    <Layers className="w-4 h-4" /> Cycle Baseline
+                    <Layers className="w-5 h-5" /> Cycle Baseline
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={reset} className="text-xs h-8">
-                    <RefreshCw className="w-3 h-3 mr-1" /> Edit Params
+                  <Button variant="outline" size="sm" onClick={reset} className="text-xs h-8 bg-white/20 border-white/30">
+                    <RefreshCw className="w-3 h-3 mr-1" /> Edit
                   </Button>
                 </div>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between border-b pb-2">
+                <div className="space-y-4 text-sm">
+                  <div className="flex justify-between border-b border-white/20 pb-2">
                     <span className="text-muted-foreground">Category:</span>
                     <span className="font-bold">{baselineData ? animalTypeLabels[baselineData.animalType] : ''}</span>
                   </div>
-                  <div className="flex justify-between border-b pb-2">
+                  <div className="flex justify-between border-b border-white/20 pb-2">
                     <span className="text-muted-foreground">Baseline FCR:</span>
-                    <span className="font-bold text-secondary">{baselineData?.fcr}</span>
+                    <span className="font-bold text-secondary text-lg">{baselineData?.fcr}</span>
                   </div>
                   
                   {isPhased && baselineData && (
-                    <div className="p-3 bg-primary/5 rounded border border-primary/10 space-y-2">
-                      <div className="text-[10px] font-bold uppercase text-primary/60 border-b pb-1">Dietary Phases (I/II/III)</div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                    <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-3">
+                      <div className="text-[10px] font-bold uppercase text-primary/60 border-b border-primary/10 pb-1">Dietary Phases (I/II/III)</div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px]">
                         <span className="text-muted-foreground">Crude Protein:</span>
                         <span className="font-bold text-right">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}%</span>
                         
@@ -239,69 +232,51 @@ export default function Home() {
                     </div>
                   )}
                   
-                  <div className="flex justify-between border-b pb-2">
+                  <div className="flex justify-between border-b border-white/20 pb-2">
                     <span className="text-muted-foreground">Exit Weight:</span>
                     <span className="font-bold">{baselineData?.avgWeight} kg</span>
                   </div>
-                  <div className="flex justify-between border-b pb-2">
+                  <div className="flex justify-between border-b border-white/20 pb-2">
                     <span className="text-muted-foreground">Animal Count:</span>
                     <span className="font-bold">{baselineData?.count} head</span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-primary/5 p-6 rounded-2xl border-2 border-primary/20">
+              <div className="glass-dark p-6 rounded-2xl bg-primary/10 border-white/20">
                 <h3 className="font-bold text-primary mb-4 flex items-center gap-2">
-                  <ArrowRight className="w-4 h-4" /> Mitigation Scenario
+                  <ArrowRight className="w-5 h-5" /> Mitigation Strategy
                 </h3>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Select a nutritional strategy and adjust FCR to see its mitigation impact.
+                <p className="text-xs text-muted-foreground mb-6">
+                  Select a nutritional strategy and refine efficiency targets.
                 </p>
-                <div className="grid grid-cols-1 gap-2 mb-6">
-                  <Button 
-                    variant={selectedAdditive === 'jefo-pro' ? 'default' : 'outline'}
-                    onClick={() => handleApplyMitigation('jefo-pro')}
-                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'jefo-pro' ? 'bg-[#FBBC01] hover:bg-[#FBBC01]/90' : ''}`}
-                  >
-                    <div className="text-left">
-                      <div className="font-bold text-sm">Jefo Pro Solution</div>
-                      <div className="text-[10px] opacity-70">Metabolic catalyst</div>
-                    </div>
-                  </Button>
-                  <Button 
-                    variant={selectedAdditive === 'poa-eo' ? 'default' : 'outline'}
-                    onClick={() => handleApplyMitigation('poa-eo')}
-                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'poa-eo' ? 'bg-[#D38F89] hover:bg-[#D38F89]/90' : ''}`}
-                  >
-                    <div className="text-left">
-                      <div className="font-bold text-sm">P(OA+EO)</div>
-                      <div className="text-[10px] opacity-70">Organic acid / EO synergy</div>
-                    </div>
-                  </Button>
-                  <Button 
-                    variant={selectedAdditive === 'xylanase' ? 'default' : 'outline'}
-                    onClick={() => handleApplyMitigation('xylanase')}
-                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'xylanase' ? 'bg-[#4A90E2] hover:bg-[#4A90E2]/90' : ''}`}
-                  >
-                    <div className="text-left">
-                      <div className="font-bold text-sm">Xylanase</div>
-                      <div className="text-[10px] opacity-70">Energy efficiency catalyst</div>
-                    </div>
-                  </Button>
-                  <Button 
-                    variant={selectedAdditive === 'jefo-combo' ? 'default' : 'outline'}
-                    onClick={() => handleApplyMitigation('jefo-combo')}
-                    className={`justify-start h-auto py-3 px-4 ${selectedAdditive === 'jefo-combo' ? 'bg-[#F5A623] hover:bg-[#F5A623]/90' : ''}`}
-                  >
-                    <div className="text-left">
-                      <div className="font-bold text-sm">Jefo Xylanase + Protease</div>
-                      <div className="text-[10px] opacity-70">Synergistic enzyme complex</div>
-                    </div>
-                  </Button>
+                <div className="grid grid-cols-1 gap-3 mb-6">
+                  {[
+                    { id: 'jefo-pro', label: 'Jefo Pro Solution', sub: 'Metabolic catalyst', color: '#FBBC01' },
+                    { id: 'poa-eo', label: 'P(OA+EO)', sub: 'Organic acid synergy', color: '#D38F89' },
+                    { id: 'xylanase', label: 'Xylanase', sub: 'Energy efficiency', color: '#4A90E2' },
+                    { id: 'jefo-combo', label: 'Jefo Xyl + Pro', sub: 'Enzyme complex', color: '#F5A623' },
+                  ].map((item) => (
+                    <Button 
+                      key={item.id}
+                      variant={selectedAdditive === item.id ? 'default' : 'outline'}
+                      onClick={() => handleApplyMitigation(item.id as any)}
+                      className={cn(
+                        "justify-start h-auto py-3 px-4 border-white/20 backdrop-blur-sm transition-all duration-300",
+                        selectedAdditive === item.id ? "ring-2 ring-primary ring-offset-2 scale-[1.02]" : "hover:bg-white/30"
+                      )}
+                      style={selectedAdditive === item.id ? { backgroundColor: item.color } : {}}
+                    >
+                      <div className="text-left">
+                        <div className="font-bold text-sm">{item.label}</div>
+                        <div className="text-[10px] opacity-70">{item.sub}</div>
+                      </div>
+                    </Button>
+                  ))}
                 </div>
 
                 {selectedAdditive !== 'none' && (
-                  <div className="space-y-3 p-4 bg-white rounded-xl border border-primary/20 animate-in zoom-in-95 duration-200">
+                  <div className="space-y-3 p-4 bg-white/40 rounded-xl border border-white/40 animate-in zoom-in-95 duration-200 backdrop-blur-md">
                     <Label className="text-xs font-bold text-primary flex items-center gap-1">
                       <Calculator className="w-3 h-3" /> Improved Cycle FCR
                     </Label>
@@ -310,11 +285,8 @@ export default function Home() {
                       step="0.01"
                       value={scenarioFcr}
                       onChange={(e) => handleFcrChange(parseFloat(e.target.value) || 0)}
-                      className="h-10 border-primary/30 focus:ring-primary font-bold text-secondary"
+                      className="h-10 border-white/50 focus:ring-primary font-bold text-secondary bg-white/50"
                     />
-                    <p className="text-[10px] text-muted-foreground italic">
-                      Adjust expected FCR for this cycle.
-                    </p>
                   </div>
                 )}
               </div>
@@ -330,11 +302,11 @@ export default function Home() {
             <div className="lg:col-span-8">
               {baselineResults && (
                 <Tabs defaultValue="results" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-8 h-12 p-1 bg-primary/10">
-                    <TabsTrigger value="results" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+                  <TabsList className="grid w-full grid-cols-2 mb-8 h-14 p-1 bg-white/40 backdrop-blur-xl border border-white/30 rounded-2xl shadow-sm">
+                    <TabsTrigger value="results" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all text-sm font-bold">
                       {comparisonResults ? 'Comparative Summary' : 'Baseline Results'}
                     </TabsTrigger>
-                    <TabsTrigger value="details" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+                    <TabsTrigger value="details" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all text-sm font-bold">
                       Technical Metrics
                     </TabsTrigger>
                   </TabsList>
@@ -349,23 +321,23 @@ export default function Home() {
                   </TabsContent>
                   
                   <TabsContent value="details" className="mt-0">
-                    <div className="bg-white p-8 rounded-2xl border shadow-sm">
+                    <div className="glass p-8 rounded-3xl border-white/30">
                       <div className="flex items-center justify-between mb-8">
                         <div>
-                          <h3 className="text-xl font-bold">Cycle Technical Comparison</h3>
-                          <p className="text-xs text-muted-foreground">Detailed mass balance and gas emission metrics.</p>
+                          <h3 className="text-2xl font-bold text-primary">Technical Comparison</h3>
+                          <p className="text-sm text-muted-foreground">Detailed mass balance and gas emission audit.</p>
                         </div>
-                        <Badge variant="outline" className="text-xs font-normal">Calculated via Mass Balance</Badge>
+                        <Badge variant="outline" className="text-xs font-bold py-1 px-3 bg-primary/5 border-primary/20 text-primary uppercase">Mass Balance Model</Badge>
                       </div>
                       
-                      <div className="overflow-hidden border rounded-xl">
+                      <div className="overflow-hidden border border-white/40 rounded-2xl bg-white/20 backdrop-blur-md">
                         <Table>
-                          <TableHeader className="bg-muted/50">
-                            <TableRow>
-                              <TableHead className="w-[240px]">Environmental Metric</TableHead>
-                              <TableHead className="text-right">Baseline</TableHead>
-                              <TableHead className="text-right">Mitigation</TableHead>
-                              <TableHead className="text-right">% Diff</TableHead>
+                          <TableHeader className="bg-white/30">
+                            <TableRow className="hover:bg-transparent border-white/30">
+                              <TableHead className="w-[240px] font-bold text-primary">Metric</TableHead>
+                              <TableHead className="text-right font-bold">Baseline</TableHead>
+                              <TableHead className="text-right font-bold">Mitigation</TableHead>
+                              <TableHead className="text-right font-bold">% Diff</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -377,33 +349,33 @@ export default function Home() {
                               { label: 'Direct N2O', unit: 'kg N2O', key: 'directN2O', precision: 3 },
                               { label: 'Indirect N2O', unit: 'kg N2O', key: 'indirectN2O', precision: 3 },
                               { label: 'Phosphorus Runoff', unit: 'kg P', key: 'phosphorusRunoff', precision: 2 },
-                              { label: 'Total Carbon Equivalent', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
+                              { label: 'Carbon Equivalent', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
                             ].map((item) => {
                               const baseVal = baselineResults[item.key as keyof EmissionResults];
                               const scenVal = (comparisonResults?.scenario || baselineResults)[item.key as keyof EmissionResults];
                               const diff = calculateDiff(baseVal, scenVal);
                               
                               return (
-                                <TableRow key={item.key} className="hover:bg-muted/30 transition-colors">
+                                <TableRow key={item.key} className="hover:bg-white/30 transition-colors border-white/20">
                                   <TableCell className="font-medium">
                                     <div className="flex flex-col">
-                                      <span>{item.label}</span>
-                                      <span className="text-[10px] text-muted-foreground uppercase">{item.unit}</span>
+                                      <span className="font-bold text-primary/80">{item.label}</span>
+                                      <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">{item.unit}</span>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-right font-mono">{baseVal.toFixed(item.precision)}</TableCell>
+                                  <TableCell className="text-right font-mono text-muted-foreground">{baseVal.toFixed(item.precision)}</TableCell>
                                   <TableCell className="text-right font-mono font-bold text-primary">{scenVal.toFixed(item.precision)}</TableCell>
                                   <TableCell className="text-right">{formatDiff(diff)}</TableCell>
                                 </TableRow>
                               );
                             })}
-                            <TableRow className="bg-primary/5 hover:bg-primary/5">
-                              <TableCell className="font-bold text-primary">Cycle Feed Consumption</TableCell>
-                              <TableCell className="text-right font-mono">
-                                {(baselineData!.fcr * baselineData!.avgWeight * baselineData!.count).toLocaleString()} <span className="text-[10px]">kg</span>
+                            <TableRow className="bg-white/40 hover:bg-white/50 border-white/40">
+                              <TableCell className="font-black text-primary">Batch Feed Load</TableCell>
+                              <TableCell className="text-right font-mono text-muted-foreground">
+                                {(baselineData!.fcr * baselineData!.avgWeight * baselineData!.count).toLocaleString()} <span className="text-[10px] font-bold">kg</span>
                               </TableCell>
                               <TableCell className="text-right font-mono font-bold text-primary">
-                                {(scenarioFcr * baselineData!.avgWeight * baselineData!.count).toLocaleString()} <span className="text-[10px]">kg</span>
+                                {(scenarioFcr * baselineData!.avgWeight * baselineData!.count).toLocaleString()} <span className="text-[10px] font-bold">kg</span>
                               </TableCell>
                               <TableCell className="text-right">
                                 {formatDiff(calculateDiff(baselineData!.fcr, scenarioFcr))}
@@ -412,10 +384,10 @@ export default function Home() {
                           </TableBody>
                         </Table>
                       </div>
-                      <div className="mt-4 p-4 bg-muted/20 rounded-lg flex items-start gap-2">
-                        <span className="text-primary mt-0.5"><Info className="w-4 h-4" /></span>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">
-                          Mitigation values include both physical feed efficiency (FCR) improvements and modeled metabolic efficiencies (digestibility enhancements and gas suppression) specific to the selected nutritional additive.
+                      <div className="mt-6 p-5 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
+                        <Info className="w-5 h-5 text-primary mt-0.5" />
+                        <p className="text-[11px] text-muted-foreground leading-relaxed italic">
+                          Calculations integrate physical efficiency gains (FCR) with biochemical digestibility improvements and methane suppression specific to the selected mitigation agent.
                         </p>
                       </div>
                     </div>
@@ -427,17 +399,19 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="bg-white border-t py-12">
+      <footer className="bg-white/40 backdrop-blur-md border-t border-white/30 py-12 mt-12">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Leaf className="w-5 h-5 text-primary" />
-            <span className="font-bold text-lg text-primary">FarmEI Estimator</span>
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="p-1.5 bg-primary/10 rounded-lg">
+              <Leaf className="w-5 h-5 text-primary" />
+            </div>
+            <span className="font-bold text-xl text-primary tracking-tight">FarmEI Estimator</span>
           </div>
-          <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Methodology follows user-defined mass balance formulas per production cycle. Intensity includes N and P excretion plus CH4 and N2O carbon equivalents.
+          <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed font-medium">
+            Proprietary mass balance calculation engine. Environmental impact intensities are derived from nutrient partitioning and IPCC 2019 gaseous emission factors.
           </p>
-          <div className="mt-6 text-[10px] text-muted-foreground">
-            © {new Date().getFullYear()} FarmEI Environmental intensity tool.
+          <div className="mt-8 text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-bold">
+            © {new Date().getFullYear()} FarmEI • Precision Environmental Metrics
           </div>
         </div>
       </footer>

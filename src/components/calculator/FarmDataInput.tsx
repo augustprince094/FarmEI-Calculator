@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { FarmData, AnimalType } from '@/lib/calculations';
-import { Bird, Database, Repeat, Waves } from 'lucide-react';
+import { Bird, Database, Repeat, Waves, Settings2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -95,43 +96,45 @@ export function FarmDataInput({ onCalculate }: Props) {
   const isPhased = formData.animalType === 'broilers' || formData.animalType === 'swine-nursery';
 
   return (
-    <Card className="shadow-2xl border-none overflow-hidden">
-      <CardHeader className="bg-primary text-primary-foreground">
-        <div className="flex items-center gap-2">
-          <Database className="w-6 h-6" />
-          <CardTitle>Farm Baseline Setup</CardTitle>
+    <Card className="glass border-white/40 overflow-hidden rounded-3xl transition-all duration-500 hover:shadow-2xl">
+      <CardHeader className="bg-primary/90 backdrop-blur-md text-white p-8">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white/20 rounded-xl border border-white/30 backdrop-blur-lg">
+            <Database className="w-8 h-8" />
+          </div>
+          <div>
+            <CardTitle className="text-3xl font-bold tracking-tight">Farm Configuration</CardTitle>
+            <CardDescription className="text-white/80 font-medium">Define your production parameters to build an environmental profile.</CardDescription>
+          </div>
         </div>
-        <CardDescription className="text-primary-foreground/80">
-          Define current production metrics to establish environmental benchmarks.
-        </CardDescription>
       </CardHeader>
-      <CardContent className="p-8">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-3">
-              <Label className="flex items-center gap-1 text-primary font-bold">
-                <Bird className="w-4 h-4" /> Animal Production Type
+      <CardContent className="p-10">
+        <form onSubmit={handleSubmit} className="space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-4">
+              <Label className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-wider">
+                <Bird className="w-4 h-4" /> Animal Category
               </Label>
               <Select 
                 value={formData.animalType} 
                 onValueChange={(val: AnimalType) => handleAnimalTypeChange(val)}
               >
-                <SelectTrigger className="h-12 border-primary/20">
+                <SelectTrigger className="h-14 border-white/40 bg-white/40 backdrop-blur-md focus:ring-primary rounded-xl text-lg font-medium">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="glass">
                   <SelectItem value="broilers">Poultry: Broilers</SelectItem>
-                  <SelectItem value="swine-sow">Swine: Sow and Litter</SelectItem>
+                  <SelectItem value="swine-sow">Swine: Sow & Litter</SelectItem>
                   <SelectItem value="swine-nursery">Swine: Nursery Pigs</SelectItem>
                   <SelectItem value="swine-grow-finish">Swine: Grow-to-Finish</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-3">
-              <Label className="font-bold">Animals per Cycle (Count)</Label>
+            <div className="space-y-4">
+              <Label className="font-bold text-sm uppercase tracking-wider text-primary">Head Count per Cycle</Label>
               <Input 
-                className="h-12"
+                className="h-14 border-white/40 bg-white/40 backdrop-blur-md text-lg font-bold rounded-xl"
                 type="number" 
                 value={formData.count} 
                 onChange={(e) => updateField('count', e.target.value)} 
@@ -139,10 +142,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-3">
-              <Label className="font-bold text-secondary">Final Weight at Exit (kg)</Label>
+            <div className="space-y-4">
+              <Label className="font-bold text-sm uppercase tracking-wider text-secondary">Target Exit Weight (kg)</Label>
               <Input 
-                className="h-12 border-secondary/20"
+                className="h-14 border-secondary/20 bg-white/40 backdrop-blur-md text-lg font-bold rounded-xl"
                 type="number" 
                 step="0.1"
                 value={formData.avgWeight} 
@@ -150,10 +153,10 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-3">
-              <Label className="font-bold text-secondary">Feed Conversion Ratio (FCR)</Label>
+            <div className="space-y-4">
+              <Label className="font-bold text-sm uppercase tracking-wider text-secondary">Feed Conversion Ratio (FCR)</Label>
               <Input 
-                className="h-12 border-secondary/20"
+                className="h-14 border-secondary/20 bg-white/40 backdrop-blur-md text-lg font-bold rounded-xl"
                 type="number" 
                 step="0.01"
                 value={formData.fcr} 
@@ -161,32 +164,32 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            <div className="space-y-3">
-              <Label className="flex items-center gap-1 font-bold text-primary/80">
+            <div className="space-y-4">
+              <Label className="flex items-center gap-2 font-bold text-sm uppercase tracking-wider text-primary">
                 <Repeat className="w-4 h-4" /> Production Cycles
               </Label>
               <Input 
-                className="h-12"
+                className="h-14 border-white/40 bg-white/40 backdrop-blur-md text-lg font-bold rounded-xl"
                 type="number" 
                 step="0.1"
                 value={formData.cyclesPerYear} 
                 onChange={(e) => updateField('cyclesPerYear', e.target.value)} 
               />
-              <p className="text-[10px] text-muted-foreground italic">Set to 1 for a single batch analysis.</p>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase">Set to 1 for batch analysis.</p>
             </div>
 
-            <div className="space-y-3">
-              <Label className="flex items-center gap-1 font-bold">
-                <Waves className="w-4 h-4" /> Manure System
+            <div className="space-y-4">
+              <Label className="flex items-center gap-2 font-bold text-sm uppercase tracking-wider text-primary">
+                <Waves className="w-4 h-4" /> Manure Management
               </Label>
               <Select 
                 value={formData.manureManagement} 
                 onValueChange={(val) => updateField('manureManagement', val)}
               >
-                <SelectTrigger className="h-12">
+                <SelectTrigger className="h-14 border-white/40 bg-white/40 backdrop-blur-md rounded-xl text-lg font-medium">
                   <SelectValue placeholder="Select system" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="glass">
                   <SelectItem value="solid">Solid Storage / Litter</SelectItem>
                   <SelectItem value="lagoon">Anaerobic Lagoon</SelectItem>
                   <SelectItem value="slurry">Liquid/Slurry Storage</SelectItem>
@@ -196,72 +199,51 @@ export function FarmDataInput({ onCalculate }: Props) {
             </div>
 
             {isPhased ? (
-              <div className="md:col-span-2 space-y-6">
-                <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
-                  <h4 className="text-sm font-bold text-primary mb-4">Phase Specific Nutrients (%)</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Phase I CP (%)</Label>
-                      <Input 
-                        type="number" step="0.1" value={formData.phase1CP} 
-                        onChange={(e) => updateField('phase1CP', e.target.value)} 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Phase II CP (%)</Label>
-                      <Input 
-                        type="number" step="0.1" value={formData.phase2CP} 
-                        onChange={(e) => updateField('phase2CP', e.target.value)} 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Phase III CP (%)</Label>
-                      <Input 
-                        type="number" step="0.1" value={formData.phase3CP} 
-                        onChange={(e) => updateField('phase3CP', e.target.value)} 
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Phase I P (%)</Label>
-                      <Input 
-                        type="number" step="0.01" value={formData.phase1P} 
-                        onChange={(e) => updateField('phase1P', e.target.value)} 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Phase II P (%)</Label>
-                      <Input 
-                        type="number" step="0.01" value={formData.phase2P} 
-                        onChange={(e) => updateField('phase2P', e.target.value)} 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-primary">Phase III P (%)</Label>
-                      <Input 
-                        type="number" step="0.01" value={formData.phase3P} 
-                        onChange={(e) => updateField('phase3P', e.target.value)} 
-                      />
-                    </div>
+              <div className="md:col-span-2 space-y-8 animate-in slide-in-from-top-4 duration-500">
+                <div className="p-8 bg-white/30 rounded-3xl border border-white/50 backdrop-blur-md">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Settings2 className="w-5 h-5 text-primary" />
+                    <h4 className="text-sm font-black text-primary uppercase tracking-[0.2em]">Dietary Nutrient Strategy (%)</h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {[
+                      { id: 'phase1CP', label: 'Phase I CP (%)', value: formData.phase1CP },
+                      { id: 'phase2CP', label: 'Phase II CP (%)', value: formData.phase2CP },
+                      { id: 'phase3CP', label: 'Phase III CP (%)', value: formData.phase3CP },
+                      { id: 'phase1P', label: 'Phase I P (%)', value: formData.phase1P },
+                      { id: 'phase2P', label: 'Phase II P (%)', value: formData.phase2P },
+                      { id: 'phase3P', label: 'Phase III P (%)', value: formData.phase3P },
+                    ].map((item) => (
+                      <div key={item.id} className="space-y-2">
+                        <Label className="text-[11px] font-bold text-primary/70 uppercase tracking-wider">{item.label}</Label>
+                        <Input 
+                          type="number" 
+                          step={item.id.includes('CP') ? "0.1" : "0.01"}
+                          value={item.value} 
+                          onChange={(e) => updateField(item.id as any, e.target.value)} 
+                          className="h-12 border-white/50 bg-white/50 rounded-xl font-bold"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <Label className="font-bold text-primary/80">Diet Crude Protein (%)</Label>
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-4">
+                  <Label className="font-bold text-sm uppercase tracking-wider text-primary">Dietary Crude Protein (%)</Label>
                   <Input 
-                    className="h-12"
+                    className="h-14 border-white/40 bg-white/40 backdrop-blur-md text-lg font-bold rounded-xl"
                     type="number" 
                     step="0.1"
                     value={formData.feedCrudeProtein} 
                     onChange={(e) => updateField('feedCrudeProtein', e.target.value)} 
                   />
                 </div>
-                <div className="space-y-3">
-                  <Label className="font-bold text-primary/80">Diet Phosphorus (%)</Label>
+                <div className="space-y-4">
+                  <Label className="font-bold text-sm uppercase tracking-wider text-primary">Dietary Phosphorus (%)</Label>
                   <Input 
-                    className="h-12"
+                    className="h-14 border-white/40 bg-white/40 backdrop-blur-md text-lg font-bold rounded-xl"
                     type="number" 
                     step="0.01"
                     value={formData.feedPhosphorus} 
@@ -272,8 +254,8 @@ export function FarmDataInput({ onCalculate }: Props) {
             )}
           </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 text-xl shadow-lg transition-all active:scale-[0.98]">
-            Establish Environmental Baseline
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-black h-16 text-xl rounded-2xl shadow-xl transition-all active:scale-[0.98] uppercase tracking-widest">
+            Generate Environmental Baseline
           </Button>
         </form>
       </CardContent>
