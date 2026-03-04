@@ -74,10 +74,10 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="glass p-3 rounded-xl border-white/40 shadow-2xl">
-          <p className="font-bold text-xs mb-1 text-primary uppercase tracking-wider">{label}</p>
-          <p className="text-lg font-black text-primary">
-            {payload[0].value.toLocaleString()} <span className="text-[10px] font-medium text-muted-foreground uppercase">{payload[0].payload.unit || ''}</span>
+        <div className="glass p-2 rounded-lg border-white/40 shadow-2xl">
+          <p className="font-bold text-[10px] mb-0.5 text-primary uppercase tracking-wider">{label}</p>
+          <p className="text-sm font-black text-primary">
+            {payload[0].value.toLocaleString()} <span className="text-[9px] font-medium text-muted-foreground uppercase">{payload[0].payload.unit || ''}</span>
           </p>
         </div>
       );
@@ -86,13 +86,13 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="bg-white/40 backdrop-blur-2xl p-8 rounded-[2rem] border border-white/50 shadow-xl flex flex-col md:flex-row justify-between items-center gap-8">
+    <div className="space-y-6 animate-in fade-in duration-700">
+      <div className="bg-white/40 backdrop-blur-2xl p-6 rounded-2xl border border-white/50 shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
-          <h2 className="text-3xl font-black text-primary tracking-tight">
+          <h2 className="text-2xl font-black text-primary tracking-tight uppercase">
             {isComparison ? 'Mitigation Performance' : 'Environmental Profile'}
           </h2>
-          <p className="text-muted-foreground font-medium mt-1">
+          <p className="text-xs text-muted-foreground font-medium mt-0.5">
             {isComparison ? (
               <>Impact Analysis: <span className="font-black" style={{ color: scenarioColor }}>{additiveName}</span> Strategy</>
             ) : (
@@ -101,26 +101,26 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
           </p>
         </div>
         {isComparison && (
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {fcrImprovement > 0 && (
-              <div className="glass p-4 rounded-2xl border-secondary/20 flex items-center gap-4 hover:scale-105 transition-transform">
-                 <div className="p-3 bg-secondary/10 rounded-xl">
-                    <Calculator className="w-6 h-6 text-secondary" />
+              <div className="glass p-3 rounded-xl border-secondary/20 flex items-center gap-3 hover:scale-105 transition-transform">
+                 <div className="p-2 bg-secondary/10 rounded-lg">
+                    <Calculator className="w-5 h-5 text-secondary" />
                  </div>
                  <div>
-                    <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Efficiency</p>
-                    <p className="text-2xl font-black text-secondary">-{fcrImprovement}% FCR</p>
+                    <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Efficiency</p>
+                    <p className="text-lg font-black text-secondary">-{fcrImprovement}% FCR</p>
                  </div>
               </div>
             )}
             {reductionPercentage > 0 && (
-              <div className="glass p-5 rounded-2xl border-green-200/50 flex items-center gap-5 hover:scale-105 transition-transform bg-green-50/40">
-                <div className="p-3 bg-green-500 rounded-full shadow-lg shadow-green-500/30">
-                  <TrendingDown className="w-8 h-8 text-white" />
+              <div className="glass p-3 rounded-xl border-green-200/50 flex items-center gap-4 hover:scale-105 transition-transform bg-green-50/40">
+                <div className="p-2 bg-green-500 rounded-full shadow-lg shadow-green-500/30">
+                  <TrendingDown className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">CO2e Mitigated</p>
-                  <p className="text-4xl font-black text-green-700">-{reductionPercentage}%</p>
+                  <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">CO2e Mitigated</p>
+                  <p className="text-2xl font-black text-green-700">-{reductionPercentage}%</p>
                 </div>
               </div>
             )}
@@ -128,7 +128,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           { 
             label: 'Nitrogen Load', 
@@ -158,29 +158,29 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             diff: isComparison ? baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent : 0
           }
         ].map((item, idx) => (
-          <Card key={idx} className="glass overflow-hidden border-none shadow-lg transition-all hover:scale-[1.03] duration-300">
-            <div className="h-2 w-full" style={{ backgroundColor: item.border }} />
-            <CardContent className="p-8">
+          <Card key={idx} className="glass overflow-hidden border-none shadow-md transition-all hover:scale-[1.02] duration-300">
+            <div className="h-1.5 w-full" style={{ backgroundColor: item.border }} />
+            <CardContent className="p-5">
               <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{item.label}</p>
-                  <h3 className={cn("text-3xl font-black", item.color)}>
+                <div className="space-y-1">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">{item.label}</p>
+                  <h3 className={cn("text-2xl font-black", item.color)}>
                     {item.unit === 'kg CO2e' ? formatCarbon(item.val) : formatValue(item.val)} 
-                    <span className="text-xs font-bold ml-1.5 opacity-60">{item.unit}</span>
+                    <span className="text-[10px] font-bold ml-1 opacity-60">{item.unit}</span>
                   </h3>
                   {isComparison && (
-                    <div className="flex items-center gap-1.5 mt-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                      <p className="text-[10px] text-green-700 font-black uppercase tracking-wider">
+                    <div className="flex items-center gap-1 mt-1">
+                      <div className="w-1 h-1 rounded-full bg-green-500" />
+                      <p className="text-[9px] text-green-700 font-black uppercase tracking-wider">
                         {item.diff > 0 
-                          ? `Mitigated ${item.unit === 'kg CO2e' ? formatCarbon(item.diff) : formatValue(item.diff)} ${item.unit}` 
+                          ? `-${item.unit === 'kg CO2e' ? formatCarbon(item.diff) : formatValue(item.diff)} ${item.unit}` 
                           : 'Maintaining baseline'}
                       </p>
                     </div>
                   )}
                 </div>
-                <div className="p-3 bg-primary/5 rounded-2xl backdrop-blur-md">
-                  <item.icon className={cn("w-8 h-8 opacity-40", item.color)} />
+                <div className="p-2 bg-primary/5 rounded-xl backdrop-blur-md">
+                  <item.icon className={cn("w-6 h-6 opacity-40", item.color)} />
                 </div>
               </div>
             </CardContent>
@@ -188,26 +188,26 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           { label: 'Nitrogen (kg N)', data: nitrogenData, icon: Wind, color: 'text-primary' },
           { label: 'Phosphorus (kg P)', data: phosphorusData, icon: Droplets, color: 'text-secondary' },
           { label: 'Carbon (kg CO2e)', data: carbonData, icon: Leaf, color: 'text-green-700' }
         ].map((chart, idx) => (
-          <Card key={idx} className="glass rounded-3xl border-white/30 shadow-2xl p-6">
-            <CardHeader className="px-0 pt-0 pb-6">
-              <CardTitle className="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-primary/80">
-                <chart.icon className={cn("w-5 h-5", chart.color)} /> {chart.label}
+          <Card key={idx} className="glass rounded-2xl border-white/30 shadow-xl p-4">
+            <CardHeader className="px-0 pt-0 pb-4">
+              <CardTitle className="text-[10px] font-black flex items-center gap-2 uppercase tracking-widest text-primary/80">
+                <chart.icon className={cn("w-4 h-4", chart.color)} /> {chart.label}
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-[280px] px-0">
+            <CardContent className="h-[220px] px-0">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chart.data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={chart.data} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold' }} />
                   <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} content={<CustomTooltip />} />
-                  <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={40}>
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={32}>
                     {chart.data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
@@ -219,15 +219,15 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6 justify-between items-center pt-8">
-        <div className="glass p-4 rounded-2xl flex items-center gap-3 bg-primary/5">
-          <Leaf className="w-5 h-5 text-primary opacity-50" />
-          <p className="text-[11px] text-muted-foreground italic font-medium">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center pt-4">
+        <div className="glass p-3 rounded-xl flex items-center gap-2 bg-primary/5">
+          <Leaf className="w-4 h-4 text-primary opacity-50" />
+          <p className="text-[10px] text-muted-foreground italic font-medium">
             Calculated intensities are batch-specific. Includes N and P partitioning plus CH4/N2O sequestration modeling.
           </p>
         </div>
-        <Button variant="outline" className="glass h-14 px-8 rounded-2xl font-black text-primary border-primary/20 hover:bg-primary/10 flex items-center gap-3 transition-all" onClick={() => window.print()}>
-          <Download className="w-5 h-5" /> Export Cycle Audit
+        <Button variant="outline" className="glass h-11 px-6 rounded-xl font-black text-xs text-primary border-primary/20 hover:bg-primary/10 flex items-center gap-2 transition-all uppercase tracking-widest" onClick={() => window.print()}>
+          <Download className="w-4 h-4" /> Export Cycle Audit
         </Button>
       </div>
     </div>
