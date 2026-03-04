@@ -38,14 +38,6 @@ export interface ComparativeResults {
 
 /**
  * Calculates farm emissions per production cycle based on phase-specific mass balance.
- * 
- * EQUATIONS:
- * Nitrogen Excretion (Phase) = (Nitrogen Intake - Nitrogen Retention)
- * Phosphorus Excretion (Phase) = (Phosphorus Intake - Phosphorus Retention)
- * 
- * Partitioning:
- * - Broilers: 14/45/41 for Intake & Gain
- * - Swine Nursery: 15/35/50 for Intake & Gain
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -74,7 +66,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       metabolicPMitigation = 0.95;
       ch4MitigationFactor = 0.88; 
     } else if (additive === 'xylanase') {
-      metabolicNMitigation = 0.98;
+      // Research shows 4.5% improvement in nitrogen digestibility
+      metabolicNMitigation = 0.955; 
       metabolicPMitigation = 0.99;
       ch4MitigationFactor = 0.98;
     } else if (additive === 'jefo-combo') {
@@ -153,7 +146,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
   let totalEntericMethane = 0;
   if (animalType === 'broilers') {
-    // 1.6 g per bird per cycle as kg
+    // 1.6 g per bird per cycle
     totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
   } else {
     let entericMultiplier = 0.03;
@@ -163,28 +156,28 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalEntericMethane = entericEmissionFactor * count * cycleDays * ch4MitigationFactor;
   }
 
-  // REFINED MANURE METHANE (VS Balance)
+  // Manure Methane (VS Balance)
   const dmd = 0.85; // 85%
   const ash = 0.10; // 10%
   const b0 = 0.36;  // Maximum methane potential
   const mcf_val = 0.015; // 1.5%
-  const density_ch4 = 0.0662; // kg/m3 as requested
+  const density_ch4 = 0.0662; // kg/m3
 
   const totalVolatileSolids = totalFeedPerCycle * (1 - dmd) * (1 - ash);
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
 
-  // Phosphorus run-off estimated at 2.9% of the phosphorus excreted
+  // Phosphorus run-off (2.9% of excreted)
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.029;
 
-  // Direct and Indirect N2O logic update (IPCC 2019)
+  // Direct and Indirect N2O (IPCC 2019)
   let directN2oFactor = 0.01;
   let fracGas = 0.1;
   const ef4 = 0.01;
   const awmsFactor = 1.0;
 
   if (animalType === 'broilers') {
-    directN2oFactor = 0.001; // IPCC 2019 for poultry litter
-    fracGas = 0.2;           // Frac_gas for poultry litter
+    directN2oFactor = 0.001; 
+    fracGas = 0.2;           
   } else {
     directN2oFactor = {
       'lagoon': 0.005,
