@@ -49,7 +49,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
     switch (type) {
       case 'poa-eo': return '#f87171';
       case 'xylanase': return '#F26648';
-      case 'jefo-combo': return '#fbbf24';
+      case 'jefo-combo': return '#FCD84B';
       default: return '#fbbf24';
     }
   };
@@ -75,9 +75,9 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
     if (active && payload && payload.length) {
       return (
         <div className="glass p-3 rounded-xl border-white/40 shadow-2xl backdrop-blur-xl">
-          <p className="font-bold text-xs mb-1 text-primary uppercase tracking-wider">{label}</p>
+          <p className="font-black text-xs mb-1 text-primary uppercase tracking-wider">{label}</p>
           <p className="text-base font-black text-primary">
-            {payload[0].value.toLocaleString()} <span className="text-[11px] font-medium text-muted-foreground uppercase">{payload[0].payload.unit || ''}</span>
+            {payload[0].value.toLocaleString()} <span className="text-[11px] font-bold text-muted-foreground uppercase">{payload[0].payload.unit || ''}</span>
           </p>
         </div>
       );
@@ -92,10 +92,10 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
           <h2 className="text-2xl font-black text-primary tracking-tight uppercase">
             {isComparison ? 'Performance Comparison' : 'Impact Profile'}
           </h2>
-          <p className="text-xs text-muted-foreground font-bold mt-1">
+          <p className="text-sm text-muted-foreground font-black mt-1">
             {isComparison ? (
-              <span className="flex items-center gap-2" style={{ color: scenarioColor }}>
-                <TrendingDown className="w-4 h-4" /> {additiveName} Strategy Assessment
+              <span className="flex items-center gap-2" style={{ color: scenarioColor === '#FCD84B' ? '#d97706' : scenarioColor }}>
+                <TrendingDown className="w-5 h-5" /> {additiveName} Strategy Assessment
               </span>
             ) : (
               'Cycle Benchmarks & Intensities'
@@ -164,10 +164,10 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">{item.label}</p>
                   <h3 className={cn("text-3xl font-black", item.color)}>
                     {item.unit === 'kg CO2e' ? formatCarbon(item.val) : formatValue(item.val)} 
-                    <span className="text-xs font-bold ml-2 opacity-60">{item.unit}</span>
+                    <span className="text-xs font-black ml-2 opacity-60">{item.unit}</span>
                   </h3>
                   {isComparison && item.diff > 0 && (
-                    <p className="text-xs text-green-700 font-bold uppercase tracking-wider flex items-center gap-1.5 mt-1">
+                    <p className="text-xs text-green-700 font-black uppercase tracking-wider flex items-center gap-1.5 mt-1">
                       <TrendingDown className="w-4 h-4" />
                       {item.unit === 'kg CO2e' ? formatCarbon(item.diff) : formatValue(item.diff)} {item.unit} Mitigated
                     </p>
@@ -190,11 +190,11 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
         ].map((chart, idx) => (
           <Card key={idx} className="glass rounded-2xl border-white/30 p-5 transition-all duration-300 hover:shadow-xl">
             <CardHeader className="p-0 pb-5">
-              <CardTitle className="text-[13px] font-black flex items-center gap-2.5 uppercase tracking-widest text-primary/80">
-                <chart.icon className={cn("w-5 h-5", chart.color)} /> {chart.label}
+              <CardTitle className="text-sm font-black flex items-center gap-2.5 uppercase tracking-widest text-primary/80">
+                <chart.icon className={cn("w-6 h-6", chart.color)} /> {chart.label}
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-[240px] px-0">
+            <CardContent className="h-[220px] px-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chart.data} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="rgba(0,0,0,0.08)" />
@@ -202,12 +202,12 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                     dataKey="name" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 11, fontWeight: 'bold', fill: 'hsl(var(--primary))' }} 
+                    tick={{ fontSize: 12, fontWeight: 'bold', fill: 'hsl(var(--primary))' }} 
                   />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 11, fontWeight: 'bold', fill: 'hsl(var(--muted-foreground))' }} 
+                    tick={{ fontSize: 12, fontWeight: 'bold', fill: 'hsl(var(--muted-foreground))' }} 
                   />
                   <Tooltip cursor={{ fill: 'rgba(0,0,0,0.04)' }} content={<CustomTooltip />} />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={40}>
@@ -223,7 +223,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-4">
-        <div className="flex items-center gap-2.5 text-sm text-muted-foreground italic font-medium">
+        <div className="flex items-center gap-2.5 text-sm text-muted-foreground italic font-bold">
           <Leaf className="w-4 h-4 opacity-50" />
           Note: Values derived from batch-specific mass balance and IPCC 2019 guidelines.
         </div>

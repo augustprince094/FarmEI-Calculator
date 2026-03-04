@@ -96,10 +96,10 @@ export default function Home() {
   };
 
   const formatDiff = (diff: number) => {
-    if (Math.abs(diff) < 0.1) return <span className="text-muted-foreground text-sm font-medium">0%</span>;
+    if (Math.abs(diff) < 0.1) return <span className="text-muted-foreground text-sm font-bold">0%</span>;
     const isReduction = diff < 0;
     return (
-      <span className={cn("flex items-center gap-1 font-bold text-sm", isReduction ? "text-green-600" : "text-red-600")}>
+      <span className={cn("flex items-center gap-1 font-black text-sm", isReduction ? "text-green-600" : "text-red-600")}>
         {isReduction ? <TrendingDown className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
         {Math.abs(diff).toFixed(1)}%
       </span>
@@ -122,7 +122,7 @@ export default function Home() {
           <nav className="flex gap-8 text-white/90 font-medium text-sm">
             <Dialog>
               <DialogTrigger asChild>
-                <button className="hover:text-white transition-colors flex items-center gap-2"><Info className="w-5 h-5" /> Science</button>
+                <button className="hover:text-white transition-colors flex items-center gap-2 font-bold"><Info className="w-5 h-5" /> Science</button>
               </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto glass">
                 <DialogHeader>
@@ -131,8 +131,8 @@ export default function Home() {
                 <div className="space-y-6 text-sm leading-relaxed pr-2">
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nutrient Excretion (Mass Balance)</h4>
-                    <p className="font-medium">Calculated as dietary intake minus biological retention. Xylanase supplementation models a 4.5% improvement in N digestibility.</p>
-                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-2 font-bold text-slate-700">
+                    <p className="font-bold">Calculated as dietary intake minus biological retention. Xylanase supplementation models a 4.5% improvement in N digestibility based on peer-reviewed data.</p>
+                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-2 font-black text-slate-700">
                       <p><strong>N Intake</strong> = {"Sum((Feed_i * CP_i / 100) / 6.25)"}</p>
                       <p><strong>N Retention</strong> = {"Sum((Weight_Gain_i * 29g N/kg) * Count)"}</p>
                       <p className="border-t border-white/30 pt-2 mt-2"><strong>P Intake</strong> = {"Sum(Feed_i * P_i / 100)"}</p>
@@ -141,28 +141,28 @@ export default function Home() {
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrous Oxide (IPCC 2019)</h4>
-                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-bold text-slate-700">
+                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
-                        <p className="text-xs uppercase text-primary mb-1">Direct N2O (Poultry)</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Direct N2O (Poultry)</p>
                         <p>{"Direct N2O = N_excreted * 1.0 (AWMS) * 0.001 (EF) * (44/28)"}</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase text-primary mb-1">Indirect N2O (Poultry)</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Indirect N2O (Poultry)</p>
                         <p>{"Indirect N2O = N_excreted * 1.0 (AWMS) * 0.2 (FracGas) * 0.01 (EF4) * (44/28)"}</p>
                       </div>
                     </div>
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (CH4) & Run-off</h4>
-                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-bold text-slate-700">
+                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
-                        <p className="text-xs uppercase text-primary mb-1">Enteric & Manure Methane</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Enteric & Manure Methane</p>
                         <p><strong>Enteric (Poultry):</strong> {"1.6g / bird / cycle"}</p>
                         <p><strong>Manure (VS Balance):</strong> {"VS * 0.36 (B0) * 1.5% (MCF) * 0.0662 (Density)"}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">{"VS = Feed_in * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 font-bold">{"VS = Feed_in * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
                       </div>
                       <div className="border-t border-white/30 pt-2">
-                        <p className="text-xs uppercase text-primary mb-1">Phosphorus Run-off</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Phosphorus Run-off</p>
                         <p>{"P Run-off = P_excreted * 0.029 (2.9%)"}</p>
                       </div>
                     </div>
@@ -170,8 +170,8 @@ export default function Home() {
                 </div>
               </DialogContent>
             </Dialog>
-            <a href="#" className="hover:text-white transition-colors flex items-center gap-2"><BookOpen className="w-5 h-5" /> Additives</a>
-            <a href="#" className="hover:text-white transition-colors flex items-center gap-2"><ShieldCheck className="w-5 h-5" /> Audit</a>
+            <a href="#" className="hover:text-white transition-colors flex items-center gap-2 font-bold"><BookOpen className="w-5 h-5" /> Additives</a>
+            <a href="#" className="hover:text-white transition-colors flex items-center gap-2 font-bold"><ShieldCheck className="w-5 h-5" /> Audit</a>
           </nav>
         </div>
       </header>
@@ -181,7 +181,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
               <h2 className="text-4xl font-black text-primary mb-3 uppercase tracking-tight">Cycle Baseline</h2>
-              <p className="text-muted-foreground max-w-xl mx-auto text-lg font-medium">
+              <p className="text-muted-foreground max-w-xl mx-auto text-lg font-bold">
                 Establish your production baseline by defining core efficiency metrics.
               </p>
             </div>
@@ -201,13 +201,13 @@ export default function Home() {
                     <RefreshCw className="w-4 h-4 mr-2" /> Reset
                   </Button>
                 </div>
-                <div className="space-y-4 text-sm font-bold">
+                <div className="space-y-4 text-sm font-black">
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest">Category</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Category</span>
                     <span className="text-primary">{baselineData ? animalTypeLabels[baselineData.animalType] : ''}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest">Baseline FCR</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Baseline FCR</span>
                     <span className="text-secondary">{baselineData?.fcr}</span>
                   </div>
                   
@@ -215,18 +215,18 @@ export default function Home() {
                     <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-3">
                       <div className="text-[11px] font-black uppercase text-primary/60 border-b border-primary/10 pb-2 tracking-widest">Dietary Strategy</div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                        <span className="text-muted-foreground">CP % (P1-3)</span>
-                        <span className="text-right text-primary font-bold">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}</span>
+                        <span className="text-muted-foreground font-bold">CP % (P1-3)</span>
+                        <span className="text-right text-primary font-black">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}</span>
                         
-                        <span className="text-muted-foreground">P % (P1-3)</span>
-                        <span className="text-right text-primary font-bold">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
+                        <span className="text-muted-foreground font-bold">P % (P1-3)</span>
+                        <span className="text-right text-primary font-black">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
                       </div>
                     </div>
                   )}
                   
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest">Exit Weight</span>
-                    <span className="text-primary font-bold">{baselineData?.avgWeight} kg</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Exit Weight</span>
+                    <span className="text-primary font-black">{baselineData?.avgWeight} kg</span>
                   </div>
                 </div>
               </div>
@@ -240,7 +240,7 @@ export default function Home() {
                     { id: 'jefo-pro', label: 'Jefo Pro', color: '#FBBC01' },
                     { id: 'poa-eo', label: 'P(OA+EO)', color: '#D38F89' },
                     { id: 'xylanase', label: 'Xylanase', color: '#F26648' },
-                    { id: 'jefo-combo', label: 'Xyl + Pro', color: '#F5A623' },
+                    { id: 'jefo-combo', label: 'Xyl + Pro', color: '#FCD84B' },
                   ].map((item) => (
                     <Button 
                       key={item.id}
@@ -248,7 +248,7 @@ export default function Home() {
                       onClick={() => handleApplyMitigation(item.id as any)}
                       className={cn(
                         "h-12 px-4 border-white/20 backdrop-blur-sm text-[11px] font-black uppercase tracking-widest",
-                        selectedAdditive === item.id ? "ring-2 ring-primary ring-offset-2" : "hover:bg-white/40"
+                        selectedAdditive === item.id ? "ring-2 ring-primary ring-offset-2 text-slate-900" : "hover:bg-white/40"
                       )}
                       style={selectedAdditive === item.id ? { backgroundColor: item.color } : {}}
                     >
@@ -307,7 +307,7 @@ export default function Home() {
                       <div className="flex items-center justify-between mb-8">
                         <div>
                           <h3 className="text-2xl font-black text-primary uppercase tracking-widest">Technical Audit</h3>
-                          <p className="text-sm font-medium text-muted-foreground mt-1">Detailed mass balance & emission factor audit.</p>
+                          <p className="text-sm font-bold text-muted-foreground mt-1">Detailed mass balance & emission factor audit.</p>
                         </div>
                         <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Validated Engine</Badge>
                       </div>
@@ -345,7 +345,7 @@ export default function Home() {
                                       <span className="text-[11px] text-muted-foreground uppercase tracking-widest font-black">{item.unit}</span>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-right font-bold text-slate-600 text-base border-x border-white/10 px-8">{baseVal.toFixed(item.precision)}</TableCell>
+                                  <TableCell className="text-right font-black text-slate-600 text-base border-x border-white/10 px-8">{baseVal.toFixed(item.precision)}</TableCell>
                                   <TableCell className="text-right font-black text-primary text-base bg-primary/5 px-8">{scenVal.toFixed(item.precision)}</TableCell>
                                   <TableCell className="text-right bg-white/20 px-8">{formatDiff(diff)}</TableCell>
                                 </TableRow>
@@ -370,7 +370,7 @@ export default function Home() {
             <span className="font-black text-xl text-primary tracking-tight uppercase">FarmEI Estimator</span>
           </div>
           <div className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-black">
-            © {new Date().getFullYear()} FarmEI • Precision Environmental Metrics
+            © {new Date().getFullYear()} FarmEI • Precision Environmental Metrics • Xylanase Metabolic Model Applied
           </div>
         </div>
       </footer>
