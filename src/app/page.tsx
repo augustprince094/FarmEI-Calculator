@@ -291,7 +291,7 @@ export default function Home() {
                       {comparisonResults ? 'Comparative Summary' : 'Baseline Results'}
                     </TabsTrigger>
                     <TabsTrigger value="details" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md transition-all text-[10px] font-bold uppercase tracking-wider">
-                      Technical Metrics
+                      Technical Audit
                     </TabsTrigger>
                   </TabsList>
                   
@@ -314,14 +314,14 @@ export default function Home() {
                         <Badge variant="outline" className="text-[8px] font-bold py-0.5 px-2 bg-primary/5 border-primary/20 text-primary uppercase tracking-widest">Mass Balance Engine</Badge>
                       </div>
                       
-                      <div className="overflow-hidden border border-white/20 rounded-xl bg-white/10 backdrop-blur-md">
+                      <div className="overflow-hidden border border-white/20 rounded-xl bg-white/5 backdrop-blur-md">
                         <Table>
-                          <TableHeader className="bg-white/20">
-                            <TableRow className="hover:bg-transparent border-white/20 h-9">
+                          <TableHeader className="bg-primary/5 backdrop-blur-lg">
+                            <TableRow className="hover:bg-transparent border-white/20 h-10">
                               <TableHead className="w-[180px] font-bold text-primary text-[10px] uppercase tracking-wider">Metric</TableHead>
-                              <TableHead className="text-right font-bold text-[10px] uppercase tracking-wider">Base</TableHead>
-                              <TableHead className="text-right font-bold text-[10px] uppercase tracking-wider">Scen</TableHead>
-                              <TableHead className="text-right font-bold text-[10px] uppercase tracking-wider">Δ</TableHead>
+                              <TableHead className="text-right font-bold text-[10px] uppercase tracking-wider border-x border-white/10 px-4">Base</TableHead>
+                              <TableHead className="text-right font-bold text-[10px] uppercase tracking-wider bg-primary/5 px-4">Scen</TableHead>
+                              <TableHead className="text-right font-bold text-[10px] uppercase tracking-wider bg-white/20 px-4">Δ %</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -340,16 +340,16 @@ export default function Home() {
                               const diff = calculateDiff(baseVal, scenVal);
                               
                               return (
-                                <TableRow key={item.key} className="hover:bg-white/20 transition-colors border-white/10 h-9">
+                                <TableRow key={item.key} className="hover:bg-white/10 transition-colors border-white/10 h-10">
                                   <TableCell className="py-1">
                                     <div className="flex flex-col">
                                       <span className="font-bold text-primary/80 text-[10px]">{item.label}</span>
                                       <span className="text-[7px] text-muted-foreground uppercase tracking-widest font-bold">{item.unit}</span>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-right font-mono text-muted-foreground text-[10px]">{baseVal.toFixed(item.precision)}</TableCell>
-                                  <TableCell className="text-right font-mono font-bold text-primary text-[10px]">{scenVal.toFixed(item.precision)}</TableCell>
-                                  <TableCell className="text-right">{formatDiff(diff)}</TableCell>
+                                  <TableCell className="text-right font-mono text-muted-foreground text-[10px] border-x border-white/10 px-4">{baseVal.toFixed(item.precision)}</TableCell>
+                                  <TableCell className="text-right font-mono font-bold text-primary text-[10px] bg-primary/5 px-4">{scenVal.toFixed(item.precision)}</TableCell>
+                                  <TableCell className="text-right bg-white/10 px-4">{formatDiff(diff)}</TableCell>
                                 </TableRow>
                               );
                             })}
