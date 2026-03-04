@@ -370,7 +370,7 @@ export default function Home() {
             <span className="font-black text-xl text-primary tracking-tight uppercase">FarmEI Estimator</span>
           </div>
           <div className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-black">
-            © {new Date().getFullYear()} FarmEI • Precision Environmental Metrics • Xylanase Metabolic Model Applied
+            © {new Date().getFullYear()} FarmEI • Precision Environmental Metrics • Feed additive metabolic model applied
           </div>
         </div>
       </footer>
