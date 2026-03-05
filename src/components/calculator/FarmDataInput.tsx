@@ -50,7 +50,20 @@ export function FarmDataInput({ onCalculate }: Props) {
     
     switch (val) {
       case 'swine-sow':
-        defaults = { ...defaults, avgWeight: 250, fcr: 3.5, cyclesPerYear: 1, count: 100, feedCrudeProtein: 14, feedPhosphorus: 0.55, manureManagement: 'slurry' };
+        defaults = { 
+          ...defaults, 
+          avgWeight: 250, 
+          fcr: 3.5, 
+          cyclesPerYear: 1, 
+          count: 100, 
+          phase1CP: 13, 
+          phase2CP: 18, 
+          phase3CP: 0,
+          phase1P: 0.5,
+          phase2P: 0.65,
+          phase3P: 0,
+          manureManagement: 'slurry' 
+        };
         break;
       case 'swine-nursery':
         defaults = { 
@@ -93,7 +106,9 @@ export function FarmDataInput({ onCalculate }: Props) {
     setFormData(prev => ({ ...prev, ...defaults }));
   };
 
-  const isPhased = formData.animalType === 'broilers' || formData.animalType === 'swine-nursery';
+  const isPhased = formData.animalType === 'broilers' || 
+                   formData.animalType === 'swine-nursery' || 
+                   formData.animalType === 'swine-sow';
 
   return (
     <Card className="glass border-white/40 overflow-hidden rounded-2xl">
@@ -169,17 +184,19 @@ export function FarmDataInput({ onCalculate }: Props) {
                 <div className="p-4 bg-white/40 rounded-xl border border-primary/10 shadow-sm backdrop-blur-lg">
                   <div className="flex items-center gap-2.5 mb-3">
                     <Settings2 className="w-4 h-4 text-primary" />
-                    <h4 className="text-[11px] font-black text-primary uppercase tracking-widest">Dietary Strategy (%)</h4>
+                    <h4 className="text-[11px] font-black text-primary uppercase tracking-widest">
+                      {formData.animalType === 'swine-sow' ? 'Sow Cycle Nutrients (%)' : 'Dietary Strategy (%)'}
+                    </h4>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     {[
-                      { id: 'phase1CP', label: 'P1 CP', value: formData.phase1CP },
-                      { id: 'phase2CP', label: 'P2 CP', value: formData.phase2CP },
-                      { id: 'phase3CP', label: 'P3 CP', value: formData.phase3CP },
-                      { id: 'phase1P', label: 'P1 P', value: formData.phase1P },
-                      { id: 'phase2P', label: 'P2 P', value: formData.phase2P },
-                      { id: 'phase3P', label: 'P3 P', value: formData.phase3P },
-                    ].map((item) => (
+                      { id: 'phase1CP', label: formData.animalType === 'swine-sow' ? 'Gest CP' : 'P1 CP', value: formData.phase1CP },
+                      { id: 'phase2CP', label: formData.animalType === 'swine-sow' ? 'Lact CP' : 'P2 CP', value: formData.phase2CP },
+                      { id: 'phase3CP', label: 'P3 CP', value: formData.phase3CP, hidden: formData.animalType === 'swine-sow' },
+                      { id: 'phase1P', label: formData.animalType === 'swine-sow' ? 'Gest P' : 'P1 P', value: formData.phase1P },
+                      { id: 'phase2P', label: formData.animalType === 'swine-sow' ? 'Lact P' : 'P2 P', value: formData.phase2P },
+                      { id: 'phase3P', label: 'P3 P', value: formData.phase3P, hidden: formData.animalType === 'swine-sow' },
+                    ].filter(i => !i.hidden).map((item) => (
                       <div key={item.id} className="space-y-1.5">
                         <Label className="text-[10px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
                         <Input 

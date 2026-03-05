@@ -88,7 +88,9 @@ export default function Home() {
     setStep('input');
   };
 
-  const isPhased = baselineData?.animalType === 'broilers' || baselineData?.animalType === 'swine-nursery';
+  const isPhased = baselineData?.animalType === 'broilers' || 
+                   baselineData?.animalType === 'swine-nursery' ||
+                   baselineData?.animalType === 'swine-sow';
 
   const calculateDiff = (base: number, scen: number) => {
     if (base === 0) return 0;
@@ -213,13 +215,25 @@ export default function Home() {
                   
                   {isPhased && baselineData && (
                     <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-3">
-                      <div className="text-[11px] font-black uppercase text-primary/60 border-b border-primary/10 pb-2 tracking-widest">Dietary Strategy</div>
+                      <div className="text-[11px] font-black uppercase text-primary/60 border-b border-primary/10 pb-2 tracking-widest">
+                        {baselineData.animalType === 'swine-sow' ? 'Sow Nutrition (Gest/Lact)' : 'Dietary Strategy'}
+                      </div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                        <span className="text-muted-foreground font-bold">CP % (P1-3)</span>
-                        <span className="text-right text-primary font-black">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}</span>
-                        
-                        <span className="text-muted-foreground font-bold">P % (P1-3)</span>
-                        <span className="text-right text-primary font-black">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
+                        {baselineData.animalType === 'swine-sow' ? (
+                          <>
+                            <span className="text-muted-foreground font-bold">CP %</span>
+                            <span className="text-right text-primary font-black">{baselineData.phase1CP}/{baselineData.phase2CP}</span>
+                            <span className="text-muted-foreground font-bold">P %</span>
+                            <span className="text-right text-primary font-black">{baselineData.phase1P}/{baselineData.phase2P}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-muted-foreground font-bold">CP % (P1-3)</span>
+                            <span className="text-right text-primary font-black">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}</span>
+                            <span className="text-muted-foreground font-bold">P % (P1-3)</span>
+                            <span className="text-right text-primary font-black">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -263,7 +277,7 @@ export default function Home() {
                       <Calculator className="w-4 h-4" /> Improved FCR
                     </Label>
                     <Input 
-                      type="number"
+                      type="number" 
                       step="0.01"
                       value={scenarioFcr}
                       onChange={(e) => handleFcrChange(parseFloat(e.target.value) || 0)}

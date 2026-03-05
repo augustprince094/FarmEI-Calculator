@@ -7,12 +7,12 @@ export interface FarmData {
   fcr: number; // Feed Conversion Ratio
   cyclesPerYear: number; // Number of production cycles per year
   feedCrudeProtein: number; // percentage (used for swine-sow/grow-finish or as fallback)
-  phase1CP?: number; // Phase 1 CP (%)
-  phase2CP?: number; // Phase 2 CP (%)
+  phase1CP?: number; // Phase 1 CP (%) / Gestation CP for Sow
+  phase2CP?: number; // Phase 2 CP (%) / Lactation CP for Sow
   phase3CP?: number; // Phase 3 CP (%)
   feedPhosphorus: number; // percentage (used for swine-sow/grow-finish or as fallback)
-  phase1P?: number; // Phase 1 P (%)
-  phase2P?: number; // Phase 2 P (%)
+  phase1P?: number; // Phase 1 P (%) / Gestation P for Sow
+  phase2P?: number; // Phase 2 P (%) / Lactation P for Sow
   phase3P?: number; // Phase 3 P (%)
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
   avgWeight: number; // kg (target market weight at end of cycle)
@@ -80,19 +80,27 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   let totalNitrogenExcreted = 0;
   let totalPhosphorusExcreted = 0;
 
-  const isPhased = (animalType === 'broilers' || animalType === 'swine-nursery') && 
-                   phase1CP !== undefined && phase2CP !== undefined && phase3CP !== undefined &&
-                   phase1P !== undefined && phase2P !== undefined && phase3P !== undefined;
+  const isPhased = (animalType === 'broilers' || animalType === 'swine-nursery' || animalType === 'swine-sow') && 
+                   phase1CP !== undefined && phase2CP !== undefined &&
+                   phase1P !== undefined && phase2P !== undefined;
 
   if (isPhased) {
-    const phaseDist = animalType === 'broilers' 
-      ? { p1: 0.14, p2: 0.45, p3: 0.41 } 
-      : { p1: 0.15, p2: 0.35, p3: 0.50 };
+    let phaseDist;
+    if (animalType === 'broilers') {
+      phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 };
+    } else if (animalType === 'swine-nursery') {
+      phaseDist = { p1: 0.15, p2: 0.35, p3: 0.50 };
+    } else if (animalType === 'swine-sow') {
+      // Standard sow feed split (approx. 70% Gestation mass, 30% Lactation mass over cycle)
+      phaseDist = { p1: 0.70, p2: 0.30, p3: 0 };
+    } else {
+        phaseDist = { p1: 1, p2: 0, p3: 0 };
+    }
 
     const nRetentionFactor = 29; // g N / kg gain
     const pRetentionFactor = 6;  // g P / kg gain (0.6%)
 
-    // Phase 1
+    // Phase 1 (or Gestation)
     const p1Feed = totalFeedPerCycle * phaseDist.p1;
     const p1Gain = totalGain * phaseDist.p1;
     const p1NIntake = (p1Feed * phase1CP! / 100) / 6.25;
@@ -102,7 +110,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenExcreted += Math.max(0, p1NIntake - p1NRetention);
     totalPhosphorusExcreted += Math.max(0, p1PIntake - p1PRetention);
 
-    // Phase 2
+    // Phase 2 (or Lactation)
     const p2Feed = totalFeedPerCycle * phaseDist.p2;
     const p2Gain = totalGain * phaseDist.p2;
     const p2NIntake = (p2Feed * phase2CP! / 100) / 6.25;
@@ -113,14 +121,16 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalPhosphorusExcreted += Math.max(0, p2PIntake - p2PRetention);
 
     // Phase 3
-    const p3Feed = totalFeedPerCycle * phaseDist.p3;
-    const p3Gain = totalGain * phaseDist.p3;
-    const p3NIntake = (p3Feed * phase3CP! / 100) / 6.25;
-    const p3NRetention = (nRetentionFactor * p3Gain / 1000) * count;
-    const p3PIntake = p3Feed * (phase3P! / 100);
-    const p3PRetention = (pRetentionFactor * p3Gain / 1000) * count;
-    totalNitrogenExcreted += Math.max(0, p3NIntake - p3NRetention);
-    totalPhosphorusExcreted += Math.max(0, p3PIntake - p3PRetention);
+    if (phaseDist.p3 > 0) {
+      const p3Feed = totalFeedPerCycle * phaseDist.p3;
+      const p3Gain = totalGain * phaseDist.p3;
+      const p3NIntake = (p3Feed * (phase3CP || 0) / 100) / 6.25;
+      const p3NRetention = (nRetentionFactor * p3Gain / 1000) * count;
+      const p3PIntake = p3Feed * ((phase3P || 0) / 100);
+      const p3PRetention = (pRetentionFactor * p3Gain / 1000) * count;
+      totalNitrogenExcreted += Math.max(0, p3NIntake - p3NRetention);
+      totalPhosphorusExcreted += Math.max(0, p3PIntake - p3PRetention);
+    }
 
   } else {
     // Single Phase Analysis
