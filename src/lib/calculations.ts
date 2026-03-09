@@ -50,7 +50,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     phase1P, phase2P, phase3P,
     feedCrudeProtein, feedPhosphorus,
     animalType, manureManagement, avgWeight, additive,
-    awms
+    awms, region
   } = data;
   
   const totalFeedPerCycle = count * fcr * avgWeight;
@@ -166,8 +166,15 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   // Manure Methane (VS Balance)
   const dmd = 0.85; // 85%
   const ash = 0.10; // 10%
-  const b0 = 0.36;  // Maximum methane potential
-  const density_ch4 = 0.0662; // kg/m3
+  const density_ch4 = 0.662; // kg/m3 (standard density)
+  
+  // B0 (Maximum methane potential) logic
+  let b0 = 0.36; // Default for poultry
+  if (animalType.startsWith('swine')) {
+    if (region === 'North America') b0 = 0.48;
+    else if (region === 'Western Europe' || region === 'Eastern Europe') b0 = 0.45;
+    else b0 = 0.45; // Default for other swine regions
+  }
   
   // Methane Conversion Factor (MCF) based on system
   let mcf_val = 0.015; // default 1.5%

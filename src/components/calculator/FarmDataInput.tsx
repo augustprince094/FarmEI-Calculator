@@ -48,7 +48,7 @@ export function FarmDataInput({ onCalculate }: Props) {
   };
 
   const handleAnimalTypeChange = (val: AnimalType) => {
-    let defaults: Partial<FarmData> = { animalType: val };
+    let defaults: Partial<FarmData> = { animalType: val, region: 'North America' };
     
     switch (val) {
       case 'swine-sow':
@@ -101,7 +101,6 @@ export function FarmDataInput({ onCalculate }: Props) {
           phase2P: 0.6,
           phase3P: 0.55,
           manureManagement: 'solid',
-          region: 'North America',
           awms: 'poultry-litter'
         };
         break;
@@ -113,6 +112,8 @@ export function FarmDataInput({ onCalculate }: Props) {
   const isPhased = formData.animalType === 'broilers' || 
                    formData.animalType === 'swine-nursery' || 
                    formData.animalType === 'swine-sow';
+
+  const showRegion = formData.animalType === 'broilers' || formData.animalType.startsWith('swine');
 
   return (
     <Card className="glass border-white/40 overflow-hidden rounded-2xl">
@@ -161,51 +162,51 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            {formData.animalType === 'broilers' && (
-              <>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
-                    <Globe className="w-3.5 h-3.5" /> Region of Interest
-                  </Label>
-                  <Select 
-                    value={formData.region} 
-                    onValueChange={(val: Region) => updateField('region', val)}
-                  >
-                    <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
-                      <SelectValue placeholder="Select Region" />
-                    </SelectTrigger>
-                    <SelectContent className="glass">
-                      <SelectItem value="Western Europe">Western Europe</SelectItem>
-                      <SelectItem value="Eastern Europe">Eastern Europe</SelectItem>
-                      <SelectItem value="Asia">Asia</SelectItem>
-                      <SelectItem value="Africa">Africa</SelectItem>
-                      <SelectItem value="North America">North America</SelectItem>
-                      <SelectItem value="Latin America">Latin America</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            {showRegion && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                  <Globe className="w-3.5 h-3.5" /> Region of Interest
+                </Label>
+                <Select 
+                  value={formData.region} 
+                  onValueChange={(val: Region) => updateField('region', val)}
+                >
+                  <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
+                    <SelectValue placeholder="Select Region" />
+                  </SelectTrigger>
+                  <SelectContent className="glass">
+                    <SelectItem value="Western Europe">Western Europe</SelectItem>
+                    <SelectItem value="Eastern Europe">Eastern Europe</SelectItem>
+                    <SelectItem value="Asia">Asia</SelectItem>
+                    <SelectItem value="Africa">Africa</SelectItem>
+                    <SelectItem value="North America">North America</SelectItem>
+                    <SelectItem value="Latin America">Latin America</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
-                    <Trash2 className="w-3.5 h-3.5" /> Waste Management (AWMS)
-                  </Label>
-                  <Select 
-                    value={formData.awms} 
-                    onValueChange={(val: AWMS) => updateField('awms', val)}
-                  >
-                    <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
-                      <SelectValue placeholder="Select AWMS" />
-                    </SelectTrigger>
-                    <SelectContent className="glass">
-                      <SelectItem value="lagoon">Lagoon</SelectItem>
-                      <SelectItem value="liquid-slurry">Liquid/Slurry</SelectItem>
-                      <SelectItem value="poultry-litter">Poultry with litter</SelectItem>
-                      <SelectItem value="solid-storage">Solid storage</SelectItem>
-                      <SelectItem value="pit-long-term">Pit {'>'} 1 month</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
+            {formData.animalType === 'broilers' && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                  <Trash2 className="w-3.5 h-3.5" /> Waste Management (AWMS)
+                </Label>
+                <Select 
+                  value={formData.awms} 
+                  onValueChange={(val: AWMS) => updateField('awms', val)}
+                >
+                  <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
+                    <SelectValue placeholder="Select AWMS" />
+                  </SelectTrigger>
+                  <SelectContent className="glass">
+                    <SelectItem value="lagoon">Lagoon</SelectItem>
+                    <SelectItem value="liquid-slurry">Liquid/Slurry</SelectItem>
+                    <SelectItem value="poultry-litter">Poultry with litter</SelectItem>
+                    <SelectItem value="solid-storage">Solid storage</SelectItem>
+                    <SelectItem value="pit-long-term">Pit {'>'} 1 month</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             )}
 
             <div className="space-y-2">
@@ -232,7 +233,7 @@ export function FarmDataInput({ onCalculate }: Props) {
 
             {isPhased ? (
               <div className="md:col-span-2 space-y-4 pt-2 animate-in slide-in-from-top-4 duration-500">
-                <div className="p-4 bg-white/40 rounded-xl border border-primary/10 shadow-sm backdrop-blur-lg">
+                <div className="p-4 bg-white/90 rounded-xl border border-primary/20 shadow-sm backdrop-blur-lg">
                   <div className="flex items-center gap-2.5 mb-3">
                     <Settings2 className="w-4 h-4 text-primary" />
                     <h4 className="text-[11px] font-black text-primary uppercase tracking-widest">
@@ -249,13 +250,13 @@ export function FarmDataInput({ onCalculate }: Props) {
                       { id: 'phase3P', label: 'P3 P', value: formData.phase3P, hidden: formData.animalType === 'swine-sow' },
                     ].filter(i => !i.hidden).map((item) => (
                       <div key={item.id} className="space-y-1.5">
-                        <Label className="text-[10px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
+                        <Label className="text-[11px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
                         <Input 
                           type="number" 
                           step={item.id.includes('CP') ? "0.1" : "0.01"}
                           value={item.value} 
                           onChange={(e) => updateField(item.id as any, e.target.value)} 
-                          className="h-9 border-primary/20 bg-white/90 rounded-lg font-bold text-xs px-2.5 text-primary focus:ring-primary shadow-sm"
+                          className="h-9 border-primary/20 bg-white/95 rounded-lg font-black text-xs px-2.5 text-primary focus:ring-primary shadow-sm"
                         />
                       </div>
                     ))}
