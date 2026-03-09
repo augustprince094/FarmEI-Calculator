@@ -177,17 +177,18 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
   
   // Methane Conversion Factor (MCF) based on system
-  let mcf_val = 0.015; // default 1.5%
+  // Updated values: lagoon (67%), liquid/slurry (16%), poultry-litter (2%), solid storage (2%), pit (16%)
+  let mcf_val = 0.02; // default 2%
   if (animalType === 'broilers') {
-    if (awms === 'lagoon') mcf_val = 0.75;
-    else if (awms === 'liquid-slurry') mcf_val = 0.15;
-    else if (awms === 'solid-storage') mcf_val = 0.04;
-    else if (awms === 'pit-long-term') mcf_val = 0.25;
-    else mcf_val = 0.015; // poultry-litter
+    if (awms === 'lagoon') mcf_val = 0.67;
+    else if (awms === 'liquid-slurry') mcf_val = 0.16;
+    else if (awms === 'solid-storage') mcf_val = 0.02;
+    else if (awms === 'pit-long-term') mcf_val = 0.16;
+    else mcf_val = 0.02; // poultry-litter
   } else {
-    if (manureManagement === 'lagoon') mcf_val = 0.75;
-    else if (manureManagement === 'slurry') mcf_val = 0.15;
-    else if (manureManagement === 'solid') mcf_val = 0.04;
+    if (manureManagement === 'lagoon') mcf_val = 0.67;
+    else if (manureManagement === 'slurry') mcf_val = 0.16;
+    else if (manureManagement === 'solid') mcf_val = 0.02;
     else if (manureManagement === 'dry-lot') mcf_val = 0.02;
   }
 

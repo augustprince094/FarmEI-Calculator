@@ -177,7 +177,7 @@ export default function Home() {
                         <p className="mb-2">{"CH4 = VS * B0 * MCF * 0.662"}</p>
                         <p className="text-[10px] text-muted-foreground font-bold">{"VS (Volatile Solids) = Feed_in * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
                         <p className="text-[10px] text-muted-foreground font-bold italic">{"B0 Swine: North America (0.48), Europe (0.45). Poultry (0.36)"}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold italic">{"MCF varies by system: Litter (1.5%), Slurry (15%), Lagoon (75%), Pit (25%)"}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold italic">{"MCF varies by system: Lagoon (67%), Liquid/Slurry (16%), Poultry Litter (2%), Solid Storage (2%), Pit (16%)"}</p>
                       </div>
                       <div className="border-t border-white/30 pt-2">
                         <p className="text-xs uppercase text-primary mb-1 font-black">Phosphorus Run-off</p>
