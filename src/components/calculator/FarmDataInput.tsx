@@ -200,6 +200,8 @@ export function FarmDataInput({ onCalculate }: Props) {
                       <SelectItem value="lagoon">Lagoon</SelectItem>
                       <SelectItem value="liquid-slurry">Liquid/Slurry</SelectItem>
                       <SelectItem value="poultry-litter">Poultry with litter</SelectItem>
+                      <SelectItem value="solid-storage">Solid storage</SelectItem>
+                      <SelectItem value="pit-long-term">Pit {'>'} 1 month</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

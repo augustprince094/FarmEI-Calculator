@@ -1,7 +1,7 @@
 export type AnimalType = 'broilers' | 'swine-sow' | 'swine-nursery' | 'swine-grow-finish';
 export type FeedAdditive = 'none' | 'jefo-pro' | 'poa-eo' | 'xylanase' | 'jefo-combo';
 export type Region = 'Western Europe' | 'Eastern Europe' | 'Asia' | 'Africa' | 'North America' | 'Latin America';
-export type AWMS = 'lagoon' | 'liquid-slurry' | 'poultry-litter';
+export type AWMS = 'lagoon' | 'liquid-slurry' | 'poultry-litter' | 'solid-storage' | 'pit-long-term';
 
 export interface FarmData {
   animalType: AnimalType;
@@ -198,6 +198,12 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     } else if (awms === 'liquid-slurry') {
       directN2oFactor = 0.005;
       fracGas = 0.25;
+    } else if (awms === 'solid-storage') {
+      directN2oFactor = 0.005;
+      fracGas = 0.3;
+    } else if (awms === 'pit-long-term') {
+      directN2oFactor = 0.01;
+      fracGas = 0.45;
     } else {
       // poultry-litter (default)
       directN2oFactor = 0.001; 

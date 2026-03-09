@@ -25,7 +25,9 @@ const animalTypeLabels: Record<AnimalType, string> = {
 const awmsLabels: Record<string, string> = {
   'lagoon': 'Lagoon',
   'liquid-slurry': 'Liquid/Slurry',
-  'poultry-litter': 'Poultry with litter'
+  'poultry-litter': 'Poultry with litter',
+  'solid-storage': 'Solid storage',
+  'pit-long-term': 'Pit > 1 month'
 };
 
 export default function Home() {
@@ -153,7 +155,7 @@ export default function Home() {
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Direct N2O (Poultry)</p>
                         <p>{"Direct N2O = N_excreted * 1.0 (AWMS) * EF * (44/28)"}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">{"EF depends on AWMS: Litter (0.001), Lagoon/Slurry (0.005)"}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{"EF depends on AWMS: Litter (0.001), Lagoon/Slurry (0.005), Solid Storage (0.005), Pit (0.01)"}</p>
                       </div>
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Indirect N2O (Poultry)</p>
