@@ -22,6 +22,12 @@ const animalTypeLabels: Record<AnimalType, string> = {
   'swine-grow-finish': 'Swine (Grow-to-Finish)'
 };
 
+const awmsLabels: Record<string, string> = {
+  'lagoon': 'Lagoon',
+  'liquid-slurry': 'Liquid/Slurry',
+  'poultry-litter': 'Poultry with litter'
+};
+
 export default function Home() {
   const [baselineData, setBaselineData] = useState<FarmData | null>(null);
   const [baselineResults, setBaselineResults] = useState<EmissionResults | null>(null);
@@ -146,11 +152,12 @@ export default function Home() {
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Direct N2O (Poultry)</p>
-                        <p>{"Direct N2O = N_excreted * 1.0 (AWMS) * 0.001 (EF) * (44/28)"}</p>
+                        <p>{"Direct N2O = N_excreted * 1.0 (AWMS) * EF * (44/28)"}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{"EF depends on AWMS: Litter (0.001), Lagoon/Slurry (0.005)"}</p>
                       </div>
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Indirect N2O (Poultry)</p>
-                        <p>{"Indirect N2O = N_excreted * 1.0 (AWMS) * 0.2 (FracGas) * 0.01 (EF4) * (44/28)"}</p>
+                        <p>{"Indirect N2O = N_excreted * 1.0 (AWMS) * FracGas * 0.01 (EF4) * (44/28)"}</p>
                       </div>
                     </div>
                   </section>
@@ -208,6 +215,18 @@ export default function Home() {
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Category</span>
                     <span className="text-primary">{baselineData ? animalTypeLabels[baselineData.animalType] : ''}</span>
                   </div>
+                  {baselineData?.animalType === 'broilers' && (
+                    <>
+                      <div className="flex justify-between border-b border-white/10 pb-2">
+                        <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Region</span>
+                        <span className="text-primary">{baselineData.region}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/10 pb-2">
+                        <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">AWMS</span>
+                        <span className="text-primary">{baselineData.awms ? awmsLabels[baselineData.awms] : ''}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between border-b border-white/10 pb-2">
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Baseline FCR</span>
                     <span className="text-secondary">{baselineData?.fcr}</span>

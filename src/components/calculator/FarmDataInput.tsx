@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { FarmData, AnimalType } from '@/lib/calculations';
-import { Bird, Database, Repeat, Waves, Settings2 } from 'lucide-react';
+import { FarmData, AnimalType, Region, AWMS } from '@/lib/calculations';
+import { Bird, Database, Settings2, Globe, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -17,6 +17,8 @@ interface Props {
 export function FarmDataInput({ onCalculate }: Props) {
   const [formData, setFormData] = useState<FarmData>({
     animalType: 'broilers',
+    region: 'North America',
+    awms: 'poultry-litter',
     count: 1000,
     fcr: 1.6,
     cyclesPerYear: 1,
@@ -41,7 +43,7 @@ export function FarmDataInput({ onCalculate }: Props) {
   const updateField = (field: keyof FarmData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: typeof value === 'string' && !isNaN(Number(value)) && !['animalType', 'manureManagement', 'additive'].includes(field) ? Number(value) : value
+      [field]: typeof value === 'string' && !isNaN(Number(value)) && !['animalType', 'manureManagement', 'additive', 'region', 'awms'].includes(field) ? Number(value) : value
     }));
   };
 
@@ -98,7 +100,9 @@ export function FarmDataInput({ onCalculate }: Props) {
           phase1P: 0.65,
           phase2P: 0.6,
           phase3P: 0.55,
-          manureManagement: 'solid' 
+          manureManagement: 'solid',
+          region: 'North America',
+          awms: 'poultry-litter'
         };
         break;
     }
@@ -156,6 +160,51 @@ export function FarmDataInput({ onCalculate }: Props) {
                 min="1"
               />
             </div>
+
+            {formData.animalType === 'broilers' && (
+              <>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                    <Globe className="w-3.5 h-3.5" /> Region of Interest
+                  </Label>
+                  <Select 
+                    value={formData.region} 
+                    onValueChange={(val: Region) => updateField('region', val)}
+                  >
+                    <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
+                      <SelectValue placeholder="Select Region" />
+                    </SelectTrigger>
+                    <SelectContent className="glass">
+                      <SelectItem value="Western Europe">Western Europe</SelectItem>
+                      <SelectItem value="Eastern Europe">Eastern Europe</SelectItem>
+                      <SelectItem value="Asia">Asia</SelectItem>
+                      <SelectItem value="Africa">Africa</SelectItem>
+                      <SelectItem value="North America">North America</SelectItem>
+                      <SelectItem value="Latin America">Latin America</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                    <Trash2 className="w-3.5 h-3.5" /> Waste Management (AWMS)
+                  </Label>
+                  <Select 
+                    value={formData.awms} 
+                    onValueChange={(val: AWMS) => updateField('awms', val)}
+                  >
+                    <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
+                      <SelectValue placeholder="Select AWMS" />
+                    </SelectTrigger>
+                    <SelectContent className="glass">
+                      <SelectItem value="lagoon">Lagoon</SelectItem>
+                      <SelectItem value="liquid-slurry">Liquid/Slurry</SelectItem>
+                      <SelectItem value="poultry-litter">Poultry with litter</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
 
             <div className="space-y-2">
               <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Exit Weight (kg)</Label>

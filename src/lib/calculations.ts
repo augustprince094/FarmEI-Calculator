@@ -1,8 +1,12 @@
 export type AnimalType = 'broilers' | 'swine-sow' | 'swine-nursery' | 'swine-grow-finish';
 export type FeedAdditive = 'none' | 'jefo-pro' | 'poa-eo' | 'xylanase' | 'jefo-combo';
+export type Region = 'Western Europe' | 'Eastern Europe' | 'Asia' | 'Africa' | 'North America' | 'Latin America';
+export type AWMS = 'lagoon' | 'liquid-slurry' | 'poultry-litter';
 
 export interface FarmData {
   animalType: AnimalType;
+  region?: Region;
+  awms?: AWMS;
   count: number;
   fcr: number; // Feed Conversion Ratio
   cyclesPerYear: number; // Number of production cycles per year
@@ -45,7 +49,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     phase1CP, phase2CP, phase3CP,
     phase1P, phase2P, phase3P,
     feedCrudeProtein, feedPhosphorus,
-    animalType, manureManagement, avgWeight, additive 
+    animalType, manureManagement, avgWeight, additive,
+    awms
   } = data;
   
   const totalFeedPerCycle = count * fcr * avgWeight;
@@ -186,8 +191,18 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const awmsFactor = 1.0;
 
   if (animalType === 'broilers') {
-    directN2oFactor = 0.001; 
-    fracGas = 0.2;           
+    // Use specific AWMS factors if provided, otherwise default to litter
+    if (awms === 'lagoon') {
+      directN2oFactor = 0.005;
+      fracGas = 0.4;
+    } else if (awms === 'liquid-slurry') {
+      directN2oFactor = 0.005;
+      fracGas = 0.25;
+    } else {
+      // poultry-litter (default)
+      directN2oFactor = 0.001; 
+      fracGas = 0.2;           
+    }
   } else {
     directN2oFactor = {
       'lagoon': 0.005,
