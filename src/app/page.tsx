@@ -151,15 +151,16 @@ export default function Home() {
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrous Oxide (IPCC 2019)</h4>
+                    <p className="font-bold text-xs italic">For Broilers: Emissions factor (AWMS Factor) is applied (1.0) only for 'Poultry with litter' systems. All other systems use factor 0.</p>
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Direct N2O (Poultry)</p>
-                        <p>{"Direct N2O = N_excreted * 1.0 (AWMS) * EF * (44/28)"}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">{"EF depends on AWMS: Litter (0.001), Lagoon/Slurry (0.005), Solid Storage (0.005), Pit (0.01)"}</p>
+                        <p>{"Direct N2O = N_excreted * AWMS_Factor * EF * (44/28)"}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 font-bold italic">{"EF: Litter (0.001), Lagoon/Slurry (0.005), Solid Storage (0.005), Pit (0.01)"}</p>
                       </div>
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Indirect N2O (Poultry)</p>
-                        <p>{"Indirect N2O = N_excreted * 1.0 (AWMS) * FracGas * 0.01 (EF4) * (44/28)"}</p>
+                        <p>{"Indirect N2O = N_excreted * AWMS_Factor * FracGas * 0.01 (EF4) * (44/28)"}</p>
                       </div>
                     </div>
                   </section>
@@ -167,10 +168,15 @@ export default function Home() {
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (CH4) & Run-off</h4>
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Enteric & Manure Methane</p>
-                        <p><strong>Enteric (Poultry):</strong> {"1.6g / bird / cycle"}</p>
-                        <p><strong>Manure (VS Balance):</strong> {"VS * 0.36 (B0) * 1.5% (MCF) * 0.0662 (Density)"}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1 font-bold">{"VS = Feed_in * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Enteric Methane</p>
+                        <p><strong>Poultry:</strong> {"1.6g / bird / cycle"}</p>
+                        <p><strong>Swine:</strong> {"Weight-adjusted factor per animal day"}</p>
+                      </div>
+                      <div className="border-t border-white/30 pt-2">
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Manure Methane (VS Balance)</p>
+                        <p className="mb-2">{"CH4 = VS * B0 * MCF * 0.0662"}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold">{"VS (Volatile Solids) = Feed_in * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold italic">{"MCF varies by system: Litter (1.5%), Slurry (15%), Lagoon (75%), Pit (25%)"}</p>
                       </div>
                       <div className="border-t border-white/30 pt-2">
                         <p className="text-xs uppercase text-primary mb-1 font-black">Phosphorus Run-off</p>

@@ -96,7 +96,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     } else if (animalType === 'swine-nursery') {
       phaseDist = { p1: 0.15, p2: 0.35, p3: 0.50 };
     } else if (animalType === 'swine-sow') {
-      // Standard sow feed split (approx. 70% Gestation mass, 30% Lactation mass over cycle)
       phaseDist = { p1: 0.70, p2: 0.30, p3: 0 };
     } else {
         phaseDist = { p1: 1, p2: 0, p3: 0 };
@@ -105,7 +104,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const nRetentionFactor = 29; // g N / kg gain
     const pRetentionFactor = 6;  // g P / kg gain (0.6%)
 
-    // Phase 1 (or Gestation)
     const p1Feed = totalFeedPerCycle * phaseDist.p1;
     const p1Gain = totalGain * phaseDist.p1;
     const p1NIntake = (p1Feed * phase1CP! / 100) / 6.25;
@@ -115,7 +113,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenExcreted += Math.max(0, p1NIntake - p1NRetention);
     totalPhosphorusExcreted += Math.max(0, p1PIntake - p1PRetention);
 
-    // Phase 2 (or Lactation)
     const p2Feed = totalFeedPerCycle * phaseDist.p2;
     const p2Gain = totalGain * phaseDist.p2;
     const p2NIntake = (p2Feed * phase2CP! / 100) / 6.25;
@@ -125,7 +122,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalNitrogenExcreted += Math.max(0, p2NIntake - p2NRetention);
     totalPhosphorusExcreted += Math.max(0, p2PIntake - p2PRetention);
 
-    // Phase 3
     if (phaseDist.p3 > 0) {
       const p3Feed = totalFeedPerCycle * phaseDist.p3;
       const p3Gain = totalGain * phaseDist.p3;
@@ -138,7 +134,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     }
 
   } else {
-    // Single Phase Analysis
     const nIntake = (totalFeedPerCycle * (feedCrudeProtein / 100)) / 6.25;
     const nRetention = (29 * avgWeight / 1000) * count;
     const pIntake = totalFeedPerCycle * (feedPhosphorus / 100);
@@ -147,11 +142,9 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalPhosphorusExcreted = Math.max(0, pIntake - pRetention);
   }
 
-  // Apply metabolic additive efficiency
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
 
-  // Gas Emissions
   const cycleDays = {
     'broilers': 42,
     'swine-sow': 365,
@@ -161,7 +154,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
   let totalEntericMethane = 0;
   if (animalType === 'broilers') {
-    // 1.6 g per bird per cycle
     totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
   } else {
     let entericMultiplier = 0.03;
@@ -175,8 +167,22 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const dmd = 0.85; // 85%
   const ash = 0.10; // 10%
   const b0 = 0.36;  // Maximum methane potential
-  const mcf_val = 0.015; // 1.5%
   const density_ch4 = 0.0662; // kg/m3
+  
+  // Methane Conversion Factor (MCF) based on system
+  let mcf_val = 0.015; // default 1.5%
+  if (animalType === 'broilers') {
+    if (awms === 'lagoon') mcf_val = 0.75;
+    else if (awms === 'liquid-slurry') mcf_val = 0.15;
+    else if (awms === 'solid-storage') mcf_val = 0.04;
+    else if (awms === 'pit-long-term') mcf_val = 0.25;
+    else mcf_val = 0.015; // poultry-litter
+  } else {
+    if (manureManagement === 'lagoon') mcf_val = 0.75;
+    else if (manureManagement === 'slurry') mcf_val = 0.15;
+    else if (manureManagement === 'solid') mcf_val = 0.04;
+    else if (manureManagement === 'dry-lot') mcf_val = 0.02;
+  }
 
   const totalVolatileSolids = totalFeedPerCycle * (1 - dmd) * (1 - ash);
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
@@ -191,7 +197,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   let awmsFactor = 1.0;
 
   if (animalType === 'broilers') {
-    // Requirements: All scenarios except Poultry with litter, AWMS factor is 0.
+    // For broilers: AWMS is 100% only for poultry-litter, else 0% for N2O
     if (awms !== 'poultry-litter') {
       awmsFactor = 0;
     }
@@ -209,7 +215,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       directN2oFactor = 0.01;
       fracGas = 0.45;
     } else {
-      // poultry-litter (default)
       directN2oFactor = 0.001; 
       fracGas = 0.2;           
     }
