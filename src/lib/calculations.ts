@@ -188,10 +188,14 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   let directN2oFactor = 0.01;
   let fracGas = 0.1;
   const ef4 = 0.01;
-  const awmsFactor = 1.0;
+  let awmsFactor = 1.0;
 
   if (animalType === 'broilers') {
-    // Use specific AWMS factors if provided, otherwise default to litter
+    // Requirements: All scenarios except Poultry with litter, AWMS factor is 0.
+    if (awms !== 'poultry-litter') {
+      awmsFactor = 0;
+    }
+
     if (awms === 'lagoon') {
       directN2oFactor = 0.005;
       fracGas = 0.4;
