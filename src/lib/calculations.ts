@@ -152,11 +152,14 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     'swine-grow-finish': 115
   }[animalType] || 42;
 
+  // Enteric Methane Equations
   let totalEntericMethane = 0;
   if (animalType === 'broilers') {
+    // 1.6g CH4 / bird / cycle
     totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
   } else {
-    let entericMultiplier = 0.03;
+    // (Weight * Multiplier / 365) * Headcount * CycleDays
+    let entericMultiplier = 0.03; // Default Grow-Finish
     if (animalType === 'swine-sow') entericMultiplier = 0.05;
     if (animalType === 'swine-nursery') entericMultiplier = 0.015;
     const entericEmissionFactor = (avgWeight * entericMultiplier / 365);
@@ -164,9 +167,9 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
 
   // Manure Methane (VS Balance)
-  const dmd = 0.85; // 85%
-  const ash = 0.10; // 10%
-  const density_ch4 = 0.662; // kg/m3 (standard density)
+  const dmd = 0.85; // 85% Digestibility
+  const ash = 0.10; // 10% Ash
+  const density_ch4 = 0.662; // kg/m3 (Standard density of methane)
   
   // B0 (Maximum methane potential) logic
   let b0 = 0.36; // Default for poultry
@@ -177,7 +180,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
   
   // Methane Conversion Factor (MCF) based on system
-  // Updated values: lagoon (67%), liquid/slurry (16%), poultry-litter (2%), solid storage (2%), pit (16%)
   let mcf_val = 0.02; // default 2%
   if (animalType === 'broilers') {
     if (awms === 'lagoon') mcf_val = 0.67;
@@ -192,7 +194,9 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     else if (manureManagement === 'dry-lot') mcf_val = 0.02;
   }
 
+  // VS (kg) = Feed Intake * (1 - Digestibility) * (1 - Ash)
   const totalVolatileSolids = totalFeedPerCycle * (1 - dmd) * (1 - ash);
+  // CH4 (kg) = VS * B0 * MCF * density_ch4
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
 
   // Phosphorus run-off (2.9% of excreted)
