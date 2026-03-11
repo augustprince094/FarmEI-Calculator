@@ -85,6 +85,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
   let totalNitrogenExcreted = 0;
   let totalPhosphorusExcreted = 0;
+  let totalFeedIntakeAccumulated = 0;
 
   const isPhased = (animalType === 'broilers' || animalType === 'swine-nursery' || animalType === 'swine-sow') && 
                    phase1CP !== undefined && phase2CP !== undefined &&
@@ -113,6 +114,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const p1PRetention = (pRetentionFactor * p1Gain / 1000) * count;
     totalNitrogenExcreted += Math.max(0, p1NIntake - p1NRetention);
     totalPhosphorusExcreted += Math.max(0, p1PIntake - p1PRetention);
+    totalFeedIntakeAccumulated += p1Feed;
 
     const p2Feed = totalFeedPerCycle * phaseDist.p2;
     const p2Gain = totalGain * phaseDist.p2;
@@ -122,6 +124,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const p2PRetention = (pRetentionFactor * p2Gain / 1000) * count;
     totalNitrogenExcreted += Math.max(0, p2NIntake - p2NRetention);
     totalPhosphorusExcreted += Math.max(0, p2PIntake - p2PRetention);
+    totalFeedIntakeAccumulated += p2Feed;
 
     if (phaseDist.p3 > 0) {
       const p3Feed = totalFeedPerCycle * phaseDist.p3;
@@ -132,6 +135,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       const p3PRetention = (pRetentionFactor * p3Gain / 1000) * count;
       totalNitrogenExcreted += Math.max(0, p3NIntake - p3NRetention);
       totalPhosphorusExcreted += Math.max(0, p3PIntake - p3PRetention);
+      totalFeedIntakeAccumulated += p3Feed;
     }
 
   } else {
@@ -141,6 +145,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const pRetention = (6 * avgWeight / 1000) * count;
     totalNitrogenExcreted = Math.max(0, nIntake - nRetention);
     totalPhosphorusExcreted = Math.max(0, pIntake - pRetention);
+    totalFeedIntakeAccumulated = totalFeedPerCycle;
   }
 
   totalNitrogenExcreted *= metabolicNMitigation;
@@ -158,9 +163,9 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   if (animalType === 'broilers') {
     totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
   } else {
-    let entericMultiplier = 0.03;
-    if (animalType === 'swine-sow') entericMultiplier = 0.05;
+    let entericMultiplier = 0.05; // Default for Sow
     if (animalType === 'swine-nursery') entericMultiplier = 0.015;
+    if (animalType === 'swine-grow-finish') entericMultiplier = 0.03;
     const entericEmissionFactor = (avgWeight * entericMultiplier / 365);
     totalEntericMethane = entericEmissionFactor * count * cycleDays * ch4MitigationFactor;
   }
@@ -190,7 +195,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     else if (manureManagement === 'dry-lot') mcf_val = 0.02;
   }
 
-  const totalVolatileSolids = totalFeedPerCycle * (1 - dmd) * (1 - ash);
+  // VS is calculated from the total feed intake (which is summed phase-by-phase if applicable)
+  const totalVolatileSolids = totalFeedIntakeAccumulated * (1 - dmd) * (1 - ash);
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
 
   // Phosphorus run-off

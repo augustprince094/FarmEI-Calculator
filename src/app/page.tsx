@@ -141,7 +141,7 @@ export default function Home() {
                 <div className="space-y-6 text-sm leading-relaxed pr-2">
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nutrient Excretion (Mass Balance)</h4>
-                    <p className="font-bold">Calculated as dietary intake minus biological retention. Xylanase supplementation models a 4.5% improvement in N digestibility based on peer-reviewed data.</p>
+                    <p className="font-bold">Calculated per production phase as dietary intake minus biological retention. Xylanase supplementation models a 4.5% improvement in N digestibility based on peer-reviewed data.</p>
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-2 font-black text-slate-700">
                       <p><strong>N Intake</strong> = {"Sum((Feed_i * CP_i / 100) / 6.25)"}</p>
                       <p><strong>N Retention</strong> = {"Sum((Weight_Gain_i * 29g N/kg) * Count)"}</p>
@@ -165,6 +165,7 @@ export default function Home() {
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (CH4) Balance</h4>
+                    <p className="font-bold text-xs">Estimated phase-by-phase for Broilers and Phased Swine systems based on precise feed intake per phase.</p>
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Enteric Methane (IPCC Tier 2)</p>
@@ -173,9 +174,9 @@ export default function Home() {
                       </div>
                       <div className="border-t border-white/30 pt-2">
                         <p className="text-xs uppercase text-primary mb-1 font-black">Manure Methane (VS Balance)</p>
-                        <p className="mb-2">{"CH4 (kg) = VS * B0 * MCF * 0.67"}</p>
-                        <p className="text-[11px] text-muted-foreground font-bold">{"VS (Volatile Solids) = Feed Intake * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
-                        <p className="text-[11px] text-muted-foreground font-bold italic">{"B0: Swine NA (0.48), Swine EU (0.45), Poultry (0.36)"}</p>
+                        <p className="mb-2">{"CH4 (kg) = Sum(VS_i) * B0 * MCF * 0.67"}</p>
+                        <p className="text-[11px] text-muted-foreground font-bold">{"VS_i (Volatile Solids per phase) = Phased Feed Intake * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
+                        <p className="text-[11px] text-muted-foreground font-bold italic">{"B0: Swine NA (0.48), Swine EU/Other (0.45), Poultry (0.36)"}</p>
                         <p className="text-[11px] text-muted-foreground font-bold italic">{"MCF: Lagoon (67%), Slurry/Pit (16%), Litter/Solid (2%)"}</p>
                       </div>
                     </div>
