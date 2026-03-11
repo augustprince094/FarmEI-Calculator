@@ -10,16 +10,16 @@ export interface FarmData {
   count: number;
   fcr: number; // Feed Conversion Ratio
   cyclesPerYear: number; // Number of production cycles per year
-  feedCrudeProtein: number; // percentage (used for swine-sow/grow-finish or as fallback)
+  feedCrudeProtein: number; // percentage
   phase1CP?: number; // Phase 1 CP (%) / Gestation CP for Sow
   phase2CP?: number; // Phase 2 CP (%) / Lactation CP for Sow
   phase3CP?: number; // Phase 3 CP (%)
-  feedPhosphorus: number; // percentage (used for swine-sow/grow-finish or as fallback)
+  feedPhosphorus: number; // percentage
   phase1P?: number; // Phase 1 P (%) / Gestation P for Sow
   phase2P?: number; // Phase 2 P (%) / Lactation P for Sow
   phase3P?: number; // Phase 3 P (%)
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
-  avgWeight: number; // kg (target market weight at end of cycle)
+  avgWeight: number; // kg
   additive: FeedAdditive;
 }
 
@@ -42,6 +42,7 @@ export interface ComparativeResults {
 
 /**
  * Calculates farm emissions per production cycle based on phase-specific mass balance.
+ * Manure methane uses IPCC 2019 Tier 2 logic: CH4 = VS * B0 * MCF * 0.67
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -102,7 +103,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     }
 
     const nRetentionFactor = 29; // g N / kg gain
-    const pRetentionFactor = 6;  // g P / kg gain (0.6%)
+    const pRetentionFactor = 6;  // g P / kg gain
 
     const p1Feed = totalFeedPerCycle * phaseDist.p1;
     const p1Gain = totalGain * phaseDist.p1;
@@ -152,14 +153,12 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     'swine-grow-finish': 115
   }[animalType] || 42;
 
-  // Enteric Methane Equations
+  // Enteric Methane
   let totalEntericMethane = 0;
   if (animalType === 'broilers') {
-    // 1.6g CH4 / bird / cycle
     totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
   } else {
-    // (Weight * Multiplier / 365) * Headcount * CycleDays
-    let entericMultiplier = 0.03; // Default Grow-Finish
+    let entericMultiplier = 0.03;
     if (animalType === 'swine-sow') entericMultiplier = 0.05;
     if (animalType === 'swine-nursery') entericMultiplier = 0.015;
     const entericEmissionFactor = (avgWeight * entericMultiplier / 365);
@@ -167,26 +166,23 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
 
   // Manure Methane (VS Balance)
-  const dmd = 0.85; // 85% Digestibility
-  const ash = 0.10; // 10% Ash
-  const density_ch4 = 0.662; // kg/m3 (Standard density of methane)
+  const dmd = 0.85; 
+  const ash = 0.10; 
+  const density_ch4 = 0.67; // kg/m3 (IPCC 2019 Standard)
   
-  // B0 (Maximum methane potential) logic
-  let b0 = 0.36; // Default for poultry
+  let b0 = 0.36; 
   if (animalType.startsWith('swine')) {
     if (region === 'North America') b0 = 0.48;
-    else if (region === 'Western Europe' || region === 'Eastern Europe') b0 = 0.45;
-    else b0 = 0.45; // Default for other swine regions
+    else b0 = 0.45; 
   }
   
-  // Methane Conversion Factor (MCF) based on system
-  let mcf_val = 0.02; // default 2%
+  let mcf_val = 0.02; 
   if (animalType === 'broilers') {
     if (awms === 'lagoon') mcf_val = 0.67;
     else if (awms === 'liquid-slurry') mcf_val = 0.16;
     else if (awms === 'solid-storage') mcf_val = 0.02;
     else if (awms === 'pit-long-term') mcf_val = 0.16;
-    else mcf_val = 0.02; // poultry-litter
+    else mcf_val = 0.02; 
   } else {
     if (manureManagement === 'lagoon') mcf_val = 0.67;
     else if (manureManagement === 'slurry') mcf_val = 0.16;
@@ -194,55 +190,30 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     else if (manureManagement === 'dry-lot') mcf_val = 0.02;
   }
 
-  // VS (kg) = Feed Intake * (1 - Digestibility) * (1 - Ash)
   const totalVolatileSolids = totalFeedPerCycle * (1 - dmd) * (1 - ash);
-  // CH4 (kg) = VS * B0 * MCF * density_ch4
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
 
-  // Phosphorus run-off (2.9% of excreted)
+  // Phosphorus run-off
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.029;
 
-  // Direct and Indirect N2O (IPCC 2019)
+  // Direct and Indirect N2O
   let directN2oFactor = 0.01;
   let fracGas = 0.1;
   const ef4 = 0.01;
   let awmsFactor = 1.0;
 
   if (animalType === 'broilers') {
-    // For broilers: AWMS is 100% only for poultry-litter, else 0% for N2O
     if (awms !== 'poultry-litter') {
       awmsFactor = 0;
     }
-
-    if (awms === 'lagoon') {
-      directN2oFactor = 0.005;
-      fracGas = 0.4;
-    } else if (awms === 'liquid-slurry') {
-      directN2oFactor = 0.005;
-      fracGas = 0.25;
-    } else if (awms === 'solid-storage') {
-      directN2oFactor = 0.005;
-      fracGas = 0.3;
-    } else if (awms === 'pit-long-term') {
-      directN2oFactor = 0.01;
-      fracGas = 0.45;
-    } else {
-      directN2oFactor = 0.001; 
-      fracGas = 0.2;           
-    }
+    if (awms === 'lagoon') { directN2oFactor = 0.005; fracGas = 0.4; }
+    else if (awms === 'liquid-slurry') { directN2oFactor = 0.005; fracGas = 0.25; }
+    else if (awms === 'solid-storage') { directN2oFactor = 0.005; fracGas = 0.3; }
+    else if (awms === 'pit-long-term') { directN2oFactor = 0.01; fracGas = 0.45; }
+    else { directN2oFactor = 0.001; fracGas = 0.2; }
   } else {
-    directN2oFactor = {
-      'lagoon': 0.005,
-      'solid': 0.02,
-      'slurry': 0.005,
-      'dry-lot': 0.01
-    }[manureManagement] || 0.01;
-    fracGas = {
-      'lagoon': 0.4,
-      'solid': 0.45,
-      'slurry': 0.25,
-      'dry-lot': 0.3
-    }[manureManagement] || 0.2;
+    directN2oFactor = { 'lagoon': 0.005, 'solid': 0.02, 'slurry': 0.005, 'dry-lot': 0.01 }[manureManagement] || 0.01;
+    fracGas = { 'lagoon': 0.4, 'solid': 0.45, 'slurry': 0.25, 'dry-lot': 0.3 }[manureManagement] || 0.2;
   }
   
   const directN2O = totalNitrogenExcreted * awmsFactor * directN2oFactor * (44 / 28);

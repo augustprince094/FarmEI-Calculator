@@ -151,15 +151,14 @@ export default function Home() {
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrous Oxide (IPCC 2019)</h4>
-                    <p className="font-bold text-xs italic">For Broilers: Emissions factor (AWMS Factor) is applied (1.0) only for 'Poultry with litter' systems. All other systems use factor 0.</p>
+                    <p className="font-bold text-xs italic">For Broilers: Emissions factor is applied (1.0) only for 'Poultry with litter' systems. All other systems use factor 0.</p>
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Direct N2O (Poultry)</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Direct N2O</p>
                         <p>{"Direct N2O = N_excreted * AWMS_Factor * EF * (44/28)"}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1 font-bold italic">{"EF: Litter (0.001), Lagoon/Slurry (0.005), Solid Storage (0.005), Pit (0.01)"}</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Indirect N2O (Poultry)</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Indirect N2O</p>
                         <p>{"Indirect N2O = N_excreted * AWMS_Factor * FracGas * 0.01 (EF4) * (44/28)"}</p>
                       </div>
                     </div>
@@ -168,21 +167,16 @@ export default function Home() {
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (CH4) Balance</h4>
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Enteric Methane Equations</p>
+                        <p className="text-xs uppercase text-primary mb-1 font-black">Enteric Methane (IPCC Tier 2)</p>
                         <p><strong>Poultry:</strong> {"1.6g CH4 / bird / cycle"}</p>
                         <p><strong>Swine:</strong> {"(Weight * Multiplier / 365) * Headcount * CycleDays"}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold italic">{"Multipliers: Sow (0.05), Nursery (0.015), Grow-Finish (0.03)"}</p>
                       </div>
                       <div className="border-t border-white/30 pt-2">
                         <p className="text-xs uppercase text-primary mb-1 font-black">Manure Methane (VS Balance)</p>
-                        <p className="mb-2">{"CH4 (kg) = VS * B0 * MCF * 0.662"}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold">{"VS (Volatile Solids) = Feed Intake * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold italic">{"B0 Swine: North America (0.48), Europe (0.45). Poultry (0.36)"}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold italic">{"MCF: Lagoon (67%), Slurry/Pit (16%), Litter/Solid (2%)"}</p>
-                      </div>
-                      <div className="border-t border-white/30 pt-2">
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Phosphorus Run-off</p>
-                        <p>{"P Run-off = P_excreted * 0.029 (2.9%)"}</p>
+                        <p className="mb-2">{"CH4 (kg) = VS * B0 * MCF * 0.67"}</p>
+                        <p className="text-[11px] text-muted-foreground font-bold">{"VS (Volatile Solids) = Feed Intake * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
+                        <p className="text-[11px] text-muted-foreground font-bold italic">{"B0: Swine NA (0.48), Swine EU (0.45), Poultry (0.36)"}</p>
+                        <p className="text-[11px] text-muted-foreground font-bold italic">{"MCF: Lagoon (67%), Slurry/Pit (16%), Litter/Solid (2%)"}</p>
                       </div>
                     </div>
                   </section>
