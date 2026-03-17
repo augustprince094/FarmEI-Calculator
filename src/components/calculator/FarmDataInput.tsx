@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { FarmData, AnimalType, Region, AWMS } from '@/lib/calculations';
-import { Bird, Database, Settings2, Globe, Trash2, Microscope, Clock, FlaskConical, Beaker } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Bird, Database, Globe, Trash2, Microscope, Clock, FlaskConical, Beaker } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -37,12 +36,8 @@ export function FarmDataInput({ onCalculate }: Props) {
     useExperimentalData: false,
     useExperimentalN: false,
     useExperimentalP: false,
-    phase1FecalN: 4.5,
-    phase2FecalN: 4.5,
-    phase3FecalN: 4.5,
-    phase1FecalP: 1.2,
-    phase2FecalP: 1.2,
-    phase3FecalP: 1.2,
+    fecalN: 4.5,
+    fecalP: 1.2,
     cycleDurationDays: 42
   });
 
@@ -127,8 +122,6 @@ export function FarmDataInput({ onCalculate }: Props) {
                    formData.animalType === 'swine-nursery' || 
                    formData.animalType === 'swine-sow';
 
-  const showRegion = formData.animalType === 'broilers' || formData.animalType.startsWith('swine');
-
   return (
     <Card className="glass border-white/40 overflow-hidden rounded-2xl">
       <CardHeader className="bg-primary/90 backdrop-blur-md text-white p-5">
@@ -157,10 +150,10 @@ export function FarmDataInput({ onCalculate }: Props) {
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent className="glass">
-                  <SelectItem value="broilers" className="text-sm">Poultry: Broilers</SelectItem>
-                  <SelectItem value="swine-sow" className="text-sm">Swine: Sow & Litter</SelectItem>
-                  <SelectItem value="swine-nursery" className="text-sm">Swine: Nursery Pigs</SelectItem>
-                  <SelectItem value="swine-grow-finish" className="text-sm">Swine: Grow-to-Finish</SelectItem>
+                  <SelectItem value="broilers">Poultry: Broilers</SelectItem>
+                  <SelectItem value="swine-sow">Swine: Sow & Litter</SelectItem>
+                  <SelectItem value="swine-nursery">Swine: Nursery Pigs</SelectItem>
+                  <SelectItem value="swine-grow-finish">Swine: Grow-to-Finish</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -176,52 +169,48 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            {showRegion && (
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
-                  <Globe className="w-3.5 h-3.5" /> Region of Interest
-                </Label>
-                <Select 
-                  value={formData.region} 
-                  onValueChange={(val: Region) => updateField('region', val)}
-                >
-                  <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
-                    <SelectValue placeholder="Select Region" />
-                  </SelectTrigger>
-                  <SelectContent className="glass">
-                    <SelectItem value="Western Europe">Western Europe</SelectItem>
-                    <SelectItem value="Eastern Europe">Eastern Europe</SelectItem>
-                    <SelectItem value="Asia">Asia</SelectItem>
-                    <SelectItem value="Africa">Africa</SelectItem>
-                    <SelectItem value="North America">North America</SelectItem>
-                    <SelectItem value="Latin America">Latin America</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                <Globe className="w-3.5 h-3.5" /> Region of Interest
+              </Label>
+              <Select 
+                value={formData.region} 
+                onValueChange={(val: Region) => updateField('region', val)}
+              >
+                <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
+                  <SelectValue placeholder="Select Region" />
+                </SelectTrigger>
+                <SelectContent className="glass">
+                  <SelectItem value="Western Europe">Western Europe</SelectItem>
+                  <SelectItem value="Eastern Europe">Eastern Europe</SelectItem>
+                  <SelectItem value="Asia">Asia</SelectItem>
+                  <SelectItem value="Africa">Africa</SelectItem>
+                  <SelectItem value="North America">North America</SelectItem>
+                  <SelectItem value="Latin America">Latin America</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            {formData.animalType === 'broilers' && (
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
-                  <Trash2 className="w-3.5 h-3.5" /> Waste Management (AWMS)
-                </Label>
-                <Select 
-                  value={formData.awms} 
-                  onValueChange={(val: AWMS) => updateField('awms', val)}
-                >
-                  <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
-                    <SelectValue placeholder="Select AWMS" />
-                  </SelectTrigger>
-                  <SelectContent className="glass">
-                    <SelectItem value="lagoon">Lagoon</SelectItem>
-                    <SelectItem value="liquid-slurry">Liquid/Slurry</SelectItem>
-                    <SelectItem value="poultry-litter">Poultry with litter</SelectItem>
-                    <SelectItem value="solid-storage">Solid storage</SelectItem>
-                    <SelectItem value="pit-long-term">Pit {'>'} 1 month</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                <Trash2 className="w-3.5 h-3.5" /> Waste Management (AWMS)
+              </Label>
+              <Select 
+                value={formData.awms} 
+                onValueChange={(val: AWMS) => updateField('awms', val)}
+              >
+                <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
+                  <SelectValue placeholder="Select AWMS" />
+                </SelectTrigger>
+                <SelectContent className="glass">
+                  <SelectItem value="lagoon">Lagoon</SelectItem>
+                  <SelectItem value="liquid-slurry">Liquid/Slurry</SelectItem>
+                  <SelectItem value="poultry-litter">Poultry with litter</SelectItem>
+                  <SelectItem value="solid-storage">Solid storage</SelectItem>
+                  <SelectItem value="pit-long-term">Pit {'>'} 1 month</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="space-y-2">
               <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Exit Weight (kg)</Label>
@@ -308,22 +297,14 @@ export function FarmDataInput({ onCalculate }: Props) {
               {formData.useExperimentalData && formData.useExperimentalN ? (
                 <div className="p-4 bg-secondary/5 rounded-xl border border-secondary/20 space-y-3 animate-in fade-in duration-300">
                   <Label className="text-[10px] font-black text-secondary uppercase tracking-widest">Measured Fecal Nitrogen (%)</Label>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-1">
-                      <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gest' : 'Phase 1'}</Label>
-                      <Input type="number" step="0.01" value={formData.phase1FecalN} onChange={(e) => updateField('phase1FecalN', e.target.value)} className="h-9 font-black" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lact' : 'Phase 2'}</Label>
-                      <Input type="number" step="0.01" value={formData.phase2FecalN} onChange={(e) => updateField('phase2FecalN', e.target.value)} className="h-9 font-black" />
-                    </div>
-                    {formData.animalType !== 'swine-sow' && (
-                      <div className="space-y-1">
-                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
-                        <Input type="number" step="0.01" value={formData.phase3FecalN} onChange={(e) => updateField('phase3FecalN', e.target.value)} className="h-9 font-black" />
-                      </div>
-                    )}
-                  </div>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    value={formData.fecalN} 
+                    onChange={(e) => updateField('fecalN', e.target.value)} 
+                    className="h-11 font-black bg-white/70" 
+                  />
+                  <p className="text-[10px] text-muted-foreground italic font-medium">Single lab value used for nitrogen excretion across all production phases.</p>
                 </div>
               ) : (
                 <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3 animate-in fade-in duration-300">
@@ -362,22 +343,14 @@ export function FarmDataInput({ onCalculate }: Props) {
               {formData.useExperimentalData && formData.useExperimentalP ? (
                 <div className="p-4 bg-secondary/5 rounded-xl border border-secondary/20 space-y-3 animate-in fade-in duration-300">
                   <Label className="text-[10px] font-black text-secondary uppercase tracking-widest">Measured Fecal Phosphorus (%)</Label>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-1">
-                      <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gest' : 'Phase 1'}</Label>
-                      <Input type="number" step="0.01" value={formData.phase1FecalP} onChange={(e) => updateField('phase1FecalP', e.target.value)} className="h-9 font-black" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lact' : 'Phase 2'}</Label>
-                      <Input type="number" step="0.01" value={formData.phase2FecalP} onChange={(e) => updateField('phase2FecalP', e.target.value)} className="h-9 font-black" />
-                    </div>
-                    {formData.animalType !== 'swine-sow' && (
-                      <div className="space-y-1">
-                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
-                        <Input type="number" step="0.01" value={formData.phase3FecalP} onChange={(e) => updateField('phase3FecalP', e.target.value)} className="h-9 font-black" />
-                      </div>
-                    )}
-                  </div>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    value={formData.fecalP} 
+                    onChange={(e) => updateField('fecalP', e.target.value)} 
+                    className="h-11 font-black bg-white/70" 
+                  />
+                  <p className="text-[10px] text-muted-foreground italic font-medium">Single lab value used for phosphorus excretion across all production phases.</p>
                 </div>
               ) : (
                 <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3 animate-in fade-in duration-300">

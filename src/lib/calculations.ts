@@ -25,12 +25,8 @@ export interface FarmData {
   useExperimentalData?: boolean;
   useExperimentalN?: boolean;
   useExperimentalP?: boolean;
-  phase1FecalN?: number;
-  phase2FecalN?: number;
-  phase3FecalN?: number;
-  phase1FecalP?: number;
-  phase2FecalP?: number;
-  phase3FecalP?: number;
+  fecalN?: number; // Single input for cycle fecal nitrogen %
+  fecalP?: number; // Single input for cycle fecal phosphorus %
   cycleDurationDays?: number;
 }
 
@@ -64,8 +60,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     animalType, manureManagement, avgWeight, additive,
     awms, region,
     useExperimentalData, useExperimentalN, useExperimentalP,
-    phase1FecalN, phase2FecalN, phase3FecalN,
-    phase1FecalP, phase2FecalP, phase3FecalP,
+    fecalN, fecalP,
     cycleDurationDays
   } = data;
   
@@ -109,8 +104,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     'swine-grow-finish': 115
   }[animalType] || 42;
 
-  const isPhased = (animalType === 'broilers' || animalType === 'swine-nursery' || animalType === 'swine-sow');
-
+  // Phase distributions (fraction of total feed)
   let phaseDist = { p1: 1, p2: 0, p3: 0 };
   if (animalType === 'broilers') phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 };
   else if (animalType === 'swine-nursery') phaseDist = { p1: 0.15, p2: 0.35, p3: 0.50 };
@@ -127,9 +121,10 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     
     // Nitrogen calculation for phase
     if (useExperimentalData && useExperimentalN) {
-      const phaseFecalN = [phase1FecalN, phase2FecalN, phase3FecalN][phaseIdx - 1] || 0;
+      // Use single fecal N input across all phases if active
+      const measuredFecalN = fecalN || 0;
       const fecalDMOutput = phaseFeed * (1 - dmd);
-      totalNitrogenExcreted += (phaseFecalN / 100) * fecalDMOutput;
+      totalNitrogenExcreted += (measuredFecalN / 100) * fecalDMOutput;
     } else {
       const phaseCP = [phase1CP, phase2CP, phase3CP][phaseIdx - 1] ?? feedCrudeProtein;
       const nIntake = (phaseFeed * phaseCP / 100) / 6.25;
@@ -139,9 +134,10 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
     // Phosphorus calculation for phase
     if (useExperimentalData && useExperimentalP) {
-      const phaseFecalP = [phase1FecalP, phase2FecalP, phase3FecalP][phaseIdx - 1] || 0;
+      // Use single fecal P input across all phases if active
+      const measuredFecalP = fecalP || 0;
       const fecalDMOutput = phaseFeed * (1 - dmd);
-      totalPhosphorusExcreted += (phaseFecalP / 100) * fecalDMOutput;
+      totalPhosphorusExcreted += (measuredFecalP / 100) * fecalDMOutput;
     } else {
       const phaseP = [phase1P, phase2P, phase3P][phaseIdx - 1] ?? feedPhosphorus;
       const pIntake = phaseFeed * (phaseP / 100);
@@ -164,7 +160,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   if (animalType === 'broilers') {
     totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
   } else {
-    let entericMultiplier = 0.05; // Default for Sow
+    let entericMultiplier = 0.05; 
     if (animalType === 'swine-nursery') entericMultiplier = 0.015;
     if (animalType === 'swine-grow-finish') entericMultiplier = 0.03;
     const entericEmissionFactor = (avgWeight * entericMultiplier / 365);
