@@ -83,7 +83,6 @@ export default function Home() {
         targetFecalP = parseFloat(((baselineData.fecalP || 0) * 0.98).toFixed(2));
         setScenarioFecalP(targetFecalP);
       }
-      // Improved digestibility logic
       if (targetNDig === baselineData.nitrogenDigestibility) {
         targetNDig = Math.min(0.99, parseFloat((baselineData.nitrogenDigestibility * 1.05).toFixed(2)));
         setScenarioNitrogenDigestibility(targetNDig);
@@ -204,15 +203,23 @@ export default function Home() {
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrogen Excretion (Experimental)</h4>
                     <p>When Laboratory Mode is active:</p>
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
-                      <li>Daily Fecal DM Output = Feed Intake * (1 - Nitrogen Digestibility)</li>
-                      <li>N Excretion = % Fecal N * Fecal DM Output</li>
-                      <li>Total Nitrogen Excreted = Estimated N * 4</li>
+                      <li>(b) Daily Fecal DM Output = Feed Intake * (1 - Nitrogen Digestibility)</li>
+                      <li>(c) Fecal N = % Fecal N * Daily Fecal DM Output</li>
+                      <li>(d) Total Nitrogen Excreted = Cycle Fecal N * 4 (Excretion Factor Applied)</li>
                     </ul>
                   </section>
                   <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (Manure)</h4>
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Manure Methane</h4>
                     <p>CH4 (kg) = VS * B0 * MCF * 0.67</p>
-                    <p className="text-xs text-muted-foreground">VS (Volatile Solids) = Feed Intake * (1 - 0.85 DMD) * (1 - 10% Ash)</p>
+                    <ul className="list-disc pl-5 text-slate-700 space-y-1">
+                      <li>VS (Volatile Solids) = Feed Intake * (1 - 0.85 DMD) * (1 - 10% Ash)</li>
+                      <li>B0 (Max Methane Capacity): 0.36 standard (0.48 N. America Swine, 0.45 EU Swine)</li>
+                      <li>MCF (Conversion Factor): Lagoon 67%, Liquid/Slurry/Pit 16%, Solid/Litter 2%</li>
+                    </ul>
+                  </section>
+                  <section className="space-y-2">
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Enteric Methane</h4>
+                    <p>Species-specific metabolic heat production factors applied to cycle biomass.</p>
                   </section>
                 </div>
               </DialogContent>
@@ -329,7 +336,7 @@ export default function Home() {
                         </Label>
                         <Input 
                           type="number" 
-                          step="0.01"
+                          step="0.01" 
                           value={scenarioFecalN}
                           onChange={(e) => handleScenarioMetricChange('fecalN', parseFloat(e.target.value) || 0)}
                           className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
@@ -376,7 +383,7 @@ export default function Home() {
                           <h3 className="text-2xl font-black text-primary uppercase tracking-widest">Technical Audit</h3>
                           <p className="text-sm font-bold text-muted-foreground mt-1">Detailed nutrient balance & emission factors.</p>
                         </div>
-                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Validated Factor Engine</Badge>
+                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Factor Engine (v4 applied)</Badge>
                       </div>
                       
                       <div className="overflow-hidden border border-white/30 rounded-2xl bg-white/10 backdrop-blur-lg">
@@ -391,7 +398,7 @@ export default function Home() {
                           </TableHeader>
                           <TableBody>
                             {[
-                              { label: 'Total Nitrogen Excreted', unit: 'kg N (Factor 4 applied)', key: 'nitrogenExcreted', precision: 1 },
+                              { label: 'Total Nitrogen Excreted', unit: 'kg N (Factor 4 Applied)', key: 'nitrogenExcreted', precision: 1 },
                               { label: 'Phosphorus Excreted', unit: 'kg P', key: 'phosphorusExcreted', precision: 1 },
                               { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 3 },
                               { label: 'Carbon Equiv.', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
