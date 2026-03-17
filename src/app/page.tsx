@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -200,26 +201,30 @@ export default function Home() {
                 </DialogHeader>
                 <div className="space-y-6 text-sm leading-relaxed pr-2 font-bold">
                   <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrogen Excretion (Experimental)</h4>
-                    <p>When Laboratory Mode is active:</p>
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrogen Excretion (Hybrid Mode)</h4>
+                    <p>Calculated per phase (Phase 1-3 for broilers, Gest/Lact for sows):</p>
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
-                      <li>(b) Daily Fecal DM Output = Feed Intake * (1 - Nitrogen Digestibility)</li>
-                      <li>(c) Fecal N = % Fecal N * Daily Fecal DM Output</li>
-                      <li>(d) Total Nitrogen Excreted = Cycle Fecal N * 4 (Excretion Factor Applied)</li>
+                      <li><strong>Metabolic path:</strong> (Dietary CP / 6.25) - (g N Retention * g Gain)</li>
+                      <li><strong>Experimental path:</strong> Feed Intake * (1 - N Digestibility) * % Fecal N</li>
+                      <li><strong>Final Scale:</strong> Total Nitrogen Excreted is multiplied by a factor of 4.</li>
                     </ul>
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Manure Methane</h4>
                     <p>CH4 (kg) = VS * B0 * MCF * 0.67</p>
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
-                      <li>VS (Volatile Solids) = Feed Intake * (1 - 0.85 DMD) * (1 - 10% Ash)</li>
-                      <li>B0 (Max Methane Capacity): 0.36 standard (0.48 N. America Swine, 0.45 EU Swine)</li>
-                      <li>MCF (Conversion Factor): Lagoon 67%, Liquid/Slurry/Pit 16%, Solid/Litter 2%</li>
+                      <li>VS (Volatile Solids) = Feed Intake * (1 - 0.85 DMD) * (1 - 10% Ash) calculated per phase.</li>
+                      <li>B0 (Max Methane Capacity): 0.36 standard (0.48 N. America Swine, 0.45 EU Swine).</li>
+                      <li>MCF (Conversion Factor): Lagoon 67%, Liquid/Slurry/Pit 16%, Solid/Litter 2%.</li>
                     </ul>
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Enteric Methane</h4>
-                    <p>Species-specific metabolic heat production factors applied to cycle biomass.</p>
+                    <p>Broilers: 1.6g / cycle per bird. Swine: Metabolic scaling (0.015-0.05 factor) applied to biomass.</p>
+                  </section>
+                  <section className="space-y-2">
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrous Oxide (N2O)</h4>
+                    <p>Direct and Indirect emissions derived from Total Manure N using IPCC emission factors and system-specific volatilization (FracGAS).</p>
                   </section>
                 </div>
               </DialogContent>
@@ -236,7 +241,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h2 className="text-4xl font-black text-primary mb-3 uppercase tracking-tight">Cycle Baseline</h2>
               <p className="text-muted-foreground max-w-xl mx-auto text-lg font-bold">
-                Establish your production baseline by defining core efficiency and digestibility metrics.
+                Establish your production baseline by defining core efficiency, dietary metrics, or laboratory results.
               </p>
             </div>
             <div className="max-w-3xl mx-auto">
@@ -261,12 +266,12 @@ export default function Home() {
                     <span className="text-primary">{baselineData ? animalTypeLabels[baselineData.animalType] : ''}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">N Digestibility</span>
-                    <span className="text-secondary">{baselineData?.nitrogenDigestibility}</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Analysis Mode</span>
+                    <span className="text-secondary">{baselineData?.useExperimentalData ? 'Laboratory' : 'Metabolic'}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">AWMS</span>
-                    <span className="text-primary">{baselineData?.awms ? awmsLabels[baselineData.awms] : 'Default'}</span>
+                    <span className="text-primary">{baselineData?.awms ? awmsLabels[baselineData.awms] : (baselineData?.manureManagement ? awmsLabels[baselineData.manureManagement] : 'Default')}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Exit Weight</span>
@@ -381,9 +386,9 @@ export default function Home() {
                       <div className="flex items-center justify-between mb-8">
                         <div>
                           <h3 className="text-2xl font-black text-primary uppercase tracking-widest">Technical Audit</h3>
-                          <p className="text-sm font-bold text-muted-foreground mt-1">Detailed nutrient balance & emission factors.</p>
+                          <p className="text-sm font-bold text-muted-foreground mt-1">Detailed nutrient balance & emission intensities.</p>
                         </div>
-                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Factor Engine (v4 applied)</Badge>
+                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Tier 2 Engine (v4.2)</Badge>
                       </div>
                       
                       <div className="overflow-hidden border border-white/30 rounded-2xl bg-white/10 backdrop-blur-lg">
@@ -400,8 +405,12 @@ export default function Home() {
                             {[
                               { label: 'Total Nitrogen Excreted', unit: 'kg N (Factor 4 Applied)', key: 'nitrogenExcreted', precision: 1 },
                               { label: 'Phosphorus Excreted', unit: 'kg P', key: 'phosphorusExcreted', precision: 1 },
+                              { label: 'Enteric Methane', unit: 'kg CH4', key: 'entericMethane', precision: 3 },
                               { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 3 },
-                              { label: 'Carbon Equiv.', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
+                              { label: 'Phosphorus Runoff', unit: 'kg P', key: 'phosphorusRunoff', precision: 3 },
+                              { label: 'Direct N2O', unit: 'kg N2O', key: 'directN2O', precision: 3 },
+                              { label: 'Indirect N2O', unit: 'kg N2O', key: 'indirectN2O', precision: 3 },
+                              { label: 'Total Carbon Equiv.', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
                             ].map((item) => {
                               const baseVal = baselineResults[item.key as keyof EmissionResults];
                               const scenVal = (comparisonResults?.scenario || baselineResults)[item.key as keyof EmissionResults];

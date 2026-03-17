@@ -1,3 +1,4 @@
+
 export type AnimalType = 'broilers' | 'swine-sow' | 'swine-nursery' | 'swine-grow-finish';
 export type FeedAdditive = 'none' | 'jefo-pro' | 'poa-eo' | 'xylanase' | 'jefo-combo';
 export type Region = 'Western Europe' | 'Eastern Europe' | 'Asia' | 'Africa' | 'North America' | 'Latin America';
@@ -125,9 +126,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     
     // Nitrogen calculation 
     if (useExperimentalData && useExperimentalN) {
-      // Step (b): Daily fecal dry matter output = daily feed intake * (1 - nitrogen digestibility)
       const fecalDMOutput = phaseFeed * (1 - nDigestibility);
-      // Step (c): Conversion = % fecal nitrogen * daily fecal DM
       totalNitrogenExcreted += (fecalN || 0) / 100 * fecalDMOutput;
     } else {
       const phaseCP = [phase1CP, phase2CP, phase3CP][phaseIdx - 1] ?? feedCrudeProtein;
@@ -138,7 +137,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
     // Phosphorus calculation
     if (useExperimentalData && useExperimentalP) {
-      // Default DMD 0.85 used for P fecal DM if experimental P is active
       const fecalDMOutput = phaseFeed * (1 - 0.85); 
       totalPhosphorusExcreted += ((fecalP || 0) / 100) * fecalDMOutput;
     } else {
@@ -160,7 +158,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
 
-  // Step (d): Final Factor of 4 for Total Nitrogen Excreted
+  // Step (d): Final Factor of 4 for Total Nitrogen Excreted (Applied to derived load)
   totalNitrogenExcreted *= 4;
 
   // Methane Logic
@@ -172,7 +170,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
   
   let mcf_val = 0.02; 
-  const currentAwms = (animalType === 'broilers') ? awms : manureManagement;
+  const currentAwms = (animalType === 'broilers') ? (awms || 'poultry-litter') : (manureManagement || 'solid');
   if (currentAwms === 'lagoon') mcf_val = 0.67;
   else if (currentAwms === 'liquid-slurry' || currentAwms === 'pit-long-term' || currentAwms === 'slurry') mcf_val = 0.16;
   else mcf_val = 0.02;
@@ -192,8 +190,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.029;
   
   // AWMS Logic for N2O
-  let awmsFactor = (animalType === 'broilers' && awms === 'poultry-litter') ? 1.0 : 1.0; // Standard factor 1 applied to manure N
-  
   let directN2oFactor = 0.01;
   let fracGas = 0.1;
   const ef4 = 0.01;
@@ -203,8 +199,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   else if (currentAwms === 'solid-storage' || currentAwms === 'solid') { directN2oFactor = 0.005; fracGas = 0.3; }
   else if (currentAwms === 'pit-long-term') { directN2oFactor = 0.01; fracGas = 0.45; }
 
-  const directN2O = totalNitrogenExcreted * awmsFactor * directN2oFactor * (44 / 28);
-  const indirectN2O = totalNitrogenExcreted * awmsFactor * fracGas * ef4 * (44 / 28);
+  const directN2O = totalNitrogenExcreted * directN2oFactor * (44 / 28);
+  const indirectN2O = totalNitrogenExcreted * fracGas * ef4 * (44 / 28);
 
   const totalCarbonEquivalent = 
     (totalEntericMethane + manureMethane) * 28 + 
