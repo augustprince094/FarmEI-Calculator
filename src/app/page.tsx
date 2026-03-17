@@ -5,7 +5,7 @@ import { FarmDataInput } from '@/components/calculator/FarmDataInput';
 import { EmissionsResults } from '@/components/calculator/EmissionsResults';
 import { MitigationAI } from '@/components/calculator/MitigationAI';
 import { calculateEmissions, FarmData, ComparativeResults, EmissionResults, AnimalType } from '@/lib/calculations';
-import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers, Calculator, TrendingDown, TrendingUp } from 'lucide-react';
+import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers, Calculator, TrendingDown, TrendingUp, FlaskConical } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,12 +38,16 @@ export default function Home() {
   
   const [selectedAdditive, setSelectedAdditive] = useState<FarmData['additive']>('none');
   const [scenarioFcr, setScenarioFcr] = useState<number>(0);
+  const [scenarioFecalN, setScenarioFecalN] = useState<number>(0);
+  const [scenarioFecalP, setScenarioFecalP] = useState<number>(0);
 
   const handleEstablishBaseline = (data: FarmData) => {
     const results = calculateEmissions(data, false);
     setBaselineData(data);
     setBaselineResults(results);
     setScenarioFcr(data.fcr);
+    setScenarioFecalN(data.fecalN || 0);
+    setScenarioFecalP(data.fecalP || 0);
     setStep('results');
     setComparisonResults(null);
     setSelectedAdditive('none');
@@ -54,6 +58,7 @@ export default function Home() {
     
     setSelectedAdditive(additive);
     
+    // Default FCR reduction logic
     let targetFcr = scenarioFcr;
     if (additive !== 'none' && targetFcr === baselineData.fcr) {
       const reduction = (additive === 'jefo-combo' || additive === 'xylanase') ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
@@ -64,7 +69,33 @@ export default function Home() {
       setScenarioFcr(targetFcr);
     }
 
-    const updatedData = { ...baselineData, additive, fcr: targetFcr };
+    // Default Fecal reduction logic if experimental mode is active
+    let targetFecalN = scenarioFecalN;
+    let targetFecalP = scenarioFecalP;
+    
+    if (additive !== 'none') {
+      if (baselineData.useExperimentalN && targetFecalN === baselineData.fecalN) {
+        targetFecalN = parseFloat(((baselineData.fecalN || 0) * 0.97).toFixed(2));
+        setScenarioFecalN(targetFecalN);
+      }
+      if (baselineData.useExperimentalP && targetFecalP === baselineData.fecalP) {
+        targetFecalP = parseFloat(((baselineData.fecalP || 0) * 0.98).toFixed(2));
+        setScenarioFecalP(targetFecalP);
+      }
+    } else {
+      targetFecalN = baselineData.fecalN || 0;
+      targetFecalP = baselineData.fecalP || 0;
+      setScenarioFecalN(targetFecalN);
+      setScenarioFecalP(targetFecalP);
+    }
+
+    const updatedData = { 
+      ...baselineData, 
+      additive, 
+      fcr: targetFcr,
+      fecalN: targetFecalN,
+      fecalP: targetFecalP
+    };
     const scenarioResults = calculateEmissions(updatedData, true);
     
     setComparisonResults({
@@ -74,11 +105,31 @@ export default function Home() {
     });
   };
 
-  const handleFcrChange = (newFcr: number) => {
-    setScenarioFcr(newFcr);
-    if (!baselineData || !baselineResults || selectedAdditive === 'none') return;
+  const handleScenarioMetricChange = (field: 'fcr' | 'fecalN' | 'fecalP', value: number) => {
+    if (!baselineData || !baselineResults) return;
 
-    const updatedData = { ...baselineData, additive: selectedAdditive, fcr: newFcr };
+    let updatedFcr = scenarioFcr;
+    let updatedFecalN = scenarioFecalN;
+    let updatedFecalP = scenarioFecalP;
+
+    if (field === 'fcr') {
+      updatedFcr = value;
+      setScenarioFcr(value);
+    } else if (field === 'fecalN') {
+      updatedFecalN = value;
+      setScenarioFecalN(value);
+    } else if (field === 'fecalP') {
+      updatedFecalP = value;
+      setScenarioFecalP(value);
+    }
+
+    const updatedData = { 
+      ...baselineData, 
+      additive: selectedAdditive, 
+      fcr: updatedFcr,
+      fecalN: updatedFecalN,
+      fecalP: updatedFecalP
+    };
     const scenarioResults = calculateEmissions(updatedData, true);
     
     setComparisonResults({
@@ -235,7 +286,7 @@ export default function Home() {
                     <span className="text-secondary">{baselineData?.fcr}</span>
                   </div>
                   
-                  {isPhased && baselineData && (
+                  {isPhased && baselineData && !baselineData.useExperimentalN && !baselineData.useExperimentalP && (
                     <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-3">
                       <div className="text-[11px] font-black uppercase text-primary/60 border-b border-primary/10 pb-2 tracking-widest">
                         {baselineData.animalType === 'swine-sow' ? 'Sow Nutrition (Gest/Lact)' : 'Dietary Strategy'}
@@ -255,6 +306,28 @@ export default function Home() {
                             <span className="text-muted-foreground font-bold">P % (P1-3)</span>
                             <span className="text-right text-primary font-black">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
                           </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {baselineData?.useExperimentalData && (
+                    <div className="p-4 bg-secondary/5 rounded-xl border border-secondary/10 space-y-3">
+                      <div className="text-[11px] font-black uppercase text-secondary/60 border-b border-secondary/10 pb-2 tracking-widest">
+                        Lab Baselines
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        {baselineData.useExperimentalN && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground font-bold">Baseline Fecal N</span>
+                            <span className="text-right text-secondary font-black">{baselineData.fecalN}%</span>
+                          </div>
+                        )}
+                        {baselineData.useExperimentalP && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground font-bold">Baseline Fecal P</span>
+                            <span className="text-right text-secondary font-black">{baselineData.fecalP}%</span>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -294,17 +367,49 @@ export default function Home() {
                 </div>
 
                 {selectedAdditive !== 'none' && (
-                  <div className="space-y-3 p-4 bg-white/50 rounded-xl border border-white/50 animate-in zoom-in-95 duration-200 backdrop-blur-xl">
-                    <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
-                      <Calculator className="w-4 h-4" /> Improved FCR
-                    </Label>
-                    <Input 
-                      type="number" 
-                      step="0.01"
-                      value={scenarioFcr}
-                      onChange={(e) => handleFcrChange(parseFloat(e.target.value) || 0)}
-                      className="h-11 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-base"
-                    />
+                  <div className="space-y-4 p-4 bg-white/50 rounded-xl border border-white/50 animate-in zoom-in-95 duration-200 backdrop-blur-xl">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+                        <Calculator className="w-4 h-4" /> Improved FCR
+                      </Label>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        value={scenarioFcr}
+                        onChange={(e) => handleScenarioMetricChange('fcr', parseFloat(e.target.value) || 0)}
+                        className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
+                      />
+                    </div>
+
+                    {baselineData?.useExperimentalN && (
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+                          <FlaskConical className="w-4 h-4" /> Scenario % Fecal N
+                        </Label>
+                        <Input 
+                          type="number" 
+                          step="0.01"
+                          value={scenarioFecalN}
+                          onChange={(e) => handleScenarioMetricChange('fecalN', parseFloat(e.target.value) || 0)}
+                          className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
+                        />
+                      </div>
+                    )}
+
+                    {baselineData?.useExperimentalP && (
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+                          <FlaskConical className="w-4 h-4" /> Scenario % Fecal P
+                        </Label>
+                        <Input 
+                          type="number" 
+                          step="0.01"
+                          value={scenarioFecalP}
+                          onChange={(e) => handleScenarioMetricChange('fecalP', parseFloat(e.target.value) || 0)}
+                          className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
