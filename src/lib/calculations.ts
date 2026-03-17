@@ -23,8 +23,14 @@ export interface FarmData {
   additive: FeedAdditive;
   // Experimental Data Fields
   useExperimentalData?: boolean;
-  fecalNPercent?: number;
-  fecalPPercent?: number;
+  useExperimentalN?: boolean;
+  useExperimentalP?: boolean;
+  phase1FecalN?: number;
+  phase2FecalN?: number;
+  phase3FecalN?: number;
+  phase1FecalP?: number;
+  phase2FecalP?: number;
+  phase3FecalP?: number;
   cycleDurationDays?: number;
 }
 
@@ -57,11 +63,15 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     feedCrudeProtein, feedPhosphorus,
     animalType, manureManagement, avgWeight, additive,
     awms, region,
-    useExperimentalData, fecalNPercent, fecalPPercent, cycleDurationDays
+    useExperimentalData, useExperimentalN, useExperimentalP,
+    phase1FecalN, phase2FecalN, phase3FecalN,
+    phase1FecalP, phase2FecalP, phase3FecalP,
+    cycleDurationDays
   } = data;
   
   const totalFeedPerCycle = count * fcr * avgWeight;
   const totalGain = avgWeight;
+  const dmd = 0.85; // Dry Matter Digestibility
 
   // Additive metabolic efficiency factors
   let metabolicNMitigation = 1.0;
@@ -99,83 +109,52 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     'swine-grow-finish': 115
   }[animalType] || 42;
 
-  if (useExperimentalData && fecalNPercent !== undefined && fecalPPercent !== undefined) {
-    // Experimental Method: Fecal Measurements
-    // (a) Daily feed intake
-    const dailyFeedIntake = totalFeedPerCycle / cycleDays;
-    // (b) Daily fecal dry matter output = daily feed * (1 - DMD) [DMD = 0.85]
-    const dmd = 0.85;
-    const dailyFecalDMOutput = dailyFeedIntake * (1 - dmd);
-    // (c) Excretion = % fecal nitrogen * daily fecal DM output
-    const dailyNExcretion = (fecalNPercent / 100) * dailyFecalDMOutput;
-    const dailyPExcretion = (fecalPPercent / 100) * dailyFecalDMOutput;
+  const isPhased = (animalType === 'broilers' || animalType === 'swine-nursery' || animalType === 'swine-sow');
+
+  let phaseDist = { p1: 1, p2: 0, p3: 0 };
+  if (animalType === 'broilers') phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 };
+  else if (animalType === 'swine-nursery') phaseDist = { p1: 0.15, p2: 0.35, p3: 0.50 };
+  else if (animalType === 'swine-sow') phaseDist = { p1: 0.70, p2: 0.30, p3: 0 };
+
+  const nRetentionFactor = 29; // g N / kg gain
+  const pRetentionFactor = 6;  // g P / kg gain
+
+  const calculatePhaseExcretion = (phaseIdx: 1 | 2 | 3, fraction: number) => {
+    if (fraction <= 0) return;
     
-    totalNitrogenExcreted = dailyNExcretion * cycleDays;
-    totalPhosphorusExcreted = dailyPExcretion * cycleDays;
-    totalFeedIntakeAccumulated = totalFeedPerCycle;
-  } else {
-    // Default Method: Mass Balance (Phased or Single)
-    const isPhased = (animalType === 'broilers' || animalType === 'swine-nursery' || animalType === 'swine-sow') && 
-                     phase1CP !== undefined && phase2CP !== undefined &&
-                     phase1P !== undefined && phase2P !== undefined;
-
-    if (isPhased) {
-      let phaseDist;
-      if (animalType === 'broilers') {
-        phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 };
-      } else if (animalType === 'swine-nursery') {
-        phaseDist = { p1: 0.15, p2: 0.35, p3: 0.50 };
-      } else if (animalType === 'swine-sow') {
-        phaseDist = { p1: 0.70, p2: 0.30, p3: 0 };
-      } else {
-          phaseDist = { p1: 1, p2: 0, p3: 0 };
-      }
-
-      const nRetentionFactor = 29; // g N / kg gain
-      const pRetentionFactor = 6;  // g P / kg gain
-
-      const p1Feed = totalFeedPerCycle * phaseDist.p1;
-      const p1Gain = totalGain * phaseDist.p1;
-      const p1NIntake = (p1Feed * phase1CP! / 100) / 6.25;
-      const p1NRetention = (nRetentionFactor * p1Gain / 1000) * count;
-      const p1PIntake = p1Feed * (phase1P! / 100);
-      const p1PRetention = (pRetentionFactor * p1Gain / 1000) * count;
-      totalNitrogenExcreted += Math.max(0, p1NIntake - p1NRetention);
-      totalPhosphorusExcreted += Math.max(0, p1PIntake - p1PRetention);
-      totalFeedIntakeAccumulated += p1Feed;
-
-      const p2Feed = totalFeedPerCycle * phaseDist.p2;
-      const p2Gain = totalGain * phaseDist.p2;
-      const p2NIntake = (p2Feed * phase2CP! / 100) / 6.25;
-      const p2NRetention = (nRetentionFactor * p2Gain / 1000) * count;
-      const p2PIntake = p2Feed * (phase2P! / 100);
-      const p2PRetention = (pRetentionFactor * p2Gain / 1000) * count;
-      totalNitrogenExcreted += Math.max(0, p2NIntake - p2NRetention);
-      totalPhosphorusExcreted += Math.max(0, p2PIntake - p2PRetention);
-      totalFeedIntakeAccumulated += p2Feed;
-
-      if (phaseDist.p3 > 0) {
-        const p3Feed = totalFeedPerCycle * phaseDist.p3;
-        const p3Gain = totalGain * phaseDist.p3;
-        const p3NIntake = (p3Feed * (phase3CP || 0) / 100) / 6.25;
-        const p3NRetention = (nRetentionFactor * p3Gain / 1000) * count;
-        const p3PIntake = p3Feed * ((phase3P || 0) / 100);
-        const p3PRetention = (pRetentionFactor * p3Gain / 1000) * count;
-        totalNitrogenExcreted += Math.max(0, p3NIntake - p3NRetention);
-        totalPhosphorusExcreted += Math.max(0, p3PIntake - p3PRetention);
-        totalFeedIntakeAccumulated += p3Feed;
-      }
-
+    const phaseFeed = totalFeedPerCycle * fraction;
+    const phaseGain = totalGain * fraction;
+    
+    // Nitrogen calculation for phase
+    if (useExperimentalData && useExperimentalN) {
+      const phaseFecalN = [phase1FecalN, phase2FecalN, phase3FecalN][phaseIdx - 1] || 0;
+      const fecalDMOutput = phaseFeed * (1 - dmd);
+      totalNitrogenExcreted += (phaseFecalN / 100) * fecalDMOutput;
     } else {
-      const nIntake = (totalFeedPerCycle * (feedCrudeProtein / 100)) / 6.25;
-      const nRetention = (29 * avgWeight / 1000) * count;
-      const pIntake = totalFeedPerCycle * (feedPhosphorus / 100);
-      const pRetention = (6 * avgWeight / 1000) * count;
-      totalNitrogenExcreted = Math.max(0, nIntake - nRetention);
-      totalPhosphorusExcreted = Math.max(0, pIntake - pRetention);
-      totalFeedIntakeAccumulated = totalFeedPerCycle;
+      const phaseCP = [phase1CP, phase2CP, phase3CP][phaseIdx - 1] ?? feedCrudeProtein;
+      const nIntake = (phaseFeed * phaseCP / 100) / 6.25;
+      const nRetention = (nRetentionFactor * phaseGain / 1000) * count;
+      totalNitrogenExcreted += Math.max(0, nIntake - nRetention);
     }
-  }
+
+    // Phosphorus calculation for phase
+    if (useExperimentalData && useExperimentalP) {
+      const phaseFecalP = [phase1FecalP, phase2FecalP, phase3FecalP][phaseIdx - 1] || 0;
+      const fecalDMOutput = phaseFeed * (1 - dmd);
+      totalPhosphorusExcreted += (phaseFecalP / 100) * fecalDMOutput;
+    } else {
+      const phaseP = [phase1P, phase2P, phase3P][phaseIdx - 1] ?? feedPhosphorus;
+      const pIntake = phaseFeed * (phaseP / 100);
+      const pRetention = (pRetentionFactor * phaseGain / 1000) * count;
+      totalPhosphorusExcreted += Math.max(0, pIntake - pRetention);
+    }
+
+    totalFeedIntakeAccumulated += phaseFeed;
+  };
+
+  calculatePhaseExcretion(1, phaseDist.p1);
+  calculatePhaseExcretion(2, phaseDist.p2);
+  calculatePhaseExcretion(3, phaseDist.p3);
 
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
@@ -193,13 +172,13 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
 
   // Manure Methane (VS Balance)
-  const dmd = 0.85; 
   const ash = 0.10; 
   const density_ch4 = 0.67; // kg/m3 (IPCC 2019 Standard)
   
   let b0 = 0.36; 
   if (animalType.startsWith('swine')) {
     if (region === 'North America') b0 = 0.48;
+    else if (region === 'Western Europe' || region === 'Eastern Europe') b0 = 0.45;
     else b0 = 0.45; 
   }
   
@@ -230,7 +209,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   let awmsFactor = 1.0;
 
   if (animalType === 'broilers') {
-    // Only 'poultry-litter' AWMS allows N2O emissions for broilers as per specific guidance
     if (awms !== 'poultry-litter') {
       awmsFactor = 0;
     }

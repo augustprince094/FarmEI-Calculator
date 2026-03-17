@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { FarmData, AnimalType, Region, AWMS } from '@/lib/calculations';
-import { Bird, Database, Settings2, Globe, Trash2, Microscope, Clock } from 'lucide-react';
+import { Bird, Database, Settings2, Globe, Trash2, Microscope, Clock, FlaskConical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -35,8 +35,14 @@ export function FarmDataInput({ onCalculate }: Props) {
     avgWeight: 2.5,
     additive: 'none',
     useExperimentalData: false,
-    fecalNPercent: 4.5,
-    fecalPPercent: 1.2,
+    useExperimentalN: false,
+    useExperimentalP: false,
+    phase1FecalN: 4.5,
+    phase2FecalN: 4.5,
+    phase3FecalN: 4.5,
+    phase1FecalP: 1.2,
+    phase2FecalP: 1.2,
+    phase3FecalP: 1.2,
     cycleDurationDays: 42
   });
 
@@ -242,9 +248,9 @@ export function FarmDataInput({ onCalculate }: Props) {
             <div className="md:col-span-2 p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-xs font-black text-primary uppercase flex items-center gap-2">
-                  <Microscope className="w-4 h-4" /> Experimental Mode
+                  <FlaskConical className="w-4 h-4" /> Experimental Mode
                 </Label>
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Use measured fecal nitrogen/phosphorus</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Apply lab-measured fecal data</p>
               </div>
               <Switch 
                 checked={formData.useExperimentalData} 
@@ -252,35 +258,82 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            {formData.useExperimentalData ? (
-              <div className="md:col-span-2 space-y-4 pt-2 animate-in slide-in-from-top-4 duration-500">
-                <div className="p-5 bg-white/90 rounded-2xl border border-secondary/20 shadow-sm backdrop-blur-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
+            {formData.useExperimentalData && (
+              <div className="md:col-span-2 space-y-6 pt-2 animate-in slide-in-from-top-4 duration-500">
+                <div className="p-6 bg-white/90 rounded-2xl border border-secondary/20 shadow-sm backdrop-blur-lg space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4 border-b border-secondary/10">
+                    <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-xl border border-secondary/10">
                       <Label className="text-[11px] font-black text-secondary uppercase tracking-widest flex items-center gap-2">
-                        <Microscope className="w-3.5 h-3.5" /> Fecal N (%)
+                        <Microscope className="w-3.5 h-3.5" /> Measured Fecal N %
                       </Label>
-                      <Input 
-                        type="number" step="0.01" 
-                        value={formData.fecalNPercent} 
-                        onChange={(e) => updateField('fecalNPercent', e.target.value)}
-                        className="h-11 border-secondary/20 font-black text-secondary"
+                      <Switch 
+                        checked={formData.useExperimentalN} 
+                        onCheckedChange={(val) => updateField('useExperimentalN', val)}
                       />
                     </div>
-                    <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-xl border border-secondary/10">
                       <Label className="text-[11px] font-black text-secondary uppercase tracking-widest flex items-center gap-2">
-                        <Microscope className="w-3.5 h-3.5" /> Fecal P (%)
+                        <Microscope className="w-3.5 h-3.5" /> Measured Fecal P %
                       </Label>
-                      <Input 
-                        type="number" step="0.01" 
-                        value={formData.fecalPPercent} 
-                        onChange={(e) => updateField('fecalPPercent', e.target.value)}
-                        className="h-11 border-secondary/20 font-black text-secondary"
+                      <Switch 
+                        checked={formData.useExperimentalP} 
+                        onCheckedChange={(val) => updateField('useExperimentalP', val)}
                       />
                     </div>
-                    <div className="space-y-2">
+                  </div>
+
+                  {formData.useExperimentalN && (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      <h4 className="text-[10px] font-black text-secondary uppercase tracking-[0.2em] flex items-center gap-2">
+                        Phased Fecal Nitrogen (%)
+                      </h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-bold text-muted-foreground uppercase">Phase 1</Label>
+                          <Input type="number" step="0.01" value={formData.phase1FecalN} onChange={(e) => updateField('phase1FecalN', e.target.value)} className="h-9 font-black" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-bold text-muted-foreground uppercase">Phase 2</Label>
+                          <Input type="number" step="0.01" value={formData.phase2FecalN} onChange={(e) => updateField('phase2FecalN', e.target.value)} className="h-9 font-black" />
+                        </div>
+                        {formData.animalType !== 'swine-sow' && (
+                          <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold text-muted-foreground uppercase">Phase 3</Label>
+                            <Input type="number" step="0.01" value={formData.phase3FecalN} onChange={(e) => updateField('phase3FecalN', e.target.value)} className="h-9 font-black" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.useExperimentalP && (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      <h4 className="text-[10px] font-black text-secondary uppercase tracking-[0.2em] flex items-center gap-2">
+                        Phased Fecal Phosphorus (%)
+                      </h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-bold text-muted-foreground uppercase">Phase 1</Label>
+                          <Input type="number" step="0.01" value={formData.phase1FecalP} onChange={(e) => updateField('phase1FecalP', e.target.value)} className="h-9 font-black" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-bold text-muted-foreground uppercase">Phase 2</Label>
+                          <Input type="number" step="0.01" value={formData.phase2FecalP} onChange={(e) => updateField('phase2FecalP', e.target.value)} className="h-9 font-black" />
+                        </div>
+                        {formData.animalType !== 'swine-sow' && (
+                          <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold text-muted-foreground uppercase">Phase 3</Label>
+                            <Input type="number" step="0.01" value={formData.phase3FecalP} onChange={(e) => updateField('phase3FecalP', e.target.value)} className="h-9 font-black" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-secondary/10">
+                    <div className="max-w-[200px] space-y-2">
                       <Label className="text-[11px] font-black text-secondary uppercase tracking-widest flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5" /> Cycle Duration (Days)
+                        <Clock className="w-3.5 h-3.5" /> Cycle Days
                       </Label>
                       <Input 
                         type="number" 
@@ -292,61 +345,65 @@ export function FarmDataInput({ onCalculate }: Props) {
                   </div>
                 </div>
               </div>
-            ) : isPhased ? (
-              <div className="md:col-span-2 space-y-4 pt-2 animate-in slide-in-from-top-4 duration-500">
-                <div className="p-4 bg-white/90 rounded-xl border border-primary/20 shadow-sm backdrop-blur-lg">
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <Settings2 className="w-4 h-4 text-primary" />
-                    <h4 className="text-[11px] font-black text-primary uppercase tracking-widest">
-                      {formData.animalType === 'swine-sow' ? 'Sow Cycle Nutrients (%)' : 'Dietary Strategy (%)'}
-                    </h4>
+            )}
+
+            {!formData.useExperimentalData && (
+              isPhased ? (
+                <div className="md:col-span-2 space-y-4 pt-2 animate-in slide-in-from-top-4 duration-500">
+                  <div className="p-4 bg-white/90 rounded-xl border border-primary/20 shadow-sm backdrop-blur-lg">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <Settings2 className="w-4 h-4 text-primary" />
+                      <h4 className="text-[11px] font-black text-primary uppercase tracking-widest">
+                        {formData.animalType === 'swine-sow' ? 'Sow Cycle Nutrients (%)' : 'Dietary Strategy (%)'}
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { id: 'phase1CP', label: formData.animalType === 'swine-sow' ? 'Gest CP' : 'P1 CP', value: formData.phase1CP },
+                        { id: 'phase2CP', label: formData.animalType === 'swine-sow' ? 'Lact CP' : 'P2 CP', value: formData.phase2CP },
+                        { id: 'phase3CP', label: 'P3 CP', value: formData.phase3CP, hidden: formData.animalType === 'swine-sow' },
+                        { id: 'phase1P', label: formData.animalType === 'swine-sow' ? 'Gest P' : 'P1 P', value: formData.phase1P },
+                        { id: 'phase2P', label: formData.animalType === 'swine-sow' ? 'Lact P' : 'P2 P', value: formData.phase2P },
+                        { id: 'phase3P', label: 'P3 P', value: formData.phase3P, hidden: formData.animalType === 'swine-sow' },
+                      ].filter(i => !i.hidden).map((item) => (
+                        <div key={item.id} className="space-y-1.5">
+                          <Label className="text-[11px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
+                          <Input 
+                            type="number" 
+                            step={item.id.includes('CP') ? "0.1" : "0.01"}
+                            value={item.value} 
+                            onChange={(e) => updateField(item.id as any, e.target.value)} 
+                            className="h-9 border-primary/20 bg-white/95 rounded-lg font-black text-xs px-2.5 text-primary focus:ring-primary shadow-sm"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { id: 'phase1CP', label: formData.animalType === 'swine-sow' ? 'Gest CP' : 'P1 CP', value: formData.phase1CP },
-                      { id: 'phase2CP', label: formData.animalType === 'swine-sow' ? 'Lact CP' : 'P2 CP', value: formData.phase2CP },
-                      { id: 'phase3CP', label: 'P3 CP', value: formData.phase3CP, hidden: formData.animalType === 'swine-sow' },
-                      { id: 'phase1P', label: formData.animalType === 'swine-sow' ? 'Gest P' : 'P1 P', value: formData.phase1P },
-                      { id: 'phase2P', label: formData.animalType === 'swine-sow' ? 'Lact P' : 'P2 P', value: formData.phase2P },
-                      { id: 'phase3P', label: 'P3 P', value: formData.phase3P, hidden: formData.animalType === 'swine-sow' },
-                    ].filter(i => !i.hidden).map((item) => (
-                      <div key={item.id} className="space-y-1.5">
-                        <Label className="text-[11px] font-black text-primary uppercase tracking-tight">{item.label}</Label>
-                        <Input 
-                          type="number" 
-                          step={item.id.includes('CP') ? "0.1" : "0.01"}
-                          value={item.value} 
-                          onChange={(e) => updateField(item.id as any, e.target.value)} 
-                          className="h-9 border-primary/20 bg-white/95 rounded-lg font-black text-xs px-2.5 text-primary focus:ring-primary shadow-sm"
-                        />
-                      </div>
-                    ))}
+                </div>
+              ) : (
+                <div className="md:col-span-2 grid grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Crude Protein (%)</Label>
+                    <Input 
+                      className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
+                      type="number" 
+                      step="0.1"
+                      value={formData.feedCrudeProtein} 
+                      onChange={(e) => updateField('feedCrudeProtein', e.target.value)} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Phosphorus (%)</Label>
+                    <Input 
+                      className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
+                      type="number" 
+                      step="0.01"
+                      value={formData.feedPhosphorus} 
+                      onChange={(e) => updateField('feedPhosphorus', e.target.value)} 
+                    />
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="md:col-span-2 grid grid-cols-2 gap-5">
-                <div className="space-y-2">
-                  <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Crude Protein (%)</Label>
-                  <Input 
-                    className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
-                    type="number" 
-                    step="0.1"
-                    value={formData.feedCrudeProtein} 
-                    onChange={(e) => updateField('feedCrudeProtein', e.target.value)} 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Phosphorus (%)</Label>
-                  <Input 
-                    className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
-                    type="number" 
-                    step="0.01"
-                    value={formData.feedPhosphorus} 
-                    onChange={(e) => updateField('feedPhosphorus', e.target.value)} 
-                  />
-                </div>
-              </div>
+              )
             )}
           </div>
 

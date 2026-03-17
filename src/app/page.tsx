@@ -140,14 +140,12 @@ export default function Home() {
                 </DialogHeader>
                 <div className="space-y-6 text-sm leading-relaxed pr-2">
                   <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nutrient Excretion (Mass Balance)</h4>
-                    <p className="font-bold">Calculated per production phase as dietary intake minus biological retention. Xylanase supplementation models a 4.5% improvement in N digestibility based on peer-reviewed data.</p>
-                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-2 font-black text-slate-700">
-                      <p><strong>N Intake</strong> = {"Sum((Feed_i * CP_i / 100) / 6.25)"}</p>
-                      <p><strong>N Retention</strong> = {"Sum((Weight_Gain_i * 29g N/kg) * Count)"}</p>
-                      <p className="border-t border-white/30 pt-2 mt-2"><strong>P Intake</strong> = {"Sum(Feed_i * P_i / 100)"}</p>
-                      <p><strong>P Retention</strong> = {"Sum((Weight_Gain_i * 0.006) * Count)"}</p>
-                    </div>
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nutrient Excretion Analysis</h4>
+                    <p className="font-bold">Supports two methodologies:</p>
+                    <ul className="list-disc pl-5 font-bold text-slate-700 space-y-1">
+                      <li><strong>Mass Balance:</strong> Phased dietary intake minus biological retention (29g N/kg, 6g P/kg gain).</li>
+                      <li><strong>Experimental Phased:</strong> Uses lab-measured Fecal % (N or P) applied per phase to fecal dry matter output. Excretion = Phased Feed * (1 - 85% DMD) * Fecal%.</li>
+                    </ul>
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrous Oxide (IPCC 2019)</h4>
@@ -165,7 +163,7 @@ export default function Home() {
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (CH4) Balance</h4>
-                    <p className="font-bold text-xs">Estimated phase-by-phase for Broilers and Phased Swine systems based on precise feed intake per phase.</p>
+                    <p className="font-bold text-xs">Estimated phase-by-phase using precise feed intake for phased production systems.</p>
                     <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
                       <div>
                         <p className="text-xs uppercase text-primary mb-1 font-black">Enteric Methane (IPCC Tier 2)</p>
