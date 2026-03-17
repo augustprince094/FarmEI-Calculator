@@ -21,6 +21,7 @@ export interface FarmData {
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot';
   avgWeight: number; // kg
   additive: FeedAdditive;
+  nitrogenDigestibility: number; // Nitrogen/Protein Digestibility (0-1)
   // Experimental Data Fields
   useExperimentalData?: boolean;
   useExperimentalN?: boolean;
@@ -49,7 +50,6 @@ export interface ComparativeResults {
 
 /**
  * Calculates farm emissions per production cycle.
- * Supports standard mass-balance and experimental fecal-measurement methods.
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -61,14 +61,19 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     awms, region,
     useExperimentalData, useExperimentalN, useExperimentalP,
     fecalN, fecalP,
-    cycleDurationDays
+    cycleDurationDays,
+    nitrogenDigestibility
   } = data;
   
   const totalFeedPerCycle = count * fcr * avgWeight;
   const totalGain = avgWeight;
-  const dmd = 0.85; // Dry Matter Digestibility
+  
+  // N/Protein Digestibility (user defined or default 0.85)
+  const nDigestibility = nitrogenDigestibility || 0.85;
+  // Dry Matter Digestibility for Methane/VS (Standard 0.85)
+  const dmd_methane = 0.85; 
 
-  // Additive metabolic efficiency factors
+  // Additive metabolic efficiency factors (Internal adjustments)
   let metabolicNMitigation = 1.0;
   let metabolicPMitigation = 1.0;
   let ch4MitigationFactor = 1.0;
@@ -104,7 +109,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     'swine-grow-finish': 115
   }[animalType] || 42;
 
-  // Phase distributions (fraction of total feed)
   let phaseDist = { p1: 1, p2: 0, p3: 0 };
   if (animalType === 'broilers') phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 };
   else if (animalType === 'swine-nursery') phaseDist = { p1: 0.15, p2: 0.35, p3: 0.50 };
@@ -119,12 +123,12 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const phaseFeed = totalFeedPerCycle * fraction;
     const phaseGain = totalGain * fraction;
     
-    // Nitrogen calculation for phase
+    // Nitrogen calculation
     if (useExperimentalData && useExperimentalN) {
-      // Use single fecal N input across all phases if active
-      const measuredFecalN = fecalN || 0;
-      const fecalDMOutput = phaseFeed * (1 - dmd);
-      totalNitrogenExcreted += (measuredFecalN / 100) * fecalDMOutput;
+      // (b) Daily fecal DM output = daily feed intake * (1 - nitrogen digestibility)
+      const fecalDMOutput = phaseFeed * (1 - nDigestibility);
+      // (c) Conversion = % fecal nitrogen * daily fecal DM
+      totalNitrogenExcreted += (fecalN || 0) / 100 * fecalDMOutput;
     } else {
       const phaseCP = [phase1CP, phase2CP, phase3CP][phaseIdx - 1] ?? feedCrudeProtein;
       const nIntake = (phaseFeed * phaseCP / 100) / 6.25;
@@ -132,12 +136,10 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       totalNitrogenExcreted += Math.max(0, nIntake - nRetention);
     }
 
-    // Phosphorus calculation for phase
+    // Phosphorus calculation
     if (useExperimentalData && useExperimentalP) {
-      // Use single fecal P input across all phases if active
-      const measuredFecalP = fecalP || 0;
-      const fecalDMOutput = phaseFeed * (1 - dmd);
-      totalPhosphorusExcreted += (measuredFecalP / 100) * fecalDMOutput;
+      const fecalDMOutput = phaseFeed * (1 - 0.85); // Standard DMD for P fecal DM
+      totalPhosphorusExcreted += ((fecalP || 0) / 100) * fecalDMOutput;
     } else {
       const phaseP = [phase1P, phase2P, phase3P][phaseIdx - 1] ?? feedPhosphorus;
       const pIntake = phaseFeed * (phaseP / 100);
@@ -152,10 +154,14 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   calculatePhaseExcretion(2, phaseDist.p2);
   calculatePhaseExcretion(3, phaseDist.p3);
 
+  // Apply additive internal mitigation
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
 
-  // Enteric Methane
+  // (d) Multiply estimated N by factor of 4
+  totalNitrogenExcreted *= 4;
+
+  // Methane Calculations
   let totalEntericMethane = 0;
   if (animalType === 'broilers') {
     totalEntericMethane = (1.6 / 1000) * count * ch4MitigationFactor;
@@ -167,57 +173,36 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalEntericMethane = entericEmissionFactor * count * cycleDays * ch4MitigationFactor;
   }
 
-  // Manure Methane (VS Balance)
   const ash = 0.10; 
-  const density_ch4 = 0.67; // kg/m3 (IPCC 2019 Standard)
+  const density_ch4 = 0.67;
   
-  let b0 = 0.36; 
+  let b0 = 0.45;
   if (animalType.startsWith('swine')) {
     if (region === 'North America') b0 = 0.48;
-    else if (region === 'Western Europe' || region === 'Eastern Europe') b0 = 0.45;
-    else b0 = 0.45; 
   }
   
   let mcf_val = 0.02; 
-  if (animalType === 'broilers') {
-    if (awms === 'lagoon') mcf_val = 0.67;
-    else if (awms === 'liquid-slurry') mcf_val = 0.16;
-    else if (awms === 'solid-storage') mcf_val = 0.02;
-    else if (awms === 'pit-long-term') mcf_val = 0.16;
-    else mcf_val = 0.02; 
-  } else {
-    if (manureManagement === 'lagoon') mcf_val = 0.67;
-    else if (manureManagement === 'slurry') mcf_val = 0.16;
-    else if (manureManagement === 'solid') mcf_val = 0.02;
-    else if (manureManagement === 'dry-lot') mcf_val = 0.02;
-  }
+  const currentAwms = (animalType === 'broilers') ? awms : manureManagement;
+  if (currentAwms === 'lagoon') mcf_val = 0.67;
+  else if (currentAwms === 'liquid-slurry' || currentAwms === 'pit-long-term' || currentAwms === 'slurry') mcf_val = 0.16;
+  else mcf_val = 0.02;
 
-  const totalVolatileSolids = totalFeedIntakeAccumulated * (1 - dmd) * (1 - ash);
+  const totalVolatileSolids = totalFeedIntakeAccumulated * (1 - dmd_methane) * (1 - ash);
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
 
-  // Phosphorus run-off
+  // Final Results
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.029;
-
-  // Direct and Indirect N2O
+  let awmsFactor = (animalType === 'broilers' && awms !== 'poultry-litter') ? 0 : 1.0;
+  
   let directN2oFactor = 0.01;
   let fracGas = 0.1;
   const ef4 = 0.01;
-  let awmsFactor = 1.0;
 
-  if (animalType === 'broilers') {
-    if (awms !== 'poultry-litter') {
-      awmsFactor = 0;
-    }
-    if (awms === 'lagoon') { directN2oFactor = 0.005; fracGas = 0.4; }
-    else if (awms === 'liquid-slurry') { directN2oFactor = 0.005; fracGas = 0.25; }
-    else if (awms === 'solid-storage') { directN2oFactor = 0.005; fracGas = 0.3; }
-    else if (awms === 'pit-long-term') { directN2oFactor = 0.01; fracGas = 0.45; }
-    else { directN2oFactor = 0.001; fracGas = 0.2; }
-  } else {
-    directN2oFactor = { 'lagoon': 0.005, 'solid': 0.02, 'slurry': 0.005, 'dry-lot': 0.01 }[manureManagement] || 0.01;
-    fracGas = { 'lagoon': 0.4, 'solid': 0.45, 'slurry': 0.25, 'dry-lot': 0.3 }[manureManagement] || 0.2;
-  }
-  
+  if (currentAwms === 'lagoon') { directN2oFactor = 0.005; fracGas = 0.4; }
+  else if (currentAwms === 'liquid-slurry' || currentAwms === 'slurry') { directN2oFactor = 0.005; fracGas = 0.25; }
+  else if (currentAwms === 'solid-storage' || currentAwms === 'solid') { directN2oFactor = 0.005; fracGas = 0.3; }
+  else if (currentAwms === 'pit-long-term') { directN2oFactor = 0.01; fracGas = 0.45; }
+
   const directN2O = totalNitrogenExcreted * awmsFactor * directN2oFactor * (44 / 28);
   const indirectN2O = totalNitrogenExcreted * awmsFactor * fracGas * ef4 * (44 / 28);
 

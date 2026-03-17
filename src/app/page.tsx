@@ -5,15 +5,15 @@ import { FarmDataInput } from '@/components/calculator/FarmDataInput';
 import { EmissionsResults } from '@/components/calculator/EmissionsResults';
 import { MitigationAI } from '@/components/calculator/MitigationAI';
 import { calculateEmissions, FarmData, ComparativeResults, EmissionResults, AnimalType } from '@/lib/calculations';
-import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers, Calculator, TrendingDown, TrendingUp, FlaskConical } from 'lucide-react';
+import { Leaf, Info, BookOpen, ShieldCheck, ArrowRight, RefreshCw, Layers, Calculator, TrendingDown, TrendingUp, FlaskConical, Zap } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const animalTypeLabels: Record<AnimalType, string> = {
   'broilers': 'Broilers',
@@ -40,6 +40,7 @@ export default function Home() {
   const [scenarioFcr, setScenarioFcr] = useState<number>(0);
   const [scenarioFecalN, setScenarioFecalN] = useState<number>(0);
   const [scenarioFecalP, setScenarioFecalP] = useState<number>(0);
+  const [scenarioNitrogenDigestibility, setScenarioNitrogenDigestibility] = useState<number>(0.85);
 
   const handleEstablishBaseline = (data: FarmData) => {
     const results = calculateEmissions(data, false);
@@ -48,6 +49,7 @@ export default function Home() {
     setScenarioFcr(data.fcr);
     setScenarioFecalN(data.fecalN || 0);
     setScenarioFecalP(data.fecalP || 0);
+    setScenarioNitrogenDigestibility(data.nitrogenDigestibility || 0.85);
     setStep('results');
     setComparisonResults(null);
     setSelectedAdditive('none');
@@ -58,7 +60,6 @@ export default function Home() {
     
     setSelectedAdditive(additive);
     
-    // Default FCR reduction logic
     let targetFcr = scenarioFcr;
     if (additive !== 'none' && targetFcr === baselineData.fcr) {
       const reduction = (additive === 'jefo-combo' || additive === 'xylanase') ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
@@ -69,9 +70,9 @@ export default function Home() {
       setScenarioFcr(targetFcr);
     }
 
-    // Default Fecal reduction logic if experimental mode is active
     let targetFecalN = scenarioFecalN;
     let targetFecalP = scenarioFecalP;
+    let targetNDig = scenarioNitrogenDigestibility;
     
     if (additive !== 'none') {
       if (baselineData.useExperimentalN && targetFecalN === baselineData.fecalN) {
@@ -82,11 +83,18 @@ export default function Home() {
         targetFecalP = parseFloat(((baselineData.fecalP || 0) * 0.98).toFixed(2));
         setScenarioFecalP(targetFecalP);
       }
+      // Improved digestibility logic
+      if (targetNDig === baselineData.nitrogenDigestibility) {
+        targetNDig = Math.min(0.99, parseFloat((baselineData.nitrogenDigestibility * 1.05).toFixed(2)));
+        setScenarioNitrogenDigestibility(targetNDig);
+      }
     } else {
       targetFecalN = baselineData.fecalN || 0;
       targetFecalP = baselineData.fecalP || 0;
+      targetNDig = baselineData.nitrogenDigestibility;
       setScenarioFecalN(targetFecalN);
       setScenarioFecalP(targetFecalP);
+      setScenarioNitrogenDigestibility(targetNDig);
     }
 
     const updatedData = { 
@@ -94,7 +102,8 @@ export default function Home() {
       additive, 
       fcr: targetFcr,
       fecalN: targetFecalN,
-      fecalP: targetFecalP
+      fecalP: targetFecalP,
+      nitrogenDigestibility: targetNDig
     };
     const scenarioResults = calculateEmissions(updatedData, true);
     
@@ -105,12 +114,13 @@ export default function Home() {
     });
   };
 
-  const handleScenarioMetricChange = (field: 'fcr' | 'fecalN' | 'fecalP', value: number) => {
+  const handleScenarioMetricChange = (field: 'fcr' | 'fecalN' | 'fecalP' | 'nDig', value: number) => {
     if (!baselineData || !baselineResults) return;
 
     let updatedFcr = scenarioFcr;
     let updatedFecalN = scenarioFecalN;
     let updatedFecalP = scenarioFecalP;
+    let updatedNDig = scenarioNitrogenDigestibility;
 
     if (field === 'fcr') {
       updatedFcr = value;
@@ -121,6 +131,9 @@ export default function Home() {
     } else if (field === 'fecalP') {
       updatedFecalP = value;
       setScenarioFecalP(value);
+    } else if (field === 'nDig') {
+      updatedNDig = value;
+      setScenarioNitrogenDigestibility(value);
     }
 
     const updatedData = { 
@@ -128,7 +141,8 @@ export default function Home() {
       additive: selectedAdditive, 
       fcr: updatedFcr,
       fecalN: updatedFecalN,
-      fecalP: updatedFecalP
+      fecalP: updatedFecalP,
+      nitrogenDigestibility: updatedNDig
     };
     const scenarioResults = calculateEmissions(updatedData, true);
     
@@ -146,10 +160,6 @@ export default function Home() {
     setSelectedAdditive('none');
     setStep('input');
   };
-
-  const isPhased = baselineData?.animalType === 'broilers' || 
-                   baselineData?.animalType === 'swine-nursery' ||
-                   baselineData?.animalType === 'swine-sow';
 
   const calculateDiff = (base: number, scen: number) => {
     if (base === 0) return 0;
@@ -177,7 +187,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight">FarmEI Estimator</h1>
-              <p className="text-white/70 text-[11px] uppercase tracking-wider font-bold">Comparative Assessment</p>
+              <p className="text-white/70 text-[11px] uppercase tracking-wider font-bold">Nutrient & Emission Audit</p>
             </div>
           </div>
           <nav className="flex gap-8 text-white/90 font-medium text-sm">
@@ -189,46 +199,20 @@ export default function Home() {
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary uppercase">Environmental Methodology</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-6 text-sm leading-relaxed pr-2">
+                <div className="space-y-6 text-sm leading-relaxed pr-2 font-bold">
                   <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nutrient Excretion Analysis</h4>
-                    <p className="font-bold">Supports two methodologies:</p>
-                    <ul className="list-disc pl-5 font-bold text-slate-700 space-y-1">
-                      <li><strong>Mass Balance:</strong> Phased dietary intake minus biological retention (29g N/kg, 6g P/kg gain).</li>
-                      <li><strong>Experimental Phased:</strong> Uses lab-measured Fecal % (N or P) applied per phase to fecal dry matter output. Excretion = Phased Feed * (1 - 85% DMD) * Fecal%.</li>
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrogen Excretion (Experimental)</h4>
+                    <p>When Laboratory Mode is active:</p>
+                    <ul className="list-disc pl-5 text-slate-700 space-y-1">
+                      <li>Daily Fecal DM Output = Feed Intake * (1 - Nitrogen Digestibility)</li>
+                      <li>N Excretion = % Fecal N * Fecal DM Output</li>
+                      <li>Total Nitrogen Excreted = Estimated N * 4</li>
                     </ul>
                   </section>
                   <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrous Oxide (IPCC 2019)</h4>
-                    <p className="font-bold text-xs italic">For Broilers: Emissions factor is applied (1.0) only for 'Poultry with litter' systems. All other systems use factor 0.</p>
-                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
-                      <div>
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Direct N2O</p>
-                        <p>{"Direct N2O = N_excreted * AWMS_Factor * EF * (44/28)"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Indirect N2O</p>
-                        <p>{"Indirect N2O = N_excreted * AWMS_Factor * FracGas * 0.01 (EF4) * (44/28)"}</p>
-                      </div>
-                    </div>
-                  </section>
-                  <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (CH4) Balance</h4>
-                    <p className="font-bold text-xs">Estimated phase-by-phase using precise feed intake for phased production systems.</p>
-                    <div className="bg-white/40 backdrop-blur-md p-4 rounded-xl border border-white/20 space-y-4 font-black text-slate-700">
-                      <div>
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Enteric Methane (IPCC Tier 2)</p>
-                        <p><strong>Poultry:</strong> {"1.6g CH4 / bird / cycle"}</p>
-                        <p><strong>Swine:</strong> {"(Weight * Multiplier / 365) * Headcount * CycleDays"}</p>
-                      </div>
-                      <div className="border-t border-white/30 pt-2">
-                        <p className="text-xs uppercase text-primary mb-1 font-black">Manure Methane (VS Balance)</p>
-                        <p className="mb-2">{"CH4 (kg) = Sum(VS_i) * B0 * MCF * 0.67"}</p>
-                        <p className="text-[11px] text-muted-foreground font-bold">{"VS_i (Volatile Solids per phase) = Phased Feed Intake * (1 - 85% DMD) * (1 - 10% Ash)"}</p>
-                        <p className="text-[11px] text-muted-foreground font-bold italic">{"B0: Swine NA (0.48), Swine EU/Other (0.45), Poultry (0.36)"}</p>
-                        <p className="text-[11px] text-muted-foreground font-bold italic">{"MCF: Lagoon (67%), Slurry/Pit (16%), Litter/Solid (2%)"}</p>
-                      </div>
-                    </div>
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Methane (Manure)</h4>
+                    <p>CH4 (kg) = VS * B0 * MCF * 0.67</p>
+                    <p className="text-xs text-muted-foreground">VS (Volatile Solids) = Feed Intake * (1 - 0.85 DMD) * (1 - 10% Ash)</p>
                   </section>
                 </div>
               </DialogContent>
@@ -245,7 +229,7 @@ export default function Home() {
             <div className="text-center mb-10">
               <h2 className="text-4xl font-black text-primary mb-3 uppercase tracking-tight">Cycle Baseline</h2>
               <p className="text-muted-foreground max-w-xl mx-auto text-lg font-bold">
-                Establish your production baseline by defining core efficiency metrics.
+                Establish your production baseline by defining core efficiency and digestibility metrics.
               </p>
             </div>
             <div className="max-w-3xl mx-auto">
@@ -269,70 +253,14 @@ export default function Home() {
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Category</span>
                     <span className="text-primary">{baselineData ? animalTypeLabels[baselineData.animalType] : ''}</span>
                   </div>
-                  {baselineData?.region && (
-                    <div className="flex justify-between border-b border-white/10 pb-2">
-                      <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Region</span>
-                      <span className="text-primary">{baselineData.region}</span>
-                    </div>
-                  )}
-                  {baselineData?.animalType === 'broilers' && (
-                    <div className="flex justify-between border-b border-white/10 pb-2">
-                      <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">AWMS</span>
-                      <span className="text-primary">{baselineData.awms ? awmsLabels[baselineData.awms] : ''}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Baseline FCR</span>
-                    <span className="text-secondary">{baselineData?.fcr}</span>
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">N Digestibility</span>
+                    <span className="text-secondary">{baselineData?.nitrogenDigestibility}</span>
                   </div>
-                  
-                  {isPhased && baselineData && !baselineData.useExperimentalN && !baselineData.useExperimentalP && (
-                    <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 space-y-3">
-                      <div className="text-[11px] font-black uppercase text-primary/60 border-b border-primary/10 pb-2 tracking-widest">
-                        {baselineData.animalType === 'swine-sow' ? 'Sow Nutrition (Gest/Lact)' : 'Dietary Strategy'}
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                        {baselineData.animalType === 'swine-sow' ? (
-                          <>
-                            <span className="text-muted-foreground font-bold">CP %</span>
-                            <span className="text-right text-primary font-black">{baselineData.phase1CP}/{baselineData.phase2CP}</span>
-                            <span className="text-muted-foreground font-bold">P %</span>
-                            <span className="text-right text-primary font-black">{baselineData.phase1P}/{baselineData.phase2P}</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-muted-foreground font-bold">CP % (P1-3)</span>
-                            <span className="text-right text-primary font-black">{baselineData.phase1CP}/{baselineData.phase2CP}/{baselineData.phase3CP}</span>
-                            <span className="text-muted-foreground font-bold">P % (P1-3)</span>
-                            <span className="text-right text-primary font-black">{baselineData.phase1P}/{baselineData.phase2P}/{baselineData.phase3P}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {baselineData?.useExperimentalData && (
-                    <div className="p-4 bg-secondary/5 rounded-xl border border-secondary/10 space-y-3">
-                      <div className="text-[11px] font-black uppercase text-secondary/60 border-b border-secondary/10 pb-2 tracking-widest">
-                        Lab Baselines
-                      </div>
-                      <div className="space-y-2 text-xs">
-                        {baselineData.useExperimentalN && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground font-bold">Baseline Fecal N</span>
-                            <span className="text-right text-secondary font-black">{baselineData.fecalN}%</span>
-                          </div>
-                        )}
-                        {baselineData.useExperimentalP && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground font-bold">Baseline Fecal P</span>
-                            <span className="text-right text-secondary font-black">{baselineData.fecalP}%</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  
+                  <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">AWMS</span>
+                    <span className="text-primary">{baselineData?.awms ? awmsLabels[baselineData.awms] : 'Default'}</span>
+                  </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Exit Weight</span>
                     <span className="text-primary font-black">{baselineData?.avgWeight} kg</span>
@@ -342,7 +270,7 @@ export default function Home() {
 
               <div className="glass-dark p-6 rounded-2xl bg-primary/10 border-white/20">
                 <h3 className="font-black text-primary mb-4 flex items-center gap-2 text-xs uppercase tracking-widest">
-                  <ArrowRight className="w-5 h-5" /> Strategies
+                  <ArrowRight className="w-5 h-5" /> Mitigation Strategies
                 </h3>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {[
@@ -381,6 +309,19 @@ export default function Home() {
                       />
                     </div>
 
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+                        <Zap className="w-4 h-4" /> Scenario N Digestibility
+                      </Label>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        value={scenarioNitrogenDigestibility}
+                        onChange={(e) => handleScenarioMetricChange('nDig', parseFloat(e.target.value) || 0)}
+                        className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
+                      />
+                    </div>
+
                     {baselineData?.useExperimentalN && (
                       <div className="space-y-2">
                         <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
@@ -395,29 +336,14 @@ export default function Home() {
                         />
                       </div>
                     )}
-
-                    {baselineData?.useExperimentalP && (
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
-                          <FlaskConical className="w-4 h-4" /> Scenario % Fecal P
-                        </Label>
-                        <Input 
-                          type="number" 
-                          step="0.01"
-                          value={scenarioFecalP}
-                          onChange={(e) => handleScenarioMetricChange('fecalP', parseFloat(e.target.value) || 0)}
-                          className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
-                        />
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
 
-              {baselineData && (comparisonResults?.scenario || baselineResults) && (
+              {baselineData && baselineResults && (
                 <MitigationAI 
                   data={baselineData} 
-                  results={comparisonResults?.scenario || baselineResults!} 
+                  results={comparisonResults?.scenario || baselineResults} 
                 />
               )}
             </div>
@@ -448,9 +374,9 @@ export default function Home() {
                       <div className="flex items-center justify-between mb-8">
                         <div>
                           <h3 className="text-2xl font-black text-primary uppercase tracking-widest">Technical Audit</h3>
-                          <p className="text-sm font-bold text-muted-foreground mt-1">Detailed mass balance & emission factor audit.</p>
+                          <p className="text-sm font-bold text-muted-foreground mt-1">Detailed nutrient balance & emission factors.</p>
                         </div>
-                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Validated Engine</Badge>
+                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Validated Factor Engine</Badge>
                       </div>
                       
                       <div className="overflow-hidden border border-white/30 rounded-2xl bg-white/10 backdrop-blur-lg">
@@ -465,13 +391,9 @@ export default function Home() {
                           </TableHeader>
                           <TableBody>
                             {[
-                              { label: 'Nitrogen Excreted', unit: 'kg N', key: 'nitrogenExcreted', precision: 1 },
+                              { label: 'Total Nitrogen Excreted', unit: 'kg N (Factor 4 applied)', key: 'nitrogenExcreted', precision: 1 },
                               { label: 'Phosphorus Excreted', unit: 'kg P', key: 'phosphorusExcreted', precision: 1 },
-                              { label: 'Enteric Methane', unit: 'kg CH4', key: 'entericMethane', precision: 3 },
                               { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 3 },
-                              { label: 'Direct N2O', unit: 'kg N2O', key: 'directN2O', precision: 3 },
-                              { label: 'Indirect N2O', unit: 'kg N2O', key: 'indirectN2O', precision: 3 },
-                              { label: 'Phosphorus Runoff', unit: 'kg P', key: 'phosphorusRunoff', precision: 2 },
                               { label: 'Carbon Equiv.', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
                             ].map((item) => {
                               const baseVal = baselineResults[item.key as keyof EmissionResults];
@@ -503,18 +425,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
-      <footer className="bg-white/40 backdrop-blur-md border-t border-white/30 py-8 mt-auto">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Leaf className="w-5 h-5 text-primary opacity-70" />
-            <span className="font-black text-xl text-primary tracking-tight uppercase">FarmEI Estimator</span>
-          </div>
-          <div className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-black">
-            © {new Date().getFullYear()} FarmEI • Precision Environmental Metrics • Feed additive metabolic model applied
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

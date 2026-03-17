@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { FarmData, AnimalType, Region, AWMS } from '@/lib/calculations';
-import { Bird, Database, Globe, Trash2, Microscope, Clock, FlaskConical, Beaker } from 'lucide-react';
+import { Bird, Database, Globe, Trash2, Microscope, Clock, FlaskConical, Beaker, Zap } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -33,6 +33,7 @@ export function FarmDataInput({ onCalculate }: Props) {
     manureManagement: 'solid',
     avgWeight: 2.5,
     additive: 'none',
+    nitrogenDigestibility: 0.85,
     useExperimentalData: false,
     useExperimentalN: false,
     useExperimentalP: false,
@@ -234,6 +235,21 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
+            <div className="space-y-2 md:col-span-2">
+              <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
+                <Zap className="w-3.5 h-3.5" /> Nitrogen / Protein Digestibility
+              </Label>
+              <Input 
+                className="h-11 border-primary/30 bg-white/70 text-sm font-bold rounded-xl"
+                type="number" 
+                step="0.01"
+                placeholder="Default 0.85"
+                value={formData.nitrogenDigestibility} 
+                onChange={(e) => updateField('nitrogenDigestibility', e.target.value)} 
+              />
+              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Value used for fecal dry matter output estimation in Nitrogen cycles.</p>
+            </div>
+
             <div className="md:col-span-2 p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between shadow-sm">
               <div className="space-y-0.5">
                 <Label className="text-xs font-black text-primary uppercase flex items-center gap-2">
@@ -287,7 +303,7 @@ export function FarmDataInput({ onCalculate }: Props) {
               </div>
             )}
 
-            {/* Nitrogen Strategy Selection */}
+            {/* Nitrogen Strategy */}
             <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/10">
               <div className="flex items-center gap-2 mb-2">
                 <Beaker className="w-4 h-4 text-primary" />
@@ -304,7 +320,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     onChange={(e) => updateField('fecalN', e.target.value)} 
                     className="h-11 font-black bg-white/70" 
                   />
-                  <p className="text-[10px] text-muted-foreground italic font-medium">Single lab value used for nitrogen excretion across all production phases.</p>
+                  <p className="text-[10px] text-muted-foreground italic font-medium">Applied to Daily Fecal DM = Daily Feed * (1 - Nitrogen Digestibility).</p>
                 </div>
               ) : (
                 <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3 animate-in fade-in duration-300">
@@ -333,7 +349,7 @@ export function FarmDataInput({ onCalculate }: Props) {
               )}
             </div>
 
-            {/* Phosphorus Strategy Selection */}
+            {/* Phosphorus Strategy */}
             <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/10">
               <div className="flex items-center gap-2 mb-2">
                 <Beaker className="w-4 h-4 text-primary" />
@@ -350,7 +366,6 @@ export function FarmDataInput({ onCalculate }: Props) {
                     onChange={(e) => updateField('fecalP', e.target.value)} 
                     className="h-11 font-black bg-white/70" 
                   />
-                  <p className="text-[10px] text-muted-foreground italic font-medium">Single lab value used for phosphorus excretion across all production phases.</p>
                 </div>
               ) : (
                 <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3 animate-in fade-in duration-300">
