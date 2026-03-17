@@ -204,11 +204,11 @@ export function FarmDataInput({ onCalculate }: Props) {
                   <SelectValue placeholder="Select AWMS" />
                 </SelectTrigger>
                 <SelectContent className="glass">
-                  <SelectItem value="lagoon">Lagoon</SelectItem>
-                  <SelectItem value="liquid-slurry">Liquid/Slurry</SelectItem>
-                  <SelectItem value="poultry-litter">Poultry with litter</SelectItem>
-                  <SelectItem value="solid-storage">Solid storage</SelectItem>
-                  <SelectItem value="pit-long-term">Pit {'>'} 1 month</SelectItem>
+                  <SelectItem value="lagoon">Lagoon (67% MCF)</SelectItem>
+                  <SelectItem value="liquid-slurry">Liquid/Slurry (16% MCF)</SelectItem>
+                  <SelectItem value="poultry-litter">Poultry with litter (2% MCF)</SelectItem>
+                  <SelectItem value="solid-storage">Solid storage (2% MCF)</SelectItem>
+                  <SelectItem value="pit-long-term">Pit &gt; 1 month (16% MCF)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -9,15 +9,15 @@ export interface FarmData {
   awms?: AWMS;
   count: number;
   fcr: number; // Feed Conversion Ratio
-  cyclesPerYear: number; // Number of production cycles per year
+  cyclesPerYear: number; 
   feedCrudeProtein: number; // percentage
-  phase1CP?: number; // Phase 1 CP (%) / Gestation CP for Swine
-  phase2CP?: number; // Phase 2 CP (%) / Lactation CP for Swine
-  phase3CP?: number; // Phase 3 CP (%)
+  phase1CP?: number; 
+  phase2CP?: number; 
+  phase3CP?: number; 
   feedPhosphorus: number; // percentage
-  phase1P?: number; // Phase 1 P (%) / Gestation P for Swine
-  phase2P?: number; // Phase 2 P (%) / Lactation P for Swine
-  phase3P?: number; // Phase 3 P (%)
+  phase1P?: number; 
+  phase2P?: number; 
+  phase3P?: number; 
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot' | 'pit-long-term';
   avgWeight: number; // kg
   additive: FeedAdditive;
@@ -49,7 +49,7 @@ export interface ComparativeResults {
 }
 
 /**
- * Calculates farm emissions per production cycle.
+ * Calculates farm emissions per production cycle using hybrid Laboratory/Metabolic logic.
  */
 export function calculateEmissions(data: FarmData, useAdditive: boolean = false): EmissionResults {
   const { 
@@ -123,10 +123,9 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const phaseFeed = totalFeedPerCycle * fraction;
     const phaseGain = totalGain * fraction;
     
-    // Nitrogen calculation (Laboratory Experimental vs Standard)
+    // Nitrogen calculation 
     if (useExperimentalData && useExperimentalN) {
       // Step (b): Daily fecal dry matter output = daily feed intake * (1 - nitrogen digestibility)
-      // Here calculated as total phase fecal DM
       const fecalDMOutput = phaseFeed * (1 - nDigestibility);
       // Step (c): Conversion = % fecal nitrogen * daily fecal DM
       totalNitrogenExcreted += (fecalN || 0) / 100 * fecalDMOutput;
@@ -139,6 +138,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
     // Phosphorus calculation
     if (useExperimentalData && useExperimentalP) {
+      // Default DMD 0.85 used for P fecal DM if experimental P is active
       const fecalDMOutput = phaseFeed * (1 - 0.85); 
       totalPhosphorusExcreted += ((fecalP || 0) / 100) * fecalDMOutput;
     } else {
@@ -148,7 +148,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       totalPhosphorusExcreted += Math.max(0, pIntake - pRetention);
     }
 
-    // Volatile Solids per phase for Methane
+    // Volatile Solids per phase for Methane (Standard VS model maintained)
     totalVolatileSolids += phaseFeed * (1 - dmd_methane) * (1 - ash);
   };
 
@@ -160,7 +160,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
 
-  // Step (d): Multiply estimated N by factor of 4 for total nitrogen excreted
+  // Step (d): Final Factor of 4 for Total Nitrogen Excreted
   totalNitrogenExcreted *= 4;
 
   // Methane Logic
@@ -191,11 +191,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.029;
   
-  // AWMS Logic for N2O: Only active for poultry with litter
-  let awmsFactor = 0;
-  if (animalType === 'broilers' && awms === 'poultry-litter') {
-    awmsFactor = 1.0;
-  }
+  // AWMS Logic for N2O
+  let awmsFactor = (animalType === 'broilers' && awms === 'poultry-litter') ? 1.0 : 1.0; // Standard factor 1 applied to manure N
   
   let directN2oFactor = 0.01;
   let fracGas = 0.1;
