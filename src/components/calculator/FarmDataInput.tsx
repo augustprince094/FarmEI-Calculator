@@ -197,8 +197,8 @@ export function FarmDataInput({ onCalculate }: Props) {
                 <Trash2 className="w-3.5 h-3.5" /> Waste Management (AWMS)
               </Label>
               <Select 
-                value={formData.awms} 
-                onValueChange={(val: AWMS) => updateField('awms', val)}
+                value={formData.animalType === 'broilers' ? formData.awms : formData.manureManagement} 
+                onValueChange={(val: any) => updateField(formData.animalType === 'broilers' ? 'awms' : 'manureManagement', val)}
               >
                 <SelectTrigger className="h-11 border-white/40 bg-white/60 backdrop-blur-md focus:ring-primary rounded-xl text-sm font-bold">
                   <SelectValue placeholder="Select AWMS" />
