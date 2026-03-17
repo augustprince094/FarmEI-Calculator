@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { FarmData, AnimalType, Region, AWMS } from '@/lib/calculations';
-import { Bird, Database, Settings2, Globe, Trash2 } from 'lucide-react';
+import { Bird, Database, Settings2, Globe, Trash2, Microscope, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -32,7 +33,11 @@ export function FarmDataInput({ onCalculate }: Props) {
     phase3P: 0.55,
     manureManagement: 'solid',
     avgWeight: 2.5,
-    additive: 'none'
+    additive: 'none',
+    useExperimentalData: false,
+    fecalNPercent: 4.5,
+    fecalPPercent: 1.2,
+    cycleDurationDays: 42
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,10 +45,10 @@ export function FarmDataInput({ onCalculate }: Props) {
     onCalculate(formData);
   };
 
-  const updateField = (field: keyof FarmData, value: string | number) => {
+  const updateField = (field: keyof FarmData, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
-      [field]: typeof value === 'string' && !isNaN(Number(value)) && !['animalType', 'manureManagement', 'additive', 'region', 'awms'].includes(field) ? Number(value) : value
+      [field]: (typeof value === 'string' && !isNaN(Number(value)) && !['animalType', 'manureManagement', 'additive', 'region', 'awms'].includes(field)) ? Number(value) : value
     }));
   };
 
@@ -64,7 +69,8 @@ export function FarmDataInput({ onCalculate }: Props) {
           phase1P: 0.5,
           phase2P: 0.65,
           phase3P: 0,
-          manureManagement: 'slurry' 
+          manureManagement: 'slurry',
+          cycleDurationDays: 365
         };
         break;
       case 'swine-nursery':
@@ -80,11 +86,12 @@ export function FarmDataInput({ onCalculate }: Props) {
           phase1P: 0.75,
           phase2P: 0.65,
           phase3P: 0.6,
-          manureManagement: 'slurry' 
+          manureManagement: 'slurry',
+          cycleDurationDays: 49
         };
         break;
       case 'swine-grow-finish':
-        defaults = { ...defaults, avgWeight: 115, fcr: 2.8, cyclesPerYear: 1, count: 1000, feedCrudeProtein: 16, feedPhosphorus: 0.5, manureManagement: 'slurry' };
+        defaults = { ...defaults, avgWeight: 115, fcr: 2.8, cyclesPerYear: 1, count: 1000, feedCrudeProtein: 16, feedPhosphorus: 0.5, manureManagement: 'slurry', cycleDurationDays: 115 };
         break;
       case 'broilers':
       default:
@@ -101,7 +108,8 @@ export function FarmDataInput({ onCalculate }: Props) {
           phase2P: 0.6,
           phase3P: 0.55,
           manureManagement: 'solid',
-          awms: 'poultry-litter'
+          awms: 'poultry-litter',
+          cycleDurationDays: 42
         };
         break;
     }
@@ -231,7 +239,60 @@ export function FarmDataInput({ onCalculate }: Props) {
               />
             </div>
 
-            {isPhased ? (
+            <div className="md:col-span-2 p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-xs font-black text-primary uppercase flex items-center gap-2">
+                  <Microscope className="w-4 h-4" /> Experimental Mode
+                </Label>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Use measured fecal nitrogen/phosphorus</p>
+              </div>
+              <Switch 
+                checked={formData.useExperimentalData} 
+                onCheckedChange={(val) => updateField('useExperimentalData', val)}
+              />
+            </div>
+
+            {formData.useExperimentalData ? (
+              <div className="md:col-span-2 space-y-4 pt-2 animate-in slide-in-from-top-4 duration-500">
+                <div className="p-5 bg-white/90 rounded-2xl border border-secondary/20 shadow-sm backdrop-blur-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-black text-secondary uppercase tracking-widest flex items-center gap-2">
+                        <Microscope className="w-3.5 h-3.5" /> Fecal N (%)
+                      </Label>
+                      <Input 
+                        type="number" step="0.01" 
+                        value={formData.fecalNPercent} 
+                        onChange={(e) => updateField('fecalNPercent', e.target.value)}
+                        className="h-11 border-secondary/20 font-black text-secondary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-black text-secondary uppercase tracking-widest flex items-center gap-2">
+                        <Microscope className="w-3.5 h-3.5" /> Fecal P (%)
+                      </Label>
+                      <Input 
+                        type="number" step="0.01" 
+                        value={formData.fecalPPercent} 
+                        onChange={(e) => updateField('fecalPPercent', e.target.value)}
+                        className="h-11 border-secondary/20 font-black text-secondary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-black text-secondary uppercase tracking-widest flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5" /> Cycle Duration (Days)
+                      </Label>
+                      <Input 
+                        type="number" 
+                        value={formData.cycleDurationDays} 
+                        onChange={(e) => updateField('cycleDurationDays', e.target.value)}
+                        className="h-11 border-secondary/20 font-black text-secondary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : isPhased ? (
               <div className="md:col-span-2 space-y-4 pt-2 animate-in slide-in-from-top-4 duration-500">
                 <div className="p-4 bg-white/90 rounded-xl border border-primary/20 shadow-sm backdrop-blur-lg">
                   <div className="flex items-center gap-2.5 mb-3">
