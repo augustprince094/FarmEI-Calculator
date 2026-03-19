@@ -30,14 +30,22 @@ To push this project to your own GitHub repository, follow these steps in your t
    ```bash
    git branch -M main
    ```
-6. **Add the remote repository URL** (replace `<USERNAME>` and `<REPO>` with your details):
+6. **Add the remote repository URL**:
+   Replace `<URL>` with your actual repository URL (e.g., `https://github.com/username/repo.git`):
    ```bash
-   git remote add origin https://github.com/<USERNAME>/<REPO>.git
+   git remote add origin <URL>
    ```
 7. **Push to GitHub**:
    ```bash
    git push -u origin main
    ```
+
+### Troubleshooting "Repository Not Found"
+If you get a "Not Found" error, your remote URL might be incorrect. You can fix it by running:
+```bash
+git remote remove origin
+git remote add origin https://github.com/augustprince094/FarmEI-Calculator.git
+```
 
 ## Tech Stack
 - **Framework**: Next.js (App Router)
