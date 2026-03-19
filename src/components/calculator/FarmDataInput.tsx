@@ -78,7 +78,7 @@ export function FarmDataInput({ onCalculate }: Props) {
           manureManagement: 'slurry',
           cycleDurationDays: 365,
           pigletsPerLitter: 12,
-          avgLitterWeight: 15,
+          avgLitterWeight: 1.5,
           gestationFeedIntake: 300,
           lactationFeedIntake: 150
         };
@@ -235,7 +235,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Average Litter Weight (kg)</Label>
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Average Piglet Weight (kg)</Label>
                   <Input 
                     className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
                     type="number" 

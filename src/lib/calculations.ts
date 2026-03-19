@@ -70,7 +70,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     nitrogenDigestibility,
     gestationFeedIntake,
     lactationFeedIntake,
-    avgLitterWeight
+    avgLitterWeight,
+    pigletsPerLitter
   } = data;
   
   // Total feed calculation logic
@@ -79,7 +80,9 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     totalFeedPerCycle = (gestationFeedIntake + lactationFeedIntake) * count;
   }
   
-  const totalGain = animalType === 'swine-sow' ? (avgLitterWeight || 15) : avgWeight;
+  const totalGain = animalType === 'swine-sow' 
+    ? (avgLitterWeight || 15) * (pigletsPerLitter || 12) 
+    : avgWeight;
   
   const nDigestibility = nitrogenDigestibility || 0.85;
 
@@ -142,18 +145,25 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const phaseGain = totalGain * fraction;
     
     if (useExperimentalData && useExperimentalN) {
-      const fecalDMOutput = phaseFeed * (1 - nDigestibility);
-      totalNitrogenExcreted += (fecalN || 0) / 100 * fecalDMOutput;
+      const fecalDMOutput = (phaseFeed / count) * (1 - nDigestibility);
+      totalNitrogenExcreted += (fecalN || 0) / 100 * fecalDMOutput * count;
     } else {
       const phaseCP = [phase1CP, phase2CP, phase3CP][phaseIdx - 1] ?? feedCrudeProtein;
       const nIntake = (phaseFeed * phaseCP / 100) / 6.25;
-      const nRetention = (nRetentionFactor * phaseGain / 1000) * count;
+      
+      let nRetention = 0;
+      if (animalType === 'swine-sow') {
+        // Sow formula: N Retention = (Gain (sow+litter) * 18.6% protein) / 6.25
+        nRetention = (phaseGain * count * 0.186) / 6.25;
+      } else {
+        nRetention = (nRetentionFactor * phaseGain / 1000) * count;
+      }
       totalNitrogenExcreted += Math.max(0, nIntake - nRetention);
     }
 
     if (useExperimentalData && useExperimentalP) {
-      const fecalDMOutput = phaseFeed * (1 - 0.85); 
-      totalPhosphorusExcreted += ((fecalP || 0) / 100) * fecalDMOutput;
+      const fecalDMOutput = (phaseFeed / count) * (1 - 0.85); 
+      totalPhosphorusExcreted += ((fecalP || 0) / 100) * fecalDMOutput * count;
     } else {
       const phaseP = [phase1P, phase2P, phase3P][phaseIdx - 1] ?? feedPhosphorus;
       const pIntake = phaseFeed * (phaseP / 100);
@@ -170,6 +180,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
 
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
+  
+  // Apply unit factor of 4 to nitrogen
   totalNitrogenExcreted *= 4;
 
   const density_ch4 = 0.67;
