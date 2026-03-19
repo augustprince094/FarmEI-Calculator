@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -9,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { FarmData, AnimalType, Region, AWMS } from '@/lib/calculations';
-import { Bird, Database, Globe, Trash2, Microscope, Clock, FlaskConical, Beaker, Zap } from 'lucide-react';
+import { Bird, Database, Globe, Trash2, Microscope, Clock, FlaskConical, Beaker, Zap, Baby } from 'lucide-react';
 
 interface Props {
   onCalculate: (data: FarmData) => void;
@@ -40,7 +39,11 @@ export function FarmDataInput({ onCalculate }: Props) {
     useExperimentalP: false,
     fecalN: 4.5,
     fecalP: 1.2,
-    cycleDurationDays: 42
+    cycleDurationDays: 42,
+    pigletsPerLitter: 12,
+    avgLitterWeight: 15,
+    gestationFeedIntake: 300,
+    lactationFeedIntake: 150
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -73,7 +76,11 @@ export function FarmDataInput({ onCalculate }: Props) {
           phase2P: 0.65,
           phase3P: 0,
           manureManagement: 'slurry',
-          cycleDurationDays: 365
+          cycleDurationDays: 365,
+          pigletsPerLitter: 12,
+          avgLitterWeight: 15,
+          gestationFeedIntake: 300,
+          lactationFeedIntake: 150
         };
         break;
       case 'swine-nursery':
@@ -214,27 +221,72 @@ export function FarmDataInput({ onCalculate }: Props) {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Exit Weight (kg)</Label>
-              <Input 
-                className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
-                type="number" 
-                step="0.1"
-                value={formData.avgWeight} 
-                onChange={(e) => updateField('avgWeight', e.target.value)} 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Baseline FCR</Label>
-              <Input 
-                className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
-                type="number" 
-                step="0.01"
-                value={formData.fcr} 
-                onChange={(e) => updateField('fcr', e.target.value)} 
-              />
-            </div>
+            {formData.animalType === 'swine-sow' ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-wider text-secondary">
+                    <Baby className="w-3.5 h-3.5" /> Piglets per Litter
+                  </Label>
+                  <Input 
+                    className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
+                    type="number" 
+                    value={formData.pigletsPerLitter} 
+                    onChange={(e) => updateField('pigletsPerLitter', e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Average Litter Weight (kg)</Label>
+                  <Input 
+                    className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
+                    type="number" 
+                    step="0.1"
+                    value={formData.avgLitterWeight} 
+                    onChange={(e) => updateField('avgLitterWeight', e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Gestation Feed Consumption (kg)</Label>
+                  <Input 
+                    className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
+                    type="number" 
+                    value={formData.gestationFeedIntake} 
+                    onChange={(e) => updateField('gestationFeedIntake', e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-primary">Lactation Feed Consumption (kg)</Label>
+                  <Input 
+                    className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
+                    type="number" 
+                    value={formData.lactationFeedIntake} 
+                    onChange={(e) => updateField('lactationFeedIntake', e.target.value)} 
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Exit Weight (kg)</Label>
+                  <Input 
+                    className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
+                    type="number" 
+                    step="0.1"
+                    value={formData.avgWeight} 
+                    onChange={(e) => updateField('avgWeight', e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-[11px] uppercase tracking-wider text-secondary">Baseline FCR</Label>
+                  <Input 
+                    className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
+                    type="number" 
+                    step="0.01"
+                    value={formData.fcr} 
+                    onChange={(e) => updateField('fcr', e.target.value)} 
+                  />
+                </div>
+              </>
+            )}
 
             <div className="md:col-span-2 p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between shadow-sm">
               <div className="space-y-0.5">
@@ -321,7 +373,6 @@ export function FarmDataInput({ onCalculate }: Props) {
                       value={formData.nitrogenDigestibility} 
                       onChange={(e) => updateField('nitrogenDigestibility', e.target.value)} 
                     />
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Applied to Daily Fecal DM = Daily Feed * (1 - Nitrogen Digestibility).</p>
                   </div>
                 </div>
               ) : (
@@ -330,16 +381,16 @@ export function FarmDataInput({ onCalculate }: Props) {
                   {isPhased ? (
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
-                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gest CP' : 'P1 CP'}</Label>
+                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gestation' : 'Phase 1'}</Label>
                         <Input type="number" step="0.1" value={formData.phase1CP} onChange={(e) => updateField('phase1CP', e.target.value)} className="h-9 font-black" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lact CP' : 'P2 CP'}</Label>
+                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lactation' : 'Phase 2'}</Label>
                         <Input type="number" step="0.1" value={formData.phase2CP} onChange={(e) => updateField('phase2CP', e.target.value)} className="h-9 font-black" />
                       </div>
                       {formData.animalType !== 'swine-sow' && (
                         <div className="space-y-1">
-                          <Label className="text-[9px] font-bold text-muted-foreground uppercase">P3 CP</Label>
+                          <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
                           <Input type="number" step="0.1" value={formData.phase3CP} onChange={(e) => updateField('phase3CP', e.target.value)} className="h-9 font-black" />
                         </div>
                       )}
@@ -375,16 +426,16 @@ export function FarmDataInput({ onCalculate }: Props) {
                   {isPhased ? (
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
-                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gest P' : 'P1 P'}</Label>
+                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gestation' : 'Phase 1'}</Label>
                         <Input type="number" step="0.01" value={formData.phase1P} onChange={(e) => updateField('phase1P', e.target.value)} className="h-9 font-black" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lact P' : 'P2 P'}</Label>
+                        <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lactation' : 'Phase 2'}</Label>
                         <Input type="number" step="0.01" value={formData.phase2P} onChange={(e) => updateField('phase2P', e.target.value)} className="h-9 font-black" />
                       </div>
                       {formData.animalType !== 'swine-sow' && (
                         <div className="space-y-1">
-                          <Label className="text-[9px] font-bold text-muted-foreground uppercase">P3 P</Label>
+                          <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
                           <Input type="number" step="0.01" value={formData.phase3P} onChange={(e) => updateField('phase3P', e.target.value)} className="h-9 font-black" />
                         </div>
                       )}

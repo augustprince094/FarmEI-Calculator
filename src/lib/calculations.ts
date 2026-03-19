@@ -1,4 +1,3 @@
-
 export type AnimalType = 'broilers' | 'swine-sow' | 'swine-nursery' | 'swine-grow-finish';
 export type FeedAdditive = 'none' | 'jefo-pro' | 'poa-eo' | 'xylanase' | 'jefo-combo';
 export type Region = 'Western Europe' | 'Eastern Europe' | 'Asia' | 'Africa' | 'North America' | 'Latin America';
@@ -30,6 +29,11 @@ export interface FarmData {
   fecalN?: number; // Single input for cycle fecal nitrogen %
   fecalP?: number; // Single input for cycle fecal phosphorus %
   cycleDurationDays?: number;
+  // Sow Specific Fields
+  pigletsPerLitter?: number;
+  avgLitterWeight?: number;
+  gestationFeedIntake?: number;
+  lactationFeedIntake?: number;
 }
 
 export interface EmissionResults {
@@ -63,16 +67,22 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     useExperimentalData, useExperimentalN, useExperimentalP,
     fecalN, fecalP,
     cycleDurationDays,
-    nitrogenDigestibility
+    nitrogenDigestibility,
+    gestationFeedIntake,
+    lactationFeedIntake,
+    avgLitterWeight
   } = data;
   
-  const totalFeedPerCycle = count * fcr * avgWeight;
-  const totalGain = avgWeight;
+  // Total feed calculation logic
+  let totalFeedPerCycle = count * fcr * avgWeight;
+  if (animalType === 'swine-sow' && gestationFeedIntake && lactationFeedIntake) {
+    totalFeedPerCycle = (gestationFeedIntake + lactationFeedIntake) * count;
+  }
   
-  // Nitrogen/Protein Digestibility (user defined or default 0.85)
+  const totalGain = animalType === 'swine-sow' ? (avgLitterWeight || 15) : avgWeight;
+  
   const nDigestibility = nitrogenDigestibility || 0.85;
 
-  // Additive metabolic efficiency factors
   let metabolicNMitigation = 1.0;
   let metabolicPMitigation = 1.0;
   let ch4MitigationFactor = 1.0;
@@ -111,10 +121,17 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   let phaseDist = { p1: 1, p2: 0, p3: 0 };
   if (animalType === 'broilers') phaseDist = { p1: 0.14, p2: 0.45, p3: 0.41 };
   else if (animalType === 'swine-nursery') phaseDist = { p1: 0.15, p2: 0.35, p3: 0.50 };
-  else if (animalType === 'swine-sow') phaseDist = { p1: 0.70, p2: 0.30, p3: 0 };
+  else if (animalType === 'swine-sow') {
+    if (gestationFeedIntake && lactationFeedIntake) {
+      const totalSowFeed = gestationFeedIntake + lactationFeedIntake;
+      phaseDist = { p1: gestationFeedIntake / totalSowFeed, p2: lactationFeedIntake / totalSowFeed, p3: 0 };
+    } else {
+      phaseDist = { p1: 0.70, p2: 0.30, p3: 0 };
+    }
+  }
 
-  const nRetentionFactor = 29; // g N / kg gain
-  const pRetentionFactor = 6;  // g P / kg gain
+  const nRetentionFactor = 29; 
+  const pRetentionFactor = 6;  
   const ash = 0.10; 
   const dmd_methane = 0.85;
 
@@ -124,7 +141,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const phaseFeed = totalFeedPerCycle * fraction;
     const phaseGain = totalGain * fraction;
     
-    // Nitrogen calculation 
     if (useExperimentalData && useExperimentalN) {
       const fecalDMOutput = phaseFeed * (1 - nDigestibility);
       totalNitrogenExcreted += (fecalN || 0) / 100 * fecalDMOutput;
@@ -135,7 +151,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       totalNitrogenExcreted += Math.max(0, nIntake - nRetention);
     }
 
-    // Phosphorus calculation
     if (useExperimentalData && useExperimentalP) {
       const fecalDMOutput = phaseFeed * (1 - 0.85); 
       totalPhosphorusExcreted += ((fecalP || 0) / 100) * fecalDMOutput;
@@ -146,7 +161,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       totalPhosphorusExcreted += Math.max(0, pIntake - pRetention);
     }
 
-    // Volatile Solids per phase for Methane (Standard VS model maintained)
     totalVolatileSolids += phaseFeed * (1 - dmd_methane) * (1 - ash);
   };
 
@@ -154,14 +168,10 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   calculatePhaseExcretion(2, phaseDist.p2);
   calculatePhaseExcretion(3, phaseDist.p3);
 
-  // Apply additive metabolic adjustments
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
-
-  // Step (d): Final Factor of 4 for Total Nitrogen Excreted (Applied to derived load)
   totalNitrogenExcreted *= 4;
 
-  // Methane Logic
   const density_ch4 = 0.67;
   let b0 = 0.36; 
   if (animalType.startsWith('swine')) {
@@ -169,8 +179,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     else if (region === 'Western Europe' || region === 'Eastern Europe') b0 = 0.45;
   }
   
-  let mcf_val = 0.02; 
   const currentAwms = (animalType === 'broilers') ? (awms || 'poultry-litter') : (manureManagement || 'solid');
+  let mcf_val = 0.02; 
   if (currentAwms === 'lagoon') mcf_val = 0.67;
   else if (currentAwms === 'liquid-slurry' || currentAwms === 'pit-long-term' || currentAwms === 'slurry') mcf_val = 0.16;
   else mcf_val = 0.02;
@@ -189,7 +199,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const manureMethane = totalVolatileSolids * b0 * mcf_val * density_ch4 * ch4MitigationFactor;
   const totalPhosphorusRunoff = totalPhosphorusExcreted * 0.029;
   
-  // AWMS Logic for N2O
   let directN2oFactor = 0.01;
   let fracGas = 0.1;
   const ef4 = 0.01;
