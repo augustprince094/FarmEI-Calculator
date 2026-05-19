@@ -302,7 +302,7 @@ export default function Home() {
                         type="number" 
                         step="0.01"
                         value={scenarioFcr}
-                        placeholder={((baselineData?.fcr || 1.6) * 0.95).toFixed(2)}
+                        placeholder={"eg. " + ((baselineData?.fcr || 1.6) * 0.95).toFixed(2)}
                         onChange={(e) => handleScenarioMetricChange('fcr', e.target.value)}
                         className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm placeholder:text-muted-foreground/50"
                       />
@@ -316,7 +316,7 @@ export default function Home() {
                         type="number" 
                         step="0.01"
                         value={scenarioNitrogenDigestibility}
-                        placeholder="0.90"
+                        placeholder="eg. 0.90"
                         onChange={(e) => handleScenarioMetricChange('nDig', e.target.value)}
                         className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm placeholder:text-muted-foreground/50"
                       />
@@ -331,7 +331,7 @@ export default function Home() {
                           type="number" 
                           step="0.01" 
                           value={scenarioFecalN}
-                          placeholder={((baselineData?.fecalN || 4.5) * 0.97).toFixed(2)}
+                          placeholder={"eg. " + ((baselineData?.fecalN || 4.5) * 0.97).toFixed(2)}
                           onChange={(e) => handleScenarioMetricChange('fecalN', e.target.value)}
                           className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm placeholder:text-muted-foreground/50"
                         />

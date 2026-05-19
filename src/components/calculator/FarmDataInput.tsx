@@ -151,7 +151,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                 className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl placeholder:text-muted-foreground/50"
                 type="number" 
                 value={formData.count} 
-                placeholder="1000"
+                placeholder="eg. 1000"
                 onChange={(e) => updateField('count', e.target.value)} 
                 min="1"
               />
@@ -210,7 +210,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl placeholder:text-muted-foreground/50"
                     type="number" 
                     value={formData.pigletsPerLitter} 
-                    placeholder="12"
+                    placeholder="eg. 12"
                     onChange={(e) => updateField('pigletsPerLitter', e.target.value)} 
                   />
                 </div>
@@ -221,7 +221,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.1"
                     value={formData.avgLitterWeight} 
-                    placeholder="1.5"
+                    placeholder="eg. 1.5"
                     onChange={(e) => updateField('avgLitterWeight', e.target.value)} 
                   />
                 </div>
@@ -231,7 +231,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl placeholder:text-muted-foreground/50"
                     type="number" 
                     value={formData.gestationFeedIntake} 
-                    placeholder="300"
+                    placeholder="eg. 300"
                     onChange={(e) => updateField('gestationFeedIntake', e.target.value)} 
                   />
                 </div>
@@ -241,7 +241,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl placeholder:text-muted-foreground/50"
                     type="number" 
                     value={formData.lactationFeedIntake} 
-                    placeholder="150"
+                    placeholder="eg. 150"
                     onChange={(e) => updateField('lactationFeedIntake', e.target.value)} 
                   />
                 </div>
@@ -255,7 +255,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.1"
                     value={formData.avgWeight} 
-                    placeholder={formData.animalType === 'broilers' ? "2.5" : "115"}
+                    placeholder={formData.animalType === 'broilers' ? "eg. 2.5" : "eg. 115"}
                     onChange={(e) => updateField('avgWeight', e.target.value)} 
                   />
                 </div>
@@ -266,7 +266,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.01"
                     value={formData.fcr} 
-                    placeholder="1.6"
+                    placeholder="eg. 1.6"
                     onChange={(e) => updateField('fcr', e.target.value)} 
                   />
                 </div>
@@ -317,7 +317,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     <Input 
                       type="number" 
                       value={formData.cycleDurationDays} 
-                      placeholder="42"
+                      placeholder="eg. 42"
                       onChange={(e) => updateField('cycleDurationDays', e.target.value)}
                       className="h-9 w-20 border-secondary/20 font-black text-secondary text-center placeholder:text-muted-foreground/50"
                     />
@@ -342,7 +342,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                       type="number" 
                       step="0.01" 
                       value={formData.fecalN} 
-                      placeholder="4.50"
+                      placeholder="eg. 4.50"
                       onChange={(e) => updateField('fecalN', e.target.value)} 
                       className="h-11 font-black bg-white/70 placeholder:text-muted-foreground/50" 
                     />
@@ -356,7 +356,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                       className="h-11 border-primary/30 bg-white/70 text-sm font-bold rounded-xl placeholder:text-muted-foreground/50"
                       type="number" 
                       step="0.01"
-                      placeholder="0.85"
+                      placeholder="eg. 0.85"
                       value={formData.nitrogenDigestibility} 
                       onChange={(e) => updateField('nitrogenDigestibility', e.target.value)} 
                     />
@@ -369,21 +369,21 @@ export function FarmDataInput({ onCalculate }: Props) {
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gestation' : 'Phase 1'}</Label>
-                        <Input type="number" step="0.1" value={formData.phase1CP} placeholder="22.0" onChange={(e) => updateField('phase1CP', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
+                        <Input type="number" step="0.1" value={formData.phase1CP} placeholder="eg. 22.0" onChange={(e) => updateField('phase1CP', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lactation' : 'Phase 2'}</Label>
-                        <Input type="number" step="0.1" value={formData.phase2CP} placeholder="20.0" onChange={(e) => updateField('phase2CP', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
+                        <Input type="number" step="0.1" value={formData.phase2CP} placeholder="eg. 20.0" onChange={(e) => updateField('phase2CP', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
                       </div>
                       {formData.animalType !== 'swine-sow' && (
                         <div className="space-y-1">
                           <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
-                          <Input type="number" step="0.1" value={formData.phase3CP} placeholder="18.5" onChange={(e) => updateField('phase3CP', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
+                          <Input type="number" step="0.1" value={formData.phase3CP} placeholder="eg. 18.5" onChange={(e) => updateField('phase3CP', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
                         </div>
                       )}
                     </div>
                   ) : (
-                    <Input type="number" step="0.1" value={formData.feedCrudeProtein} placeholder="16.0" onChange={(e) => updateField('feedCrudeProtein', e.target.value)} className="h-11 font-black placeholder:text-muted-foreground/50" />
+                    <Input type="number" step="0.1" value={formData.feedCrudeProtein} placeholder="eg. 16.0" onChange={(e) => updateField('feedCrudeProtein', e.target.value)} className="h-11 font-black placeholder:text-muted-foreground/50" />
                   )}
                 </div>
               )}
@@ -403,7 +403,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.01" 
                     value={formData.fecalP} 
-                    placeholder="1.20"
+                    placeholder="eg. 1.20"
                     onChange={(e) => updateField('fecalP', e.target.value)} 
                     className="h-11 font-black bg-white/70 placeholder:text-muted-foreground/50" 
                   />
@@ -415,21 +415,21 @@ export function FarmDataInput({ onCalculate }: Props) {
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gestation' : 'Phase 1'}</Label>
-                        <Input type="number" step="0.01" value={formData.phase1P} placeholder="0.65" onChange={(e) => updateField('phase1P', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
+                        <Input type="number" step="0.01" value={formData.phase1P} placeholder="eg. 0.65" onChange={(e) => updateField('phase1P', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lactation' : 'Phase 2'}</Label>
-                        <Input type="number" step="0.01" value={formData.phase2P} placeholder="0.60" onChange={(e) => updateField('phase2P', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
+                        <Input type="number" step="0.01" value={formData.phase2P} placeholder="eg. 0.60" onChange={(e) => updateField('phase2P', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
                       </div>
                       {formData.animalType !== 'swine-sow' && (
                         <div className="space-y-1">
                           <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
-                          <Input type="number" step="0.01" value={formData.phase3P} placeholder="0.55" onChange={(e) => updateField('phase3P', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
+                          <Input type="number" step="0.01" value={formData.phase3P} placeholder="eg. 0.55" onChange={(e) => updateField('phase3P', e.target.value)} className="h-9 font-black placeholder:text-muted-foreground/50" />
                         </div>
                       )}
                     </div>
                   ) : (
-                    <Input type="number" step="0.01" value={formData.feedPhosphorus} placeholder="0.50" onChange={(e) => updateField('feedPhosphorus', e.target.value)} className="h-11 font-black placeholder:text-muted-foreground/50" />
+                    <Input type="number" step="0.01" value={formData.feedPhosphorus} placeholder="eg. 0.50" onChange={(e) => updateField('feedPhosphorus', e.target.value)} className="h-11 font-black placeholder:text-muted-foreground/50" />
                   )}
                 </div>
               )}
