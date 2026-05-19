@@ -38,13 +38,13 @@ export interface FarmData {
 
 export interface EmissionResults {
   nitrogenExcreted: number; // kg/cycle
-  phosphorusExcreted: number; // kg/cycle
+  ammoniaEmissions: number; // kg NH3/cycle
   entericMethane: number; // kg CH4/cycle
   manureMethane: number; // kg CH4/cycle
   phosphorusRunoff: number; // kg/cycle
   directN2O: number; // kg N2O/cycle
   indirectN2O: number; // kg N2O/cycle
-  totalCarbonEquivalent: number; // kg CO2e/cycle
+  netGhgEmissions: number; // kg CO2e/cycle
 }
 
 export interface ComparativeResults {
@@ -81,7 +81,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   }
   
   const totalGain = animalType === 'swine-sow' 
-    ? (avgLitterWeight || 15) * (pigletsPerLitter || 12) 
+    ? (avgLitterWeight || 1.5) * (pigletsPerLitter || 12) 
     : avgWeight;
   
   const nDigestibility = nitrogenDigestibility || 0.85;
@@ -153,7 +153,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
       
       let nRetention = 0;
       if (animalType === 'swine-sow') {
-        // Sow formula: N Retention = (Gain (sow+litter) * 18.6% protein) / 6.25
         nRetention = (phaseGain * count * 0.186) / 6.25;
       } else {
         nRetention = (nRetentionFactor * phaseGain / 1000) * count;
@@ -183,6 +182,9 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   
   // Apply unit factor of 4 to nitrogen
   totalNitrogenExcreted *= 4;
+
+  // Ammonia Emission Formula: 0.7 * Nitrogen Excretion * (0.21 + 0.30 + 0.38)
+  const ammoniaEmissions = 0.7 * totalNitrogenExcreted * (0.21 + 0.30 + 0.38);
 
   const density_ch4 = 0.67;
   let b0 = 0.36; 
@@ -223,18 +225,18 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const directN2O = totalNitrogenExcreted * directN2oFactor * (44 / 28);
   const indirectN2O = totalNitrogenExcreted * fracGas * ef4 * (44 / 28);
 
-  const totalCarbonEquivalent = 
+  const netGhgEmissions = 
     (totalEntericMethane + manureMethane) * 28 + 
     (directN2O + indirectN2O) * 265;
 
   return {
     nitrogenExcreted: totalNitrogenExcreted,
-    phosphorusExcreted: totalPhosphorusExcreted,
+    ammoniaEmissions,
     entericMethane: totalEntericMethane,
     manureMethane,
     phosphorusRunoff: totalPhosphorusRunoff,
     directN2O,
     indirectN2O,
-    totalCarbonEquivalent
+    netGhgEmissions
   };
 }

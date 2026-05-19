@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -210,6 +209,10 @@ export default function Home() {
                     </ul>
                   </section>
                   <section className="space-y-2">
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Ammonia Emissions</h4>
+                    <p>NH3 (kg) = 0.7 * Total Nitrogen Excreted * (0.21 + 0.30 + 0.38)</p>
+                  </section>
+                  <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Manure Methane</h4>
                     <p>CH4 (kg) = VS * B0 * MCF * 0.67</p>
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
@@ -268,6 +271,10 @@ export default function Home() {
                   <div className="flex justify-between border-b border-white/10 pb-2">
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Analysis Mode</span>
                     <span className="text-secondary">{baselineData?.useExperimentalData ? 'Laboratory' : 'Metabolic'}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">Baseline FCR</span>
+                    <span className="text-primary">{baselineData?.fcr}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/10 pb-2">
                     <span className="text-muted-foreground uppercase text-[11px] tracking-widest font-black">AWMS</span>
@@ -403,14 +410,14 @@ export default function Home() {
                           </TableHeader>
                           <TableBody>
                             {[
-                              { label: 'Total Nitrogen Excreted', unit: 'kg N (Factor 4 Applied)', key: 'nitrogenExcreted', precision: 1 },
-                              { label: 'Phosphorus Excreted', unit: 'kg P', key: 'phosphorusExcreted', precision: 1 },
+                              { label: 'Total Nitrogen Excreted', unit: 'kg N (Factor 4)', key: 'nitrogenExcreted', precision: 1 },
+                              { label: 'Total Ammonia Emissions', unit: 'kg NH3', key: 'ammoniaEmissions', precision: 2 },
                               { label: 'Enteric Methane', unit: 'kg CH4', key: 'entericMethane', precision: 3 },
                               { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 3 },
                               { label: 'Phosphorus Runoff', unit: 'kg P', key: 'phosphorusRunoff', precision: 3 },
                               { label: 'Direct N2O', unit: 'kg N2O', key: 'directN2O', precision: 3 },
                               { label: 'Indirect N2O', unit: 'kg N2O', key: 'indirectN2O', precision: 3 },
-                              { label: 'Total Carbon Equiv.', unit: 'kg CO2e', key: 'totalCarbonEquivalent', precision: 0 },
+                              { label: 'Net GHG Emissions', unit: 'kg CO2e', key: 'netGhgEmissions', precision: 0 },
                             ].map((item) => {
                               const baseVal = baselineResults[item.key as keyof EmissionResults];
                               const scenVal = (comparisonResults?.scenario || baselineResults)[item.key as keyof EmissionResults];

@@ -30,7 +30,8 @@ export function MitigationAI({ data, results }: Props) {
 
       const relevantResearchData = `
         Yearly Nitrogen Excretion: ${results.nitrogenExcreted.toFixed(2)} kg
-        Total Carbon Footprint: ${results.totalCarbonEquivalent.toFixed(2)} kg CO2e
+        Ammonia Emissions: ${results.ammoniaEmissions.toFixed(2)} kg NH3
+        Net GHG Emissions: ${results.netGhgEmissions.toFixed(2)} kg CO2e
         Additive Treatment: ${data.additive === 'none' ? 'Baseline' : data.additive}
       `;
 

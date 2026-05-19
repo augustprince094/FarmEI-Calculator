@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   Cell
 } from 'recharts';
-import { Wind, Droplets, Leaf, Download, TrendingDown, Calculator } from 'lucide-react';
+import { Wind, Droplets, Leaf, Download, TrendingDown, Calculator, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -35,8 +35,8 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
   const formatValue = (val: number) => val.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const formatCarbon = (val: number) => Math.round(val).toLocaleString();
 
-  const reductionPercentage = baseline.totalCarbonEquivalent > 0 
-    ? Math.round(((baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent) / baseline.totalCarbonEquivalent) * 100)
+  const reductionPercentage = baseline.netGhgEmissions > 0 
+    ? Math.round(((baseline.netGhgEmissions - scenario.netGhgEmissions) / baseline.netGhgEmissions) * 100)
     : 0;
 
   const fcrImprovement = (baselineFcr && scenarioFcr && baselineFcr > scenarioFcr)
@@ -61,14 +61,14 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
     { name: 'Mitigation', value: Number(scenario.nitrogenExcreted.toFixed(1)), fill: scenarioColor, unit: 'kg' }
   ];
 
-  const phosphorusData = [
-    { name: 'Baseline', value: Number(baseline.phosphorusExcreted.toFixed(1)), fill: baselineColor, unit: 'kg' },
-    { name: 'Mitigation', value: Number(scenario.phosphorusExcreted.toFixed(1)), fill: scenarioColor, unit: 'kg' }
+  const ammoniaData = [
+    { name: 'Baseline', value: Number(baseline.ammoniaEmissions.toFixed(1)), fill: baselineColor, unit: 'kg' },
+    { name: 'Mitigation', value: Number(scenario.ammoniaEmissions.toFixed(1)), fill: scenarioColor, unit: 'kg' }
   ];
 
   const carbonData = [
-    { name: 'Baseline', value: Math.round(baseline.totalCarbonEquivalent), fill: baselineColor, unit: 'kg CO2e' },
-    { name: 'Mitigation', value: Math.round(scenario.totalCarbonEquivalent), fill: scenarioColor, unit: 'kg CO2e' }
+    { name: 'Baseline', value: Math.round(baseline.netGhgEmissions), fill: baselineColor, unit: 'kg CO2e' },
+    { name: 'Mitigation', value: Math.round(scenario.netGhgEmissions), fill: scenarioColor, unit: 'kg CO2e' }
   ];
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -119,7 +119,7 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
                   <TrendingDown className="w-5 h-5 text-green-700" />
                   <p className="text-[11px] font-black text-green-700 uppercase tracking-tight">Impact</p>
                 </div>
-                <p className="text-xl font-black text-green-700 leading-tight">-{reductionPercentage}% CO2e</p>
+                <p className="text-xl font-black text-green-700 leading-tight">-{reductionPercentage}% GHG</p>
               </div>
             )}
           </div>
@@ -138,22 +138,22 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
             diff: isComparison ? baseline.nitrogenExcreted - scenario.nitrogenExcreted : 0
           },
           { 
-            label: 'Phosphorus Load', 
-            val: isComparison ? scenario.phosphorusExcreted : baseline.phosphorusExcreted, 
-            unit: 'kg', 
-            icon: Droplets, 
+            label: 'Ammonia Emission', 
+            val: isComparison ? scenario.ammoniaEmissions : baseline.ammoniaEmissions, 
+            unit: 'kg NH3', 
+            icon: Zap, 
             color: 'text-secondary',
             border: '#A0522D',
-            diff: isComparison ? baseline.phosphorusExcreted - scenario.phosphorusExcreted : 0
+            diff: isComparison ? baseline.ammoniaEmissions - scenario.ammoniaEmissions : 0
           },
           { 
-            label: 'Carbon Equiv.', 
-            val: isComparison ? scenario.totalCarbonEquivalent : baseline.totalCarbonEquivalent, 
+            label: 'Net GHG Emission', 
+            val: isComparison ? scenario.netGhgEmissions : baseline.netGhgEmissions, 
             unit: 'kg CO2e', 
             icon: Leaf, 
             color: 'text-green-700',
             border: '#15803d',
-            diff: isComparison ? baseline.totalCarbonEquivalent - scenario.totalCarbonEquivalent : 0
+            diff: isComparison ? baseline.netGhgEmissions - scenario.netGhgEmissions : 0
           }
         ].map((item, idx) => (
           <Card key={idx} className="glass overflow-hidden border-none shadow-sm transition-transform hover:scale-[1.02] duration-300">
@@ -185,8 +185,8 @@ export function EmissionsResults({ results, isComparison = false, baselineFcr, s
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           { label: 'Nitrogen Excretion (kg N)', data: nitrogenData, icon: Wind, color: 'text-primary' },
-          { label: 'Phosphorus Excretion (kg P)', data: phosphorusData, icon: Droplets, color: 'text-secondary' },
-          { label: 'Carbon Equivalent (kg CO2e)', data: carbonData, icon: Leaf, color: 'text-green-700' }
+          { label: 'Ammonia Emission (kg NH3)', data: ammoniaData, icon: Zap, color: 'text-secondary' },
+          { label: 'Net GHG Emissions (kg CO2e)', data: carbonData, icon: Leaf, color: 'text-green-700' }
         ].map((chart, idx) => (
           <Card key={idx} className="glass rounded-2xl border-white/30 p-5 transition-all duration-300 hover:shadow-xl">
             <CardHeader className="p-0 pb-5">
