@@ -21,7 +21,7 @@ export interface FarmData {
   manureManagement: 'lagoon' | 'solid' | 'slurry' | 'dry-lot' | 'pit-long-term';
   avgWeight: number; // kg
   additive: FeedAdditive;
-  nitrogenDigestibility: number; // Nitrogen/Protein Digestibility (0-1)
+  moistureContent: number; // Dietary Moisture Content (%)
   // Experimental Data Fields
   useExperimentalData?: boolean;
   useExperimentalN?: boolean;
@@ -67,7 +67,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     useExperimentalData, useExperimentalN, useExperimentalP,
     fecalN, fecalP,
     cycleDurationDays,
-    nitrogenDigestibility,
+    moistureContent,
     gestationFeedIntake,
     lactationFeedIntake,
     avgLitterWeight,
@@ -84,8 +84,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     ? (avgLitterWeight || 1.5) * (pigletsPerLitter || 12) 
     : avgWeight;
   
-  const nDigestibility = nitrogenDigestibility || 0.85;
-
   let metabolicNMitigation = 1.0;
   let metabolicPMitigation = 1.0;
   let ch4MitigationFactor = 1.0;
@@ -145,8 +143,13 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
     const phaseGain = totalGain * fraction;
     
     if (useExperimentalData && useExperimentalN) {
-      const fecalDMOutput = (phaseFeed / count) * (1 - nDigestibility);
-      totalNitrogenExcreted += (fecalN || 0) / 100 * fecalDMOutput * count;
+      // Step (a): Calculate daily feed intake per head
+      const feedIntakePerHeadPerDay = (phaseFeed / count) / cycleDays;
+      // Step (b): Calculate dry matter output per head per day
+      const dryMatterOutputPerHeadPerDay = feedIntakePerHeadPerDay * (1 - (moistureContent || 0) / 100);
+      // Step (c): Nitrogen excreted per cycle total (multiplied by duration and count)
+      const nExcretedPerCycleTotal = (fecalN || 0) / 100 * dryMatterOutputPerHeadPerDay * cycleDays * count;
+      totalNitrogenExcreted += nExcretedPerCycleTotal;
     } else {
       const phaseCP = [phase1CP, phase2CP, phase3CP][phaseIdx - 1] ?? feedCrudeProtein;
       const nIntake = (phaseFeed * phaseCP / 100) / 6.25;
@@ -180,7 +183,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
   
-  // Ammonia Emission Formula: 0.7 * N-Excretion * 0.89 * (42/365)
+  // Revised Ammonia Emission Formula: 0.7 * N-Excretion * 0.89 * (42/365)
   const ammoniaEmissions = 0.7 * totalNitrogenExcreted * 0.89 * (42 / 365);
 
   const density_ch4 = 0.67;

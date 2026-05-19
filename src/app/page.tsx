@@ -40,7 +40,7 @@ export default function Home() {
   const [scenarioFcr, setScenarioFcr] = useState<string>('');
   const [scenarioFecalN, setScenarioFecalN] = useState<string>('');
   const [scenarioFecalP, setScenarioFecalP] = useState<string>('');
-  const [scenarioNitrogenDigestibility, setScenarioNitrogenDigestibility] = useState<string>('');
+  const [scenarioMoistureContent, setScenarioMoistureContent] = useState<string>('');
 
   const handleEstablishBaseline = (data: FarmData) => {
     const results = calculateEmissions(data, false);
@@ -49,7 +49,7 @@ export default function Home() {
     setScenarioFcr('');
     setScenarioFecalN('');
     setScenarioFecalP('');
-    setScenarioNitrogenDigestibility('');
+    setScenarioMoistureContent('');
     setStep('results');
     setComparisonResults(null);
     setSelectedAdditive('none');
@@ -68,7 +68,7 @@ export default function Home() {
 
     let targetFecalNValue = Number(scenarioFecalN) || (baselineData.fecalN || 0);
     let targetFecalPValue = Number(scenarioFecalP) || (baselineData.fecalP || 0);
-    let targetNDigValue = Number(scenarioNitrogenDigestibility) || baselineData.nitrogenDigestibility;
+    let targetMoistureValue = Number(scenarioMoistureContent) || baselineData.moistureContent;
     
     if (additive !== 'none') {
       if (baselineData.useExperimentalN && !scenarioFecalN) {
@@ -76,9 +76,6 @@ export default function Home() {
       }
       if (baselineData.useExperimentalP && !scenarioFecalP) {
         targetFecalPValue = parseFloat(((baselineData.fecalP || 0) * 0.98).toFixed(2));
-      }
-      if (!scenarioNitrogenDigestibility && baselineData.useExperimentalData) {
-        targetNDigValue = Math.min(0.99, parseFloat((baselineData.nitrogenDigestibility * 1.05).toFixed(2)));
       }
     }
 
@@ -88,7 +85,7 @@ export default function Home() {
       fcr: targetFcrValue,
       fecalN: targetFecalNValue,
       fecalP: targetFecalPValue,
-      nitrogenDigestibility: targetNDigValue
+      moistureContent: targetMoistureValue
     };
     const scenarioResults = calculateEmissions(updatedData, true);
     
@@ -99,18 +96,18 @@ export default function Home() {
     });
   };
 
-  const handleScenarioMetricChange = (field: 'fcr' | 'fecalN' | 'fecalP' | 'nDig', value: string) => {
+  const handleScenarioMetricChange = (field: 'fcr' | 'fecalN' | 'fecalP' | 'moisture', value: string) => {
     if (!baselineData || !baselineResults) return;
 
     if (field === 'fcr') setScenarioFcr(value);
     else if (field === 'fecalN') setScenarioFecalN(value);
     else if (field === 'fecalP') setScenarioFecalP(value);
-    else if (field === 'nDig') setScenarioNitrogenDigestibility(value);
+    else if (field === 'moisture') setScenarioMoistureContent(value);
 
     const updatedFcr = field === 'fcr' ? (Number(value) || baselineData.fcr) : (Number(scenarioFcr) || baselineData.fcr);
     const updatedFecalN = field === 'fecalN' ? (Number(value) || (baselineData.fecalN || 0)) : (Number(scenarioFecalN) || (baselineData.fecalN || 0));
     const updatedFecalP = field === 'fecalP' ? (Number(value) || (baselineData.fecalP || 0)) : (Number(scenarioFecalP) || (baselineData.fecalP || 0));
-    const updatedNDig = field === 'nDig' ? (Number(value) || baselineData.nitrogenDigestibility) : (Number(scenarioNitrogenDigestibility) || baselineData.nitrogenDigestibility);
+    const updatedMoisture = field === 'moisture' ? (Number(value) || baselineData.moistureContent) : (Number(scenarioMoistureContent) || baselineData.moistureContent);
 
     const updatedData = { 
       ...baselineData, 
@@ -118,7 +115,7 @@ export default function Home() {
       fcr: updatedFcr,
       fecalN: updatedFecalN,
       fecalP: updatedFecalP,
-      nitrogenDigestibility: updatedNDig
+      moistureContent: updatedMoisture
     };
     const scenarioResults = calculateEmissions(updatedData, true);
     
@@ -181,7 +178,7 @@ export default function Home() {
                     <p>Calculated per phase (Phase 1-3 for broilers, Gestation/Lactation for sows):</p>
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
                       <li><strong>Metabolic path:</strong> (Dietary CP / 6.25) - (g N Retention * g Gain)</li>
-                      <li><strong>Experimental path:</strong> Feed Intake * (1 - N Digestibility) * % Fecal N</li>
+                      <li><strong>Experimental path:</strong> DM Output * % Fecal N * Cycle Duration</li>
                     </ul>
                   </section>
                   <section className="space-y-2">
@@ -304,14 +301,14 @@ export default function Home() {
                     {baselineData?.useExperimentalData && (
                       <div className="space-y-2">
                         <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
-                          <Zap className="w-4 h-4" /> Scenario N Digestibility
+                          <Zap className="w-4 h-4" /> Scenario Moisture Content (%)
                         </Label>
                         <Input 
                           type="number" 
-                          step="0.01"
-                          value={scenarioNitrogenDigestibility}
-                          placeholder="eg. 0.90"
-                          onChange={(e) => handleScenarioMetricChange('nDig', e.target.value)}
+                          step="0.1"
+                          value={scenarioMoistureContent}
+                          placeholder={"eg. " + (baselineData?.moistureContent || 12).toFixed(1)}
+                          onChange={(e) => handleScenarioMetricChange('moisture', e.target.value)}
                           className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm placeholder:text-muted-foreground/50"
                         />
                       </div>

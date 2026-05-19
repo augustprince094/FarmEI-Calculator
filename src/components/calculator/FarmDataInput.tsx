@@ -33,7 +33,7 @@ export function FarmDataInput({ onCalculate }: Props) {
     manureManagement: 'solid',
     avgWeight: '',
     additive: 'none',
-    nitrogenDigestibility: '',
+    moistureContent: '',
     useExperimentalData: false,
     useExperimentalN: false,
     useExperimentalP: false,
@@ -62,7 +62,7 @@ export function FarmDataInput({ onCalculate }: Props) {
       phase2P: Number(formData.phase2P) || 0.6,
       phase3P: Number(formData.phase3P) || 0.55,
       avgWeight: Number(formData.avgWeight) || (formData.animalType === 'broilers' ? 2.5 : 115),
-      nitrogenDigestibility: Number(formData.nitrogenDigestibility) || 0.85,
+      moistureContent: Number(formData.moistureContent) || 12,
       fecalN: Number(formData.fecalN) || 4.5,
       fecalP: Number(formData.fecalP) || 1.2,
       cycleDurationDays: Number(formData.cycleDurationDays) || 42,
@@ -348,15 +348,15 @@ export function FarmDataInput({ onCalculate }: Props) {
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2 text-primary font-bold text-[11px] uppercase tracking-wider">
-                      <Zap className="w-3.5 h-3.5" /> Nitrogen / Protein Digestibility
+                      <Zap className="w-3.5 h-3.5" /> Dietary Moisture Content (%)
                     </Label>
                     <Input 
                       className="h-11 border-primary/30 bg-white/70 text-sm font-bold rounded-xl placeholder:text-muted-foreground/50"
                       type="number" 
                       step="0.01"
-                      placeholder="eg. 0.85"
-                      value={formData.nitrogenDigestibility} 
-                      onChange={(e) => updateField('nitrogenDigestibility', e.target.value)} 
+                      placeholder="eg. 12.0"
+                      value={formData.moistureContent} 
+                      onChange={(e) => updateField('moistureContent', e.target.value)} 
                     />
                   </div>
                 </div>
