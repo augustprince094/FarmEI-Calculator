@@ -77,7 +77,7 @@ export default function Home() {
       if (baselineData.useExperimentalP && !scenarioFecalP) {
         targetFecalPValue = parseFloat(((baselineData.fecalP || 0) * 0.98).toFixed(2));
       }
-      if (!scenarioNitrogenDigestibility) {
+      if (!scenarioNitrogenDigestibility && baselineData.useExperimentalData) {
         targetNDigValue = Math.min(0.99, parseFloat((baselineData.nitrogenDigestibility * 1.05).toFixed(2)));
       }
     }
@@ -301,19 +301,21 @@ export default function Home() {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
-                        <Zap className="w-4 h-4" /> Scenario N Digestibility
-                      </Label>
-                      <Input 
-                        type="number" 
-                        step="0.01"
-                        value={scenarioNitrogenDigestibility}
-                        placeholder="eg. 0.90"
-                        onChange={(e) => handleScenarioMetricChange('nDig', e.target.value)}
-                        className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm placeholder:text-muted-foreground/50"
-                      />
-                    </div>
+                    {baselineData?.useExperimentalData && (
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+                          <Zap className="w-4 h-4" /> Scenario N Digestibility
+                        </Label>
+                        <Input 
+                          type="number" 
+                          step="0.01"
+                          value={scenarioNitrogenDigestibility}
+                          placeholder="eg. 0.90"
+                          onChange={(e) => handleScenarioMetricChange('nDig', e.target.value)}
+                          className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm placeholder:text-muted-foreground/50"
+                        />
+                      </div>
+                    )}
 
                     {baselineData?.useExperimentalN && (
                       <div className="space-y-2">
