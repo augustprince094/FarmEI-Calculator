@@ -49,7 +49,6 @@ export function FarmDataInput({ onCalculate }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Provide scientific defaults if fields are left as empty placeholders
     const submittedData: FarmData = {
       ...formData,
       count: Number(formData.count) || 1000,
@@ -327,7 +326,6 @@ export function FarmDataInput({ onCalculate }: Props) {
               </div>
             )}
 
-            {/* Nitrogen Strategy */}
             <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/10">
               <div className="flex items-center gap-2 mb-2">
                 <Beaker className="w-4 h-4 text-primary" />
@@ -389,7 +387,6 @@ export function FarmDataInput({ onCalculate }: Props) {
               )}
             </div>
 
-            {/* Phosphorus Strategy */}
             <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/10">
               <div className="flex items-center gap-2 mb-2">
                 <Beaker className="w-4 h-4 text-primary" />

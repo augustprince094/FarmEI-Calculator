@@ -60,7 +60,6 @@ export default function Home() {
     
     setSelectedAdditive(additive);
     
-    // Default improvements based on additive choice, presented as placeholders
     let targetFcrValue = Number(scenarioFcr) || baselineData.fcr;
     if (additive !== 'none' && !scenarioFcr) {
       const reduction = (additive === 'jefo-combo' || additive === 'xylanase') ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
@@ -108,7 +107,6 @@ export default function Home() {
     else if (field === 'fecalP') setScenarioFecalP(value);
     else if (field === 'nDig') setScenarioNitrogenDigestibility(value);
 
-    // Apply the change immediately to the comparison results
     const updatedFcr = field === 'fcr' ? (Number(value) || baselineData.fcr) : (Number(scenarioFcr) || baselineData.fcr);
     const updatedFecalN = field === 'fecalN' ? (Number(value) || (baselineData.fecalN || 0)) : (Number(scenarioFecalN) || (baselineData.fecalN || 0));
     const updatedFecalP = field === 'fecalP' ? (Number(value) || (baselineData.fecalP || 0)) : (Number(scenarioFecalP) || (baselineData.fecalP || 0));
@@ -184,7 +182,6 @@ export default function Home() {
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
                       <li><strong>Metabolic path:</strong> (Dietary CP / 6.25) - (g N Retention * g Gain)</li>
                       <li><strong>Experimental path:</strong> Feed Intake * (1 - N Digestibility) * % Fecal N</li>
-                      <li><strong>Final Scale:</strong> Total Nitrogen Excreted is multiplied by a factor of 4.</li>
                     </ul>
                   </section>
                   <section className="space-y-2">
@@ -195,18 +192,14 @@ export default function Home() {
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Manure Methane</h4>
                     <p>CH4 (kg) = VS * B0 * MCF * 0.67</p>
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
-                      <li>VS (Volatile Solids) = Feed Intake * (1 - 0.85 DMD) * (1 - 10% Ash) calculated per phase.</li>
-                      <li>B0 (Max Methane Capacity): 0.36 standard (0.48 N. America Swine, 0.45 EU Swine).</li>
+                      <li>VS (Volatile Solids) = Feed Intake * (1 - 0.85 DMD) * (1 - 10% Ash)</li>
+                      <li>B0 (Max Methane Capacity): 0.36 standard (0.48 N. America Swine).</li>
                       <li>MCF (Conversion Factor): Lagoon 67%, Liquid/Slurry/Pit 16%, Solid/Litter 2%.</li>
                     </ul>
                   </section>
                   <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Enteric Methane</h4>
-                    <p>Broilers: 1.6g / cycle per bird. Swine: Metabolic scaling (0.015-0.05 factor) applied to biomass.</p>
-                  </section>
-                  <section className="space-y-2">
-                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrous Oxide (N2O)</h4>
-                    <p>Direct and Indirect emissions derived from Total Manure N using IPCC emission factors and system-specific volatilization (FracGAS).</p>
+                    <h4 className="font-black text-primary text-base uppercase tracking-widest">Net GHG Emissions</h4>
+                    <p>Includes enteric methane, manure methane, and direct/indirect N2O pathways, converted to CO2 equivalents.</p>
                   </section>
                 </div>
               </DialogContent>
@@ -377,7 +370,7 @@ export default function Home() {
                           <h3 className="text-2xl font-black text-primary uppercase tracking-widest">Technical Audit</h3>
                           <p className="text-sm font-bold text-muted-foreground mt-1">Detailed nutrient balance & emission intensities.</p>
                         </div>
-                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Tier 2 Engine (v4.2)</Badge>
+                        <Badge variant="outline" className="text-[11px] font-black py-2 px-4 bg-primary/10 border-primary/30 text-primary uppercase tracking-[0.2em]">Tier 2 Engine (v4.3)</Badge>
                       </div>
                       
                       <div className="overflow-hidden border border-white/30 rounded-2xl bg-white/10 backdrop-blur-lg">
@@ -392,7 +385,7 @@ export default function Home() {
                           </TableHeader>
                           <TableBody>
                             {[
-                              { label: 'Total Nitrogen Excreted', unit: 'kg N (Factor 4)', key: 'nitrogenExcreted', precision: 1 },
+                              { label: 'Total Nitrogen Excreted', unit: 'kg N', key: 'nitrogenExcreted', precision: 1 },
                               { label: 'Total Ammonia Emissions', unit: 'kg NH3', key: 'ammoniaEmissions', precision: 2 },
                               { label: 'Enteric Methane', unit: 'kg CH4', key: 'entericMethane', precision: 3 },
                               { label: 'Manure Methane', unit: 'kg CH4', key: 'manureMethane', precision: 3 },

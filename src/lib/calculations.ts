@@ -180,9 +180,6 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
   
-  // Apply unit factor of 4 to nitrogen
-  totalNitrogenExcreted *= 4;
-
   // Ammonia Emission Formula: 0.7 * Nitrogen Excretion * (0.21 + 0.30 + 0.38)
   const ammoniaEmissions = 0.7 * totalNitrogenExcreted * (0.21 + 0.30 + 0.38);
 
@@ -196,7 +193,7 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   const currentAwms = (animalType === 'broilers') ? (awms || 'poultry-litter') : (manureManagement || 'solid');
   let mcf_val = 0.02; 
   if (currentAwms === 'lagoon') mcf_val = 0.67;
-  else if (currentAwms === 'liquid-slurry' || currentAwms === 'pit-long-term' || currentAwms === 'slurry') mcf_val = 0.16;
+  else if (currentAwms === 'liquid-slurry' || currentAwms === 'pit-long-term' || currentAwms === 'slurry' || currentAwms === 'pit') mcf_val = 0.16;
   else mcf_val = 0.02;
 
   let totalEntericMethane = 0;
