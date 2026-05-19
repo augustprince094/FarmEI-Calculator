@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -15,116 +16,94 @@ interface Props {
 }
 
 export function FarmDataInput({ onCalculate }: Props) {
-  const [formData, setFormData] = useState<FarmData>({
+  const [formData, setFormData] = useState<any>({
     animalType: 'broilers',
     region: 'North America',
     awms: 'poultry-litter',
-    count: 1000,
-    fcr: 1.6,
+    count: '',
+    fcr: '',
     cyclesPerYear: 1,
-    feedCrudeProtein: 18,
-    phase1CP: 22,
-    phase2CP: 20,
-    phase3CP: 18.5,
-    feedPhosphorus: 0.6,
-    phase1P: 0.65,
-    phase2P: 0.6,
-    phase3P: 0.55,
+    feedCrudeProtein: '',
+    phase1CP: '',
+    phase2CP: '',
+    phase3CP: '',
+    feedPhosphorus: '',
+    phase1P: '',
+    phase2P: '',
+    phase3P: '',
     manureManagement: 'solid',
-    avgWeight: 2.5,
+    avgWeight: '',
     additive: 'none',
-    nitrogenDigestibility: 0.85,
+    nitrogenDigestibility: '',
     useExperimentalData: false,
     useExperimentalN: false,
     useExperimentalP: false,
-    fecalN: 4.5,
-    fecalP: 1.2,
-    cycleDurationDays: 42,
-    pigletsPerLitter: 12,
-    avgLitterWeight: 15,
-    gestationFeedIntake: 300,
-    lactationFeedIntake: 150
+    fecalN: '',
+    fecalP: '',
+    cycleDurationDays: '',
+    pigletsPerLitter: '',
+    avgLitterWeight: '',
+    gestationFeedIntake: '',
+    lactationFeedIntake: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onCalculate(formData);
+    
+    // Provide scientific defaults if fields are left as empty placeholders
+    const submittedData: FarmData = {
+      ...formData,
+      count: Number(formData.count) || 1000,
+      fcr: Number(formData.fcr) || 1.6,
+      feedCrudeProtein: Number(formData.feedCrudeProtein) || 18,
+      phase1CP: Number(formData.phase1CP) || 22,
+      phase2CP: Number(formData.phase2CP) || 20,
+      phase3CP: Number(formData.phase3CP) || 18.5,
+      feedPhosphorus: Number(formData.feedPhosphorus) || 0.6,
+      phase1P: Number(formData.phase1P) || 0.65,
+      phase2P: Number(formData.phase2P) || 0.6,
+      phase3P: Number(formData.phase3P) || 0.55,
+      avgWeight: Number(formData.avgWeight) || 2.5,
+      nitrogenDigestibility: Number(formData.nitrogenDigestibility) || 0.85,
+      fecalN: Number(formData.fecalN) || 4.5,
+      fecalP: Number(formData.fecalP) || 1.2,
+      cycleDurationDays: Number(formData.cycleDurationDays) || 42,
+      pigletsPerLitter: Number(formData.pigletsPerLitter) || 12,
+      avgLitterWeight: Number(formData.avgLitterWeight) || 1.5,
+      gestationFeedIntake: Number(formData.gestationFeedIntake) || 300,
+      lactationFeedIntake: Number(formData.lactationFeedIntake) || 150
+    };
+    
+    onCalculate(submittedData);
   };
 
-  const updateField = (field: keyof FarmData, value: string | number | boolean) => {
-    setFormData(prev => ({
+  const updateField = (field: string, value: any) => {
+    setFormData((prev: any) => ({
       ...prev,
-      [field]: (typeof value === 'string' && !isNaN(Number(value)) && !['animalType', 'manureManagement', 'additive', 'region', 'awms'].includes(field)) ? Number(value) : value
+      [field]: value
     }));
   };
 
   const handleAnimalTypeChange = (val: AnimalType) => {
-    let defaults: Partial<FarmData> = { animalType: val, region: 'North America' };
-    
-    switch (val) {
-      case 'swine-sow':
-        defaults = { 
-          ...defaults, 
-          avgWeight: 250, 
-          fcr: 3.5, 
-          cyclesPerYear: 1, 
-          count: 100, 
-          phase1CP: 13, 
-          phase2CP: 18, 
-          phase3CP: 0,
-          phase1P: 0.5,
-          phase2P: 0.65,
-          phase3P: 0,
-          manureManagement: 'slurry',
-          cycleDurationDays: 365,
-          pigletsPerLitter: 12,
-          avgLitterWeight: 1.5,
-          gestationFeedIntake: 300,
-          lactationFeedIntake: 150
-        };
-        break;
-      case 'swine-nursery':
-        defaults = { 
-          ...defaults, 
-          avgWeight: 25, 
-          fcr: 1.5, 
-          cyclesPerYear: 1, 
-          count: 1000, 
-          phase1CP: 22, 
-          phase2CP: 20, 
-          phase3CP: 18,
-          phase1P: 0.75,
-          phase2P: 0.65,
-          phase3P: 0.6,
-          manureManagement: 'slurry',
-          cycleDurationDays: 49
-        };
-        break;
-      case 'swine-grow-finish':
-        defaults = { ...defaults, avgWeight: 115, fcr: 2.8, cyclesPerYear: 1, count: 1000, feedCrudeProtein: 16, feedPhosphorus: 0.5, manureManagement: 'slurry', cycleDurationDays: 115 };
-        break;
-      case 'broilers':
-      default:
-        defaults = { 
-          ...defaults, 
-          avgWeight: 2.5, 
-          fcr: 1.6, 
-          cyclesPerYear: 1, 
-          count: 1000, 
-          phase1CP: 22, 
-          phase2CP: 20, 
-          phase3CP: 18.5,
-          phase1P: 0.65,
-          phase2P: 0.6,
-          phase3P: 0.55,
-          manureManagement: 'solid',
-          awms: 'poultry-litter',
-          cycleDurationDays: 42
-        };
-        break;
-    }
-    
-    setFormData(prev => ({ ...prev, ...defaults }));
+    setFormData((prev: any) => ({
+      ...prev,
+      animalType: val,
+      count: '',
+      fcr: '',
+      avgWeight: '',
+      phase1CP: '',
+      phase2CP: '',
+      phase3CP: '',
+      phase1P: '',
+      phase2P: '',
+      phase3P: '',
+      pigletsPerLitter: '',
+      avgLitterWeight: '',
+      gestationFeedIntake: '',
+      lactationFeedIntake: '',
+      awms: val === 'broilers' ? 'poultry-litter' : 'liquid-slurry',
+      manureManagement: val === 'broilers' ? 'solid' : 'slurry'
+    }));
   };
 
   const isPhased = formData.animalType === 'broilers' || 
@@ -173,6 +152,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                 className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
                 type="number" 
                 value={formData.count} 
+                placeholder="1000"
                 onChange={(e) => updateField('count', e.target.value)} 
                 min="1"
               />
@@ -231,6 +211,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     className="h-11 border-secondary/30 bg-white/70 text-sm font-bold rounded-xl"
                     type="number" 
                     value={formData.pigletsPerLitter} 
+                    placeholder="12"
                     onChange={(e) => updateField('pigletsPerLitter', e.target.value)} 
                   />
                 </div>
@@ -241,6 +222,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.1"
                     value={formData.avgLitterWeight} 
+                    placeholder="1.5"
                     onChange={(e) => updateField('avgLitterWeight', e.target.value)} 
                   />
                 </div>
@@ -250,6 +232,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
                     type="number" 
                     value={formData.gestationFeedIntake} 
+                    placeholder="300"
                     onChange={(e) => updateField('gestationFeedIntake', e.target.value)} 
                   />
                 </div>
@@ -259,6 +242,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     className="h-11 border-white/60 bg-white/70 text-sm font-bold rounded-xl"
                     type="number" 
                     value={formData.lactationFeedIntake} 
+                    placeholder="150"
                     onChange={(e) => updateField('lactationFeedIntake', e.target.value)} 
                   />
                 </div>
@@ -272,6 +256,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.1"
                     value={formData.avgWeight} 
+                    placeholder={formData.animalType === 'broilers' ? "2.5" : "115"}
                     onChange={(e) => updateField('avgWeight', e.target.value)} 
                   />
                 </div>
@@ -282,6 +267,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.01"
                     value={formData.fcr} 
+                    placeholder="1.6"
                     onChange={(e) => updateField('fcr', e.target.value)} 
                   />
                 </div>
@@ -332,6 +318,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     <Input 
                       type="number" 
                       value={formData.cycleDurationDays} 
+                      placeholder="42"
                       onChange={(e) => updateField('cycleDurationDays', e.target.value)}
                       className="h-9 w-20 border-secondary/20 font-black text-secondary text-center"
                     />
@@ -356,6 +343,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                       type="number" 
                       step="0.01" 
                       value={formData.fecalN} 
+                      placeholder="4.50"
                       onChange={(e) => updateField('fecalN', e.target.value)} 
                       className="h-11 font-black bg-white/70" 
                     />
@@ -369,7 +357,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                       className="h-11 border-primary/30 bg-white/70 text-sm font-bold rounded-xl"
                       type="number" 
                       step="0.01"
-                      placeholder="Default 0.85"
+                      placeholder="0.85"
                       value={formData.nitrogenDigestibility} 
                       onChange={(e) => updateField('nitrogenDigestibility', e.target.value)} 
                     />
@@ -382,21 +370,21 @@ export function FarmDataInput({ onCalculate }: Props) {
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gestation' : 'Phase 1'}</Label>
-                        <Input type="number" step="0.1" value={formData.phase1CP} onChange={(e) => updateField('phase1CP', e.target.value)} className="h-9 font-black" />
+                        <Input type="number" step="0.1" value={formData.phase1CP} placeholder="22.0" onChange={(e) => updateField('phase1CP', e.target.value)} className="h-9 font-black" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lactation' : 'Phase 2'}</Label>
-                        <Input type="number" step="0.1" value={formData.phase2CP} onChange={(e) => updateField('phase2CP', e.target.value)} className="h-9 font-black" />
+                        <Input type="number" step="0.1" value={formData.phase2CP} placeholder="20.0" onChange={(e) => updateField('phase2CP', e.target.value)} className="h-9 font-black" />
                       </div>
                       {formData.animalType !== 'swine-sow' && (
                         <div className="space-y-1">
                           <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
-                          <Input type="number" step="0.1" value={formData.phase3CP} onChange={(e) => updateField('phase3CP', e.target.value)} className="h-9 font-black" />
+                          <Input type="number" step="0.1" value={formData.phase3CP} placeholder="18.5" onChange={(e) => updateField('phase3CP', e.target.value)} className="h-9 font-black" />
                         </div>
                       )}
                     </div>
                   ) : (
-                    <Input type="number" step="0.1" value={formData.feedCrudeProtein} onChange={(e) => updateField('feedCrudeProtein', e.target.value)} className="h-11 font-black" />
+                    <Input type="number" step="0.1" value={formData.feedCrudeProtein} placeholder="16.0" onChange={(e) => updateField('feedCrudeProtein', e.target.value)} className="h-11 font-black" />
                   )}
                 </div>
               )}
@@ -416,6 +404,7 @@ export function FarmDataInput({ onCalculate }: Props) {
                     type="number" 
                     step="0.01" 
                     value={formData.fecalP} 
+                    placeholder="1.20"
                     onChange={(e) => updateField('fecalP', e.target.value)} 
                     className="h-11 font-black bg-white/70" 
                   />
@@ -427,21 +416,21 @@ export function FarmDataInput({ onCalculate }: Props) {
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Gestation' : 'Phase 1'}</Label>
-                        <Input type="number" step="0.01" value={formData.phase1P} onChange={(e) => updateField('phase1P', e.target.value)} className="h-9 font-black" />
+                        <Input type="number" step="0.01" value={formData.phase1P} placeholder="0.65" onChange={(e) => updateField('phase1P', e.target.value)} className="h-9 font-black" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[9px] font-bold text-muted-foreground uppercase">{formData.animalType === 'swine-sow' ? 'Lactation' : 'Phase 2'}</Label>
-                        <Input type="number" step="0.01" value={formData.phase2P} onChange={(e) => updateField('phase2P', e.target.value)} className="h-9 font-black" />
+                        <Input type="number" step="0.01" value={formData.phase2P} placeholder="0.60" onChange={(e) => updateField('phase2P', e.target.value)} className="h-9 font-black" />
                       </div>
                       {formData.animalType !== 'swine-sow' && (
                         <div className="space-y-1">
                           <Label className="text-[9px] font-bold text-muted-foreground uppercase">Phase 3</Label>
-                          <Input type="number" step="0.01" value={formData.phase3P} onChange={(e) => updateField('phase3P', e.target.value)} className="h-9 font-black" />
+                          <Input type="number" step="0.01" value={formData.phase3P} placeholder="0.55" onChange={(e) => updateField('phase3P', e.target.value)} className="h-9 font-black" />
                         </div>
                       )}
                     </div>
                   ) : (
-                    <Input type="number" step="0.01" value={formData.feedPhosphorus} onChange={(e) => updateField('feedPhosphorus', e.target.value)} className="h-11 font-black" />
+                    <Input type="number" step="0.01" value={formData.feedPhosphorus} placeholder="0.50" onChange={(e) => updateField('feedPhosphorus', e.target.value)} className="h-11 font-black" />
                   )}
                 </div>
               )}

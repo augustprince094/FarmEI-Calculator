@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -37,19 +38,19 @@ export default function Home() {
   const [step, setStep] = useState<'input' | 'results'>('input');
   
   const [selectedAdditive, setSelectedAdditive] = useState<FarmData['additive']>('none');
-  const [scenarioFcr, setScenarioFcr] = useState<number>(0);
-  const [scenarioFecalN, setScenarioFecalN] = useState<number>(0);
-  const [scenarioFecalP, setScenarioFecalP] = useState<number>(0);
-  const [scenarioNitrogenDigestibility, setScenarioNitrogenDigestibility] = useState<number>(0.85);
+  const [scenarioFcr, setScenarioFcr] = useState<string>('');
+  const [scenarioFecalN, setScenarioFecalN] = useState<string>('');
+  const [scenarioFecalP, setScenarioFecalP] = useState<string>('');
+  const [scenarioNitrogenDigestibility, setScenarioNitrogenDigestibility] = useState<string>('');
 
   const handleEstablishBaseline = (data: FarmData) => {
     const results = calculateEmissions(data, false);
     setBaselineData(data);
     setBaselineResults(results);
-    setScenarioFcr(data.fcr);
-    setScenarioFecalN(data.fecalN || 0);
-    setScenarioFecalP(data.fecalP || 0);
-    setScenarioNitrogenDigestibility(data.nitrogenDigestibility || 0.85);
+    setScenarioFcr('');
+    setScenarioFecalN('');
+    setScenarioFecalP('');
+    setScenarioNitrogenDigestibility('');
     setStep('results');
     setComparisonResults(null);
     setSelectedAdditive('none');
@@ -60,49 +61,36 @@ export default function Home() {
     
     setSelectedAdditive(additive);
     
-    let targetFcr = scenarioFcr;
-    if (additive !== 'none' && targetFcr === baselineData.fcr) {
+    // Default improvements based on additive choice, presented as placeholders
+    let targetFcrValue = Number(scenarioFcr) || baselineData.fcr;
+    if (additive !== 'none' && !scenarioFcr) {
       const reduction = (additive === 'jefo-combo' || additive === 'xylanase') ? 0.94 : (additive === 'jefo-pro' ? 0.97 : 0.95);
-      targetFcr = parseFloat((baselineData.fcr * reduction).toFixed(2));
-      setScenarioFcr(targetFcr);
-    } else if (additive === 'none') {
-      targetFcr = baselineData.fcr;
-      setScenarioFcr(targetFcr);
+      targetFcrValue = parseFloat((baselineData.fcr * reduction).toFixed(2));
     }
 
-    let targetFecalN = scenarioFecalN;
-    let targetFecalP = scenarioFecalP;
-    let targetNDig = scenarioNitrogenDigestibility;
+    let targetFecalNValue = Number(scenarioFecalN) || (baselineData.fecalN || 0);
+    let targetFecalPValue = Number(scenarioFecalP) || (baselineData.fecalP || 0);
+    let targetNDigValue = Number(scenarioNitrogenDigestibility) || baselineData.nitrogenDigestibility;
     
     if (additive !== 'none') {
-      if (baselineData.useExperimentalN && targetFecalN === baselineData.fecalN) {
-        targetFecalN = parseFloat(((baselineData.fecalN || 0) * 0.97).toFixed(2));
-        setScenarioFecalN(targetFecalN);
+      if (baselineData.useExperimentalN && !scenarioFecalN) {
+        targetFecalNValue = parseFloat(((baselineData.fecalN || 0) * 0.97).toFixed(2));
       }
-      if (baselineData.useExperimentalP && targetFecalP === baselineData.fecalP) {
-        targetFecalP = parseFloat(((baselineData.fecalP || 0) * 0.98).toFixed(2));
-        setScenarioFecalP(targetFecalP);
+      if (baselineData.useExperimentalP && !scenarioFecalP) {
+        targetFecalPValue = parseFloat(((baselineData.fecalP || 0) * 0.98).toFixed(2));
       }
-      if (targetNDig === baselineData.nitrogenDigestibility) {
-        targetNDig = Math.min(0.99, parseFloat((baselineData.nitrogenDigestibility * 1.05).toFixed(2)));
-        setScenarioNitrogenDigestibility(targetNDig);
+      if (!scenarioNitrogenDigestibility) {
+        targetNDigValue = Math.min(0.99, parseFloat((baselineData.nitrogenDigestibility * 1.05).toFixed(2)));
       }
-    } else {
-      targetFecalN = baselineData.fecalN || 0;
-      targetFecalP = baselineData.fecalP || 0;
-      targetNDig = baselineData.nitrogenDigestibility;
-      setScenarioFecalN(targetFecalN);
-      setScenarioFecalP(targetFecalP);
-      setScenarioNitrogenDigestibility(targetNDig);
     }
 
     const updatedData = { 
       ...baselineData, 
       additive, 
-      fcr: targetFcr,
-      fecalN: targetFecalN,
-      fecalP: targetFecalP,
-      nitrogenDigestibility: targetNDig
+      fcr: targetFcrValue,
+      fecalN: targetFecalNValue,
+      fecalP: targetFecalPValue,
+      nitrogenDigestibility: targetNDigValue
     };
     const scenarioResults = calculateEmissions(updatedData, true);
     
@@ -113,27 +101,19 @@ export default function Home() {
     });
   };
 
-  const handleScenarioMetricChange = (field: 'fcr' | 'fecalN' | 'fecalP' | 'nDig', value: number) => {
+  const handleScenarioMetricChange = (field: 'fcr' | 'fecalN' | 'fecalP' | 'nDig', value: string) => {
     if (!baselineData || !baselineResults) return;
 
-    let updatedFcr = scenarioFcr;
-    let updatedFecalN = scenarioFecalN;
-    let updatedFecalP = scenarioFecalP;
-    let updatedNDig = scenarioNitrogenDigestibility;
+    if (field === 'fcr') setScenarioFcr(value);
+    else if (field === 'fecalN') setScenarioFecalN(value);
+    else if (field === 'fecalP') setScenarioFecalP(value);
+    else if (field === 'nDig') setScenarioNitrogenDigestibility(value);
 
-    if (field === 'fcr') {
-      updatedFcr = value;
-      setScenarioFcr(value);
-    } else if (field === 'fecalN') {
-      updatedFecalN = value;
-      setScenarioFecalN(value);
-    } else if (field === 'fecalP') {
-      updatedFecalP = value;
-      setScenarioFecalP(value);
-    } else if (field === 'nDig') {
-      updatedNDig = value;
-      setScenarioNitrogenDigestibility(value);
-    }
+    // Apply the change immediately to the comparison results
+    const updatedFcr = field === 'fcr' ? (Number(value) || baselineData.fcr) : (Number(scenarioFcr) || baselineData.fcr);
+    const updatedFecalN = field === 'fecalN' ? (Number(value) || (baselineData.fecalN || 0)) : (Number(scenarioFecalN) || (baselineData.fecalN || 0));
+    const updatedFecalP = field === 'fecalP' ? (Number(value) || (baselineData.fecalP || 0)) : (Number(scenarioFecalP) || (baselineData.fecalP || 0));
+    const updatedNDig = field === 'nDig' ? (Number(value) || baselineData.nitrogenDigestibility) : (Number(scenarioNitrogenDigestibility) || baselineData.nitrogenDigestibility);
 
     const updatedData = { 
       ...baselineData, 
@@ -323,7 +303,8 @@ export default function Home() {
                         type="number" 
                         step="0.01"
                         value={scenarioFcr}
-                        onChange={(e) => handleScenarioMetricChange('fcr', parseFloat(e.target.value) || 0)}
+                        placeholder={((baselineData?.fcr || 1.6) * 0.95).toFixed(2)}
+                        onChange={(e) => handleScenarioMetricChange('fcr', e.target.value)}
                         className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
                       />
                     </div>
@@ -336,7 +317,8 @@ export default function Home() {
                         type="number" 
                         step="0.01"
                         value={scenarioNitrogenDigestibility}
-                        onChange={(e) => handleScenarioMetricChange('nDig', parseFloat(e.target.value) || 0)}
+                        placeholder="0.90"
+                        onChange={(e) => handleScenarioMetricChange('nDig', e.target.value)}
                         className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
                       />
                     </div>
@@ -350,7 +332,8 @@ export default function Home() {
                           type="number" 
                           step="0.01" 
                           value={scenarioFecalN}
-                          onChange={(e) => handleScenarioMetricChange('fecalN', parseFloat(e.target.value) || 0)}
+                          placeholder={((baselineData?.fecalN || 4.5) * 0.97).toFixed(2)}
+                          onChange={(e) => handleScenarioMetricChange('fecalN', e.target.value)}
                           className="h-10 border-white/60 focus:ring-primary font-black text-secondary bg-white/80 text-sm"
                         />
                       </div>
@@ -384,7 +367,7 @@ export default function Home() {
                       results={comparisonResults || { baseline: baselineResults, scenario: baselineResults, additiveType: 'none' }} 
                       isComparison={!!comparisonResults}
                       baselineFcr={baselineData?.fcr || 0}
-                      scenarioFcr={scenarioFcr}
+                      scenarioFcr={Number(scenarioFcr) || baselineData?.fcr || 0}
                     />
                   </TabsContent>
                   
