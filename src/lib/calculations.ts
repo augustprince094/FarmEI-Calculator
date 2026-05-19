@@ -180,8 +180,8 @@ export function calculateEmissions(data: FarmData, useAdditive: boolean = false)
   totalNitrogenExcreted *= metabolicNMitigation;
   totalPhosphorusExcreted *= metabolicPMitigation;
   
-  // Ammonia Emission Formula: 0.7 * Nitrogen Excretion * (0.21 + 0.30 + 0.38)
-  const ammoniaEmissions = 0.7 * totalNitrogenExcreted * (0.21 + 0.30 + 0.38);
+  // Ammonia Emission Formula: 0.7 * N-Excretion * 0.89 * (42/365)
+  const ammoniaEmissions = 0.7 * totalNitrogenExcreted * 0.89 * (42 / 365);
 
   const density_ch4 = 0.67;
   let b0 = 0.36; 

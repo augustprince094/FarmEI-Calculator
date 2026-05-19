@@ -178,7 +178,7 @@ export default function Home() {
                 <div className="space-y-6 text-sm leading-relaxed pr-2 font-bold">
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Nitrogen Excretion (Hybrid Mode)</h4>
-                    <p>Calculated per phase (Phase 1-3 for broilers, Gest/Lact for sows):</p>
+                    <p>Calculated per phase (Phase 1-3 for broilers, Gestation/Lactation for sows):</p>
                     <ul className="list-disc pl-5 text-slate-700 space-y-1">
                       <li><strong>Metabolic path:</strong> (Dietary CP / 6.25) - (g N Retention * g Gain)</li>
                       <li><strong>Experimental path:</strong> Feed Intake * (1 - N Digestibility) * % Fecal N</li>
@@ -186,7 +186,7 @@ export default function Home() {
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Ammonia Emissions</h4>
-                    <p>NH3 (kg) = 0.7 * Total Nitrogen Excreted * (0.21 + 0.30 + 0.38)</p>
+                    <p>NH3 (kg) = 0.7 * Total Nitrogen Excreted * 0.89 * (42/365)</p>
                   </section>
                   <section className="space-y-2">
                     <h4 className="font-black text-primary text-base uppercase tracking-widest">Manure Methane</h4>
